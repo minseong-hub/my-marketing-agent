@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chcp 65001:*)",
+      "Bash(npm install:*)",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(node node_modules/typescript/bin/tsc --noEmit)",
+      "Bash(npm run:*)",
+      "Bash(echo \"started, PID=$!\")",
+      "Bash(curl -s http://localhost:3001)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(echo \"PID=$!\")"
+    ]
+  }
+}

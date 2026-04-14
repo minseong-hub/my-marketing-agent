@@ -26,6 +26,13 @@
     --input: 214 32% 91%;
     --ring: 221 83% 53%;
     --radius: 0.75rem;
+
+    /* Glassmorphism 변수 */
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    --glass-bg-light: rgba(255, 255, 255, 0.7);
+    --glass-border-light: rgba(255, 255, 255, 0.8);
   }
 }
 
@@ -34,7 +41,7 @@
     @apply border-border;
   }
   body {
-    background-color: #F1F5F9;
+    background-color: #EEF2FF;
     color: #0F172A;
     font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     font-feature-settings: "kern";
@@ -54,6 +61,58 @@
     box-shadow: 0 4px 12px 0 rgb(0 0 0 / 0.10), 0 2px 4px -2px rgb(0 0 0 / 0.08);
     transform: translateY(-1px);
   }
+  .glass-dark {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+  .glass-light {
+    background: var(--glass-bg-light);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--glass-border-light);
+    box-shadow: 0 4px 24px rgba(99, 102, 241, 0.08);
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease forwards;
+  }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  .animate-float-delay {
+    animation: float 6s ease-in-out 2s infinite;
+  }
+  .animate-float-slow {
+    animation: float 8s ease-in-out 1s infinite;
+  }
+  .animate-orb {
+    animation: orbFloat 12s ease-in-out infinite;
+  }
+  .animate-orb-delay {
+    animation: orbFloat 15s ease-in-out 5s infinite;
+  }
+  .animate-orb-slow {
+    animation: orbFloat 20s ease-in-out 3s infinite;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -20px) scale(1.05); }
+  50% { transform: translate(-20px, 30px) scale(0.95); }
+  75% { transform: translate(20px, 10px) scale(1.02); }
 }
 
 ::-webkit-scrollbar {

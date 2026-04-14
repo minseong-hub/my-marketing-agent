@@ -9,12 +9,13 @@ import { PlatformBadgeList } from "@/components/contents/platform-badge";
 
 interface ContentPreviewRowProps {
   content: ContentItem;
+  basePath?: string;
 }
 
-export function ContentPreviewRow({ content }: ContentPreviewRowProps) {
+export function ContentPreviewRow({ content, basePath = "/app" }: ContentPreviewRowProps) {
   return (
     <Link
-      href={`/contents/${content.id}`}
+      href={`${basePath}/contents/${content.id}`}
       className="group flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
     >
       {/* 날짜 뱃지 */}

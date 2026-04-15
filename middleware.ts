@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-const COOKIE_NAME = "auth-token";
+const USER_COOKIE = "auth-token";
+const ADMIN_COOKIE = "admin-token";
 
 function getSecret() {
   return new TextEncoder().encode(
@@ -11,31 +12,48 @@ function getSecret() {
   );
 }
 
-async function isAuthenticated(request: NextRequest): Promise<boolean> {
-  const token = request.cookies.get(COOKIE_NAME)?.value;
-  if (!token) return false;
+async function verify(token: string | undefined): Promise<{ role?: string } | null> {
+  if (!token) return null;
   try {
-    await jwtVerify(token, getSecret());
-    return true;
+    const { payload } = await jwtVerify(token, getSecret());
+    return payload as { role?: string };
   } catch {
-    return false;
+    return null;
   }
 }
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // /app/* 보호
+  // ===== /admin/* — admin 전용 쿠키 세션 =====
+  if (pathname.startsWith("/admin")) {
+    if (pathname === "/admin/login") {
+      const adminPayload = await verify(request.cookies.get(ADMIN_COOKIE)?.value);
+      if (adminPayload?.role === "admin") {
+        return NextResponse.redirect(new URL("/admin", request.url));
+      }
+      return NextResponse.next();
+    }
+    const adminPayload = await verify(request.cookies.get(ADMIN_COOKIE)?.value);
+    if (!adminPayload || adminPayload.role !== "admin") {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // ===== /app/* — 일반 사용자 =====
   if (pathname.startsWith("/app")) {
-    if (!(await isAuthenticated(request))) {
+    const payload = await verify(request.cookies.get(USER_COOKIE)?.value);
+    if (!payload) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
     return NextResponse.next();
   }
 
-  // 이미 로그인한 사용자는 /login, /signup 접근 시 /app으로 리다이렉트
+  // ===== /login, /signup — 이미 로그인이면 /app =====
   if (pathname === "/login" || pathname === "/signup") {
-    if (await isAuthenticated(request)) {
+    const payload = await verify(request.cookies.get(USER_COOKIE)?.value);
+    if (payload) {
       return NextResponse.redirect(new URL("/app", request.url));
     }
   }
@@ -44,5 +62,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/app/:path*", "/login", "/signup"],
+  matcher: ["/admin/:path*", "/app/:path*", "/login", "/signup"],
 };

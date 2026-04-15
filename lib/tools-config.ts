@@ -1,5 +1,5 @@
 import {
-  Store, TrendingUp, Layers, Layout, Megaphone, Users,
+  Store, TrendingUp, Layers, Layout, Megaphone, Users, Package,
   LayoutDashboard, CalendarDays, FileText, PlusCircle, LayoutTemplate, Radio,
   ListChecks, ClipboardList, Tag, CheckSquare, AlertCircle, Archive,
   Calculator, BarChart2, PieChart, Folder, PenLine, Palette,
@@ -52,11 +52,13 @@ export const TOOLS: ToolDefinition[] = [
     navItems: [
       { href: "/app/tools/store-ops", label: "홈", icon: LayoutDashboard, exact: true, group: "개요" },
       { href: "/app/tools/store-ops/board", label: "운영 보드", icon: ClipboardList, group: "운영" },
-      { href: "/app/tools/store-ops/schedule", label: "상품 일정 관리", icon: CalendarDays, group: "운영" },
-      { href: "/app/tools/store-ops/promotions", label: "프로모션 관리", icon: Tag, group: "운영" },
-      { href: "/app/tools/store-ops/checklist", label: "체크리스트", icon: CheckSquare, group: "관리" },
-      { href: "/app/tools/store-ops/issues", label: "이슈 / 알림", icon: AlertCircle, group: "관리" },
-      { href: "/app/tools/store-ops/history", label: "운영 기록", icon: Archive, group: "관리" },
+      { href: "/app/tools/store-ops/products", label: "상품 관리", icon: Package, group: "상품" },
+      { href: "/app/tools/store-ops/inventory", label: "재고 관리", icon: BarChart2, group: "상품" },
+      { href: "/app/tools/store-ops/uploads", label: "상품 업로드 관리", icon: Layout, group: "상품" },
+      { href: "/app/tools/store-ops/promotions", label: "프로모션 관리", icon: Tag, group: "성장" },
+      { href: "/app/tools/store-ops/checklist", label: "체크리스트", icon: CheckSquare, group: "준비" },
+      { href: "/app/tools/store-ops/issues", label: "이슈 / 알림", icon: AlertCircle, group: "운영" },
+      { href: "/app/tools/store-ops/history", label: "운영 기록", icon: Archive, group: "기록" },
     ],
   },
   {

@@ -11,6 +11,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TOOLS, NavItem } from "@/lib/tools-config";
@@ -241,6 +242,13 @@ function SidebarContent({
 
       {/* ── Bottom section */}
       <div className="px-2 py-3 space-y-0.5 flex-shrink-0">
+        <NavLink
+          href="/app/billing"
+          icon={CreditCard}
+          label="결제 & 구독"
+          isActive={pathname.startsWith("/app/billing")}
+          collapsed={!showFull}
+        />
         <NavLink
           href="/app/settings"
           icon={Settings}

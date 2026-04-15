@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
       name: user.name,
       businessName: user.business_name,
       brandDisplayName: user.brand_display_name,
+      role: (user.role as "user" | "admin") ?? "user",
     });
 
     const response = NextResponse.json(

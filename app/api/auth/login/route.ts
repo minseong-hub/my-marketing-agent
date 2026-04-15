@@ -31,12 +31,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (user.status && user.status !== "active") {
+      return NextResponse.json(
+        { error: "정지되었거나 사용할 수 없는 계정입니다." },
+        { status: 403 }
+      );
+    }
+
     const token = await signToken({
       userId: user.id,
       email: user.email,
       name: user.name,
       businessName: user.business_name,
       brandDisplayName: user.brand_display_name,
+      role: (user.role as "user" | "admin") ?? "user",
     });
 
     const response = NextResponse.json({ message: "로그인 성공" }, { status: 200 });

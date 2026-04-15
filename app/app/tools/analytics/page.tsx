@@ -38,7 +38,7 @@ export default function AnalyticsTool() {
             </button>
           </Link>
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-sm">
-            <BarChart3 className="w-5 h-5 text-white" />
+            <BarChart3 className="w-5 h-5 text-slate-800" />
           </div>
           <div>
             <p className="text-[10px] font-semibold text-amber-600 uppercase tracking-wider">Analytics</p>

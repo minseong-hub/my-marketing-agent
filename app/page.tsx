@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Eye,
   EyeOff,
+  Instagram,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,8 +26,8 @@ function SSymbol({ size = 48, className = "" }: { size?: number; className?: str
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
       <defs>
         <linearGradient id="s-grad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#60A5FA" />
-          <stop offset="100%" stopColor="#818CF8" />
+          <stop offset="0%" stopColor="#3B82F6" />
+          <stop offset="100%" stopColor="#1D4ED8" />
         </linearGradient>
       </defs>
       <rect width="48" height="48" rx="12" fill="url(#s-grad)" />
@@ -46,9 +47,9 @@ function SSymbolLarge() {
     <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
       <defs>
         <linearGradient id="s-grad-lg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#93C5FD" />
-          <stop offset="50%" stopColor="#818CF8" />
-          <stop offset="100%" stopColor="#A78BFA" />
+          <stop offset="0%" stopColor="#60A5FA" />
+          <stop offset="50%" stopColor="#3B82F6" />
+          <stop offset="100%" stopColor="#1D4ED8" />
         </linearGradient>
         <filter id="s-glow">
           <feGaussianBlur stdDeviation="4" result="coloredBlur" />
@@ -82,33 +83,58 @@ function GlassCardDark({ children, className = "" }: { children: React.ReactNode
 
 // ── Floating 글래스 카드들 (그래픽 주변)
 function FloatingCards() {
-  const cards = [
+  const cards: {
+    title: string;
+    desc: string;
+    badge: string;
+    badgeColor: string;
+    brand: React.ReactNode;
+    delay: number;
+    pos: string;
+  }[] = [
     {
       title: "인스타그램",
       desc: "성주참외 신상품",
       badge: "예약됨",
       badgeColor: "bg-violet-400/80",
-      dot: "bg-pink-400",
+      brand: <Instagram className="w-7 h-7 text-pink-300 shrink-0" strokeWidth={1.9} />,
       delay: 0,
-      pos: "-top-6 -right-8",
+      pos: "-top-14 -right-24",
     },
     {
       title: "블로그",
       desc: "봄 제철 과일 특집",
       badge: "작성중",
       badgeColor: "bg-amber-400/80",
-      dot: "bg-orange-400",
+      brand: (
+        <span className="text-green-300 text-[26px] font-extrabold leading-none shrink-0 translate-y-[-0.5px]">N</span>
+      ),
       delay: 0.3,
-      pos: "-bottom-4 -left-10",
+      pos: "-bottom-12 -left-24",
     },
     {
       title: "오픈채팅",
       desc: "회원 혜택 공지",
       badge: "업로드완료",
       badgeColor: "bg-emerald-400/80",
-      dot: "bg-amber-400",
+      brand: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-yellow-300 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 3C6.477 3 2 6.58 2 11c0 2.8 1.82 5.26 4.57 6.69L5.5 21.5a.7.7 0 0 0 1 .77l4.53-2.78c.32.03.64.05.97.05 5.523 0 10-3.58 10-8S17.523 3 12 3z" />
+        </svg>
+      ),
       delay: 0.6,
-      pos: "top-1/2 -right-16 -translate-y-1/2",
+      pos: "top-1/2 -right-32 -translate-y-1/2",
+    },
+    {
+      title: "스레드",
+      desc: "봄 시즌 오픈 예고",
+      badge: "기획중",
+      badgeColor: "bg-sky-400/80",
+      brand: (
+        <span className="text-white text-[21px] font-semibold leading-none shrink-0">@</span>
+      ),
+      delay: 0.9,
+      pos: "top-1/2 -left-32 -translate-y-1/2",
     },
   ];
 
@@ -130,10 +156,10 @@ function FloatingCards() {
             },
           }}
         >
-          <GlassCardDark className="p-3">
-            <div className="flex items-center gap-2 mb-1.5">
-              <div className={`w-2 h-2 rounded-full ${card.dot}`} />
-              <span className="text-white/90 text-xs font-semibold">{card.title}</span>
+          <GlassCardDark className="p-3.5 min-h-[78px] flex flex-col justify-between">
+            <div className="flex items-center gap-2.5 mb-1.5 min-h-[28px] -translate-y-1">
+              {card.brand}
+              <span className="text-white/90 text-xs font-semibold leading-none">{card.title}</span>
               <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full text-white ${card.badgeColor}`}>
                 {card.badge}
               </span>
@@ -231,7 +257,7 @@ function InteractiveGraphic() {
           <GlassCardDark className="p-8">
             <SSymbolLarge />
             <p className="text-white/70 text-xs text-center mt-3 font-semibold tracking-widest">
-              SIMPLE LAB
+              심플 마케팅 연구소
             </p>
           </GlassCardDark>
         </motion.div>
@@ -256,7 +282,7 @@ function InteractiveGraphic() {
           <div className="flex items-center gap-2 mb-5">
             <SSymbol size={32} />
             <div>
-              <p className="text-white font-extrabold text-base leading-none">심플 마케팅 랩</p>
+              <p className="text-white font-extrabold text-base leading-none">심플 마케팅 연구소</p>
               <p className="text-white/50 text-[10px] mt-0.5 tracking-widest font-semibold">SIMPLE LAB</p>
             </div>
           </div>
@@ -269,7 +295,7 @@ function InteractiveGraphic() {
                 value={loginForm.email}
                 onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                 required
-                className="h-9 bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm focus:border-blue-400 focus:ring-blue-400/30"
+                className="h-9 bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm focus:border-blue-500 focus:ring-blue-500/40"
               />
             </div>
             <div>
@@ -281,7 +307,7 @@ function InteractiveGraphic() {
                   value={loginForm.password}
                   onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                   required
-                  className="h-9 bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm pr-9 focus:border-blue-400 focus:ring-blue-400/30"
+                  className="h-9 bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm pr-9 focus:border-blue-500 focus:ring-blue-500/40"
                 />
                 <button
                   type="button"
@@ -298,7 +324,7 @@ function InteractiveGraphic() {
             <button
               type="submit"
               disabled={loginLoading}
-              className="w-full h-9 bg-blue-500 hover:bg-blue-400 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-60"
+              className="w-full h-9 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-60 shadow-lg shadow-blue-600/30"
             >
               {loginLoading ? "로그인 중..." : "로그인"}
             </button>
@@ -374,36 +400,58 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen overflow-x-hidden">
       {/* ── 네비게이션 바 */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-blue-900/30 backdrop-blur-md border-b border-white/10">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <SSymbol size={32} />
-            <div>
-              <span className="text-base font-extrabold text-white leading-none block">심플 마케팅 랩</span>
-              <span className="text-[10px] font-semibold text-white/50 leading-none tracking-widest">SIMPLE LAB</span>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A43D1]/28 backdrop-blur-xl border-b border-white/10">
+        <div className="max-w-6xl mx-auto px-6 h-[88px] flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="relative shrink-0">
+              <div className="absolute inset-0 rounded-2xl bg-[#145CFF]/30 blur-md" />
+              <svg width="42" height="42" viewBox="0 0 48 48" fill="none" className="relative">
+                <defs>
+                  <linearGradient id="s-grad-premium" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#8FC2FF" />
+                    <stop offset="55%" stopColor="#145CFF" />
+                    <stop offset="100%" stopColor="#0D47D9" />
+                  </linearGradient>
+                </defs>
+                <rect width="48" height="48" rx="14" fill="url(#s-grad-premium)" />
+                <path
+                  d="M30 16H20a4 4 0 0 0-4 4v0a4 4 0 0 0 4 4h8a4 4 0 0 1 4 4v0a4 4 0 0 1-4 4H18"
+                  stroke="white"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+            <div className="flex flex-col justify-center">
+              <span className="text-[27px] md:text-[30px] font-extrabold text-white leading-none tracking-[-0.03em]">
+                심플 마케팅 연구소
+              </span>
+              <span className="text-[12px] text-white/55 font-medium mt-1 tracking-[0.01em]">
+                브랜드 운영을 더 정교하고 간단하게
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login">
-              <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 font-medium">
+              <button className="inline-flex items-center justify-center whitespace-nowrap transition-all duration-300 h-10 rounded-xl px-4 text-sm font-semibold text-white/85 border border-white/10 bg-white/5 hover:bg-white/[0.12] hover:text-white hover:border-white/20 hover:shadow-[0_8px_30px_rgba(255,255,255,0.08)] hover:-translate-y-[1px] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145CFF] focus-visible:ring-offset-2">
                 로그인
-              </Button>
+              </button>
             </Link>
             <Link href="/signup">
-              <Button size="sm" className="bg-white text-blue-700 hover:bg-blue-50 shadow-sm font-semibold">
+              <button className="inline-flex items-center justify-center whitespace-nowrap transition-all duration-300 h-10 rounded-xl px-5 text-sm font-semibold text-[#0D47D9] bg-white hover:bg-[#F4F8FF] hover:text-[#145CFF] hover:shadow-[0_10px_30px_rgba(20,92,255,0.22)] hover:-translate-y-[1px] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145CFF] focus-visible:ring-offset-2">
                 무료로 시작하기
-              </Button>
+              </button>
             </Link>
           </div>
         </div>
       </header>
 
       {/* ── Hero 섹션 */}
-      <section className="relative min-h-screen bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 flex items-center overflow-hidden">
+      <section className="relative min-h-screen bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-500 flex items-center overflow-hidden">
         {/* Floating orbs */}
         <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-blue-400/20 blur-3xl animate-orb pointer-events-none" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-violet-500/20 blur-3xl animate-orb-delay pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-indigo-400/15 blur-3xl animate-orb-slow pointer-events-none" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-blue-500/25 blur-3xl animate-orb-delay pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-blue-400/15 blur-3xl animate-orb-slow pointer-events-none" />
         <div className="absolute top-1/3 right-1/4 w-48 h-48 rounded-full bg-blue-300/10 blur-2xl animate-float pointer-events-none" />
 
         {/* 그리드 패턴 오버레이 */}
@@ -434,7 +482,7 @@ export default function LandingPage() {
               </h1>
 
               <p className="text-lg text-blue-100/80 leading-relaxed mb-8 max-w-xl">
-                심플 마케팅 랩은 브랜드별 독립 공간에서 SNS 콘텐츠 기획부터 발행
+                심플 마케팅 연구소는 브랜드별 독립 공간에서 SNS 콘텐츠 기획부터 발행
                 스케줄링까지 모든 마케팅 운영을 통합 관리하는 SaaS 도구입니다.
               </p>
 
@@ -524,10 +572,10 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA 섹션 */}
-      <section className="py-24 px-6 bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 relative overflow-hidden">
+      <section className="py-24 px-6 bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-500 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/4 w-64 h-64 rounded-full bg-white/5 blur-3xl animate-float" />
-          <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full bg-violet-400/10 blur-3xl animate-float-delay" />
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full bg-blue-400/15 blur-3xl animate-float-delay" />
         </div>
         <div className="relative z-10 max-w-2xl mx-auto text-center">
           <motion.div
@@ -579,7 +627,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-2">
             <SSymbol size={24} />
             <div>
-              <span className="text-sm font-extrabold text-slate-300 block">심플 마케팅 랩</span>
+              <span className="text-sm font-extrabold text-slate-300 block">심플 마케팅 연구소</span>
               <span className="text-[10px] text-slate-600 tracking-widest font-semibold">SIMPLE LAB</span>
             </div>
           </div>

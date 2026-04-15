@@ -74,18 +74,18 @@ export default function SignupPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-500 flex flex-col relative overflow-hidden">
       {/* Floating orbs */}
       <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-blue-400/20 blur-3xl animate-orb pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-violet-500/20 blur-3xl animate-orb-delay pointer-events-none" />
-      <div className="absolute top-1/3 right-1/3 w-48 h-48 rounded-full bg-indigo-300/10 blur-3xl animate-float-slow pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-blue-500/25 blur-3xl animate-orb-delay pointer-events-none" />
+      <div className="absolute top-1/3 right-1/3 w-48 h-48 rounded-full bg-blue-300/15 blur-3xl animate-float-slow pointer-events-none" />
 
       {/* 헤더 */}
       <header className="relative z-10 px-6 py-5">
         <Link href="/" className="inline-flex items-center gap-2.5">
           <SSymbol size={32} />
           <div>
-            <span className="text-sm font-bold text-white block leading-none">심플 마케팅 랩</span>
+            <span className="text-sm font-bold text-white block leading-none">심플 마케팅 연구소</span>
             <span className="text-[10px] text-white/50">S Marketing Lab</span>
           </div>
         </Link>
@@ -130,7 +130,7 @@ export default function SignupPage() {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   required
-                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-400 focus:ring-blue-400/30"
+                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-500 focus:ring-blue-500/40"
                 />
               </div>
 
@@ -146,7 +146,7 @@ export default function SignupPage() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
-                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-400 focus:ring-blue-400/30"
+                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-500 focus:ring-blue-500/40"
                 />
               </div>
 
@@ -164,7 +164,7 @@ export default function SignupPage() {
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                     required
                     minLength={6}
-                    className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 pr-10 focus:border-blue-400 focus:ring-blue-400/30"
+                    className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 pr-10 focus:border-blue-500 focus:ring-blue-500/40"
                   />
                   <button
                     type="button"
@@ -206,7 +206,7 @@ export default function SignupPage() {
                   value={form.businessName}
                   onChange={(e) => setForm({ ...form, businessName: e.target.value })}
                   required
-                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-400 focus:ring-blue-400/30"
+                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-500 focus:ring-blue-500/40"
                 />
               </div>
 
@@ -226,7 +226,7 @@ export default function SignupPage() {
                     setForm({ ...form, brandDisplayName: e.target.value })
                   }
                   required
-                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-400 focus:ring-blue-400/30"
+                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-500 focus:ring-blue-500/40"
                 />
               </div>
 

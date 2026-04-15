@@ -11,7 +11,11 @@
       "Bash(curl -s http://localhost:3001)",
       "Bash(curl -s http://localhost:3000)",
       "Bash(pkill -f \"next dev\")",
-      "Bash(echo \"PID=$!\")"
+      "Bash(echo \"PID=$!\")",
+      "Bash(npx tsc *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(ls -la \"C:\\\\Users\\\\intel\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\F--0-----------my-marketing-agent\\\\968ab41f-1011-4ebf-b4b6-10b5ef61c804\\\\tasks\\\\bzvw05odm.output\")",
+      "Bash(wait)"
     ]
   }
 }

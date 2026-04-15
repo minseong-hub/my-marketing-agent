@@ -2,25 +2,15 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  LayoutDashboard,
-  CalendarDays,
-  FileText,
-  PlusCircle,
-  LayoutTemplate,
-  Radio,
-  Settings,
-  LogOut,
-  LayoutGrid,
-} from "lucide-react";
+import { Settings, LogOut, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TOOLS } from "@/lib/tools-config";
 
 interface AppSidebarProps {
   brandDisplayName: string;
   userName: string;
 }
 
-// S 심볼 SVG (사이드바용)
 function SSymbol({ size = 32 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
@@ -41,19 +31,20 @@ function SSymbol({ size = 32 }: { size?: number }) {
   );
 }
 
-const navItems = [
-  { href: "/app/select-tool", label: "도구 선택", icon: LayoutGrid, exact: true },
-  { href: "/app", label: "SNS 콘텐츠", icon: LayoutDashboard, exact: true },
-  { href: "/app/calendar", label: "콘텐츠 캘린더", icon: CalendarDays },
-  { href: "/app/contents", label: "콘텐츠 목록", icon: FileText },
-  { href: "/app/create", label: "새 콘텐츠 등록", icon: PlusCircle },
-  { href: "/app/templates", label: "템플릿 관리", icon: LayoutTemplate },
-  { href: "/app/openchat", label: "채널 관리", icon: Radio },
-];
+function getActiveTool(pathname: string) {
+  return TOOLS.find((tool) =>
+    tool.navItems.some((item) =>
+      item.exact ? pathname === item.href : pathname.startsWith(item.href)
+    )
+  );
+}
 
 export function AppSidebar({ brandDisplayName, userName }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const activeTool = getActiveTool(pathname);
+  const navItems = activeTool?.navItems ?? [];
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -83,36 +74,52 @@ export function AppSidebar({ brandDisplayName, userName }: AppSidebarProps) {
 
       {/* 네비게이션 */}
       <nav className="flex-1 px-3 py-2 space-y-0.5">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = item.exact
-            ? pathname === item.href
-            : pathname.startsWith(item.href);
+        {/* 도구 선택 */}
+        <Link
+          href="/app/select-tool"
+          className={cn(
+            "flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-all",
+            pathname === "/app/select-tool"
+              ? "bg-blue-600/10 text-blue-700 font-semibold"
+              : "text-slate-500 hover:bg-blue-50 hover:text-slate-800 font-medium"
+          )}
+        >
+          <LayoutGrid className={cn("w-4 h-4 flex-shrink-0", pathname === "/app/select-tool" ? "text-blue-600" : "text-slate-400")} />
+          <span className="truncate">도구 선택</span>
+          {pathname === "/app/select-tool" && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500" />}
+        </Link>
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-all",
-                isActive
-                  ? "bg-blue-600/10 text-blue-700 font-semibold"
-                  : "text-slate-500 hover:bg-blue-50 hover:text-slate-800 font-medium"
-              )}
-            >
-              <Icon
-                className={cn(
-                  "w-4 h-4 flex-shrink-0",
-                  isActive ? "text-blue-600" : "text-slate-400"
-                )}
-              />
-              <span className="truncate">{item.label}</span>
-              {isActive && (
-                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500" />
-              )}
-            </Link>
-          );
-        })}
+        {/* 현재 툴의 per-tool 네비게이션 */}
+        {navItems.length > 0 && (
+          <>
+            <div className="mx-1 h-px bg-slate-200/60 my-1.5" />
+            {activeTool && (
+              <p className="px-3 pt-1 pb-0.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">
+                {activeTool.nameEn}
+              </p>
+            )}
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-all",
+                    isActive
+                      ? "bg-blue-600/10 text-blue-700 font-semibold"
+                      : "text-slate-500 hover:bg-blue-50 hover:text-slate-800 font-medium"
+                  )}
+                >
+                  <Icon className={cn("w-4 h-4 flex-shrink-0", isActive ? "text-blue-600" : "text-slate-400")} />
+                  <span className="truncate">{item.label}</span>
+                  {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500" />}
+                </Link>
+              );
+            })}
+          </>
+        )}
       </nav>
 
       {/* 하단 */}

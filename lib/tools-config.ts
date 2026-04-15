@@ -1,5 +1,16 @@
-import { Layers, FileImage, Store, MessageSquare, BarChart3 } from "lucide-react";
+import {
+  Layers, FileImage, Store, MessageSquare, BarChart3,
+  LayoutDashboard, CalendarDays, FileText, PlusCircle, LayoutTemplate, Radio,
+  FileImage as FileImageSub, ListChecks, ClipboardList, Users, Star, BarChart2,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+
+export interface NavItem {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  exact?: boolean;
+}
 
 export interface ToolDefinition {
   id: string;
@@ -13,6 +24,7 @@ export interface ToolDefinition {
   icon: LucideIcon;
   status: "available" | "beta" | "coming-soon";
   features: string[];
+  navItems: NavItem[];
 }
 
 export const TOOLS: ToolDefinition[] = [
@@ -21,13 +33,21 @@ export const TOOLS: ToolDefinition[] = [
     name: "SNS 마케팅 콘텐츠",
     nameEn: "Content Manager",
     description: "블로그, 인스타, 스레드 등 SNS 채널 콘텐츠를 통합 기획·관리합니다.",
-    href: "/app",
+    href: "/app/tools/sns",
     gradient: "from-blue-500 to-indigo-600",
     bgLight: "bg-blue-50",
     borderColor: "border-blue-200",
     icon: Layers,
     status: "available",
     features: ["캘린더 스케줄링", "플랫폼별 초안 자동 생성", "발행 현황 추적"],
+    navItems: [
+      { href: "/app/tools/sns", label: "대시보드", icon: LayoutDashboard, exact: true },
+      { href: "/app/tools/sns/calendar", label: "콘텐츠 캘린더", icon: CalendarDays },
+      { href: "/app/tools/sns/contents", label: "콘텐츠 목록", icon: FileText },
+      { href: "/app/tools/sns/create", label: "새 콘텐츠 등록", icon: PlusCircle },
+      { href: "/app/tools/sns/templates", label: "템플릿 관리", icon: LayoutTemplate },
+      { href: "/app/tools/sns/openchat", label: "채널 관리", icon: Radio },
+    ],
   },
   {
     id: "detail-page",
@@ -41,6 +61,9 @@ export const TOOLS: ToolDefinition[] = [
     icon: FileImage,
     status: "beta",
     features: ["섹션 플래닝", "카피 블록 생성", "레퍼런스 정리"],
+    navItems: [
+      { href: "/app/tools/detail-page", label: "상세페이지 기획", icon: FileImageSub, exact: true },
+    ],
   },
   {
     id: "store-ops",
@@ -54,6 +77,9 @@ export const TOOLS: ToolDefinition[] = [
     icon: Store,
     status: "beta",
     features: ["런칭 체크리스트", "프로모 플래닝", "운영 태스크보드"],
+    navItems: [
+      { href: "/app/tools/store-ops", label: "스토어 운영", icon: ListChecks, exact: true },
+    ],
   },
   {
     id: "crm",
@@ -67,6 +93,9 @@ export const TOOLS: ToolDefinition[] = [
     icon: MessageSquare,
     status: "beta",
     features: ["리뷰 답변 AI", "고객 세그먼트", "CS 템플릿"],
+    navItems: [
+      { href: "/app/tools/crm", label: "CRM · 고객 자동화", icon: Users, exact: true },
+    ],
   },
   {
     id: "analytics",
@@ -80,6 +109,9 @@ export const TOOLS: ToolDefinition[] = [
     icon: BarChart3,
     status: "coming-soon",
     features: ["성과 리포트", "채널 요약", "주간 하이라이트"],
+    navItems: [
+      { href: "/app/tools/analytics", label: "성과 분석", icon: BarChart2, exact: true },
+    ],
   },
 ];
 

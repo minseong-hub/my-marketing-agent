@@ -230,8 +230,8 @@ function InteractiveGraphic() {
         >
           <GlassCardDark className="p-8">
             <SSymbolLarge />
-            <p className="text-white/70 text-xs text-center mt-3 font-medium tracking-wide">
-              S Marketing Lab
+            <p className="text-white/70 text-xs text-center mt-3 font-semibold tracking-widest">
+              SIMPLE LAB
             </p>
           </GlassCardDark>
         </motion.div>
@@ -243,20 +243,21 @@ function InteractiveGraphic() {
       {/* 로그인 폼 레이어 */}
       <motion.div
         className="absolute inset-0 flex items-center justify-center"
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 20, scale: 0.85 }}
         animate={{
           opacity: loginVisible ? 1 : 0,
-          y: loginVisible ? 0 : 20,
-          pointerEvents: loginVisible ? "auto" : "none",
+          y: loginVisible ? 0 : 16,
+          scale: loginVisible ? 1.2 : 0.85,
         }}
+        style={{ pointerEvents: loginVisible ? "auto" : "none" }}
         transition={{ duration: 0.35, ease: "easeOut" }}
       >
         <GlassCardDark className="w-full p-6">
           <div className="flex items-center gap-2 mb-5">
             <SSymbol size={32} />
             <div>
-              <p className="text-white font-bold text-sm leading-none">심플 마케팅 랩</p>
-              <p className="text-white/50 text-[10px] mt-0.5">S Marketing Lab</p>
+              <p className="text-white font-extrabold text-base leading-none">심플 마케팅 랩</p>
+              <p className="text-white/50 text-[10px] mt-0.5 tracking-widest font-semibold">SIMPLE LAB</p>
             </div>
           </div>
           <form onSubmit={handleLogin} className="space-y-3">
@@ -378,8 +379,8 @@ export default function LandingPage() {
           <div className="flex items-center gap-2.5">
             <SSymbol size={32} />
             <div>
-              <span className="text-sm font-bold text-white leading-none block">심플 마케팅 랩</span>
-              <span className="text-[10px] text-white/50 leading-none">S Marketing Lab</span>
+              <span className="text-base font-extrabold text-white leading-none block">심플 마케팅 랩</span>
+              <span className="text-[10px] font-semibold text-white/50 leading-none tracking-widest">SIMPLE LAB</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -578,8 +579,8 @@ export default function LandingPage() {
           <div className="flex items-center gap-2">
             <SSymbol size={24} />
             <div>
-              <span className="text-xs font-bold text-slate-300 block">심플 마케팅 랩</span>
-              <span className="text-[10px] text-slate-600">S Marketing Lab</span>
+              <span className="text-sm font-extrabold text-slate-300 block">심플 마케팅 랩</span>
+              <span className="text-[10px] text-slate-600 tracking-widest font-semibold">SIMPLE LAB</span>
             </div>
           </div>
           <p className="text-xs text-slate-600">

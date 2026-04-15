@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { AlertCircle, Plus, Clock, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlassCard, PageShell, PrimaryButton, GhostButton, Pill, RelatedTools, ToneKey } from "@/components/store-ops/shared";
+import { AITaskPanel } from "@/components/store-ops/ai-task-panel";
 
 type Category = "품절" | "배송 이슈" | "일정 지연" | "광고 보류" | "등록 누락";
 type Severity = "긴급" | "확인 필요" | "지연" | "보류" | "해결 완료";
@@ -66,6 +67,7 @@ export default function IssuesPage() {
         </div>
       }
     >
+      <AITaskPanel category="이슈 / 알림" />
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-5">
         <SummaryChip label="긴급" value={summary.urgent} tone="rose" />
         <SummaryChip label="확인 필요" value={summary.checking} tone="blue" />

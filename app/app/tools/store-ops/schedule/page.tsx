@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { CalendarDays, Plus, Package, Sparkles, RefreshCw, CalendarX, Hourglass, Snowflake } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlassCard, PageShell, PrimaryButton, ProgressBar, Pill, RelatedTools } from "@/components/store-ops/shared";
+import { AITaskPanel } from "@/components/store-ops/ai-task-panel";
 
 type Cat = "신상품" | "재입고" | "종료 예정" | "예약판매" | "시즌 일정";
 
@@ -50,6 +51,7 @@ export default function SchedulePage() {
       maxWidth="1200px"
       action={<PrimaryButton><Plus className="w-3.5 h-3.5" /> 상품 일정 등록</PrimaryButton>}
     >
+      <AITaskPanel category="일정 관리" />
       {/* Category filter chips */}
       <div className="flex items-center gap-2 mb-5 flex-wrap">
         {CATS.map((c) => {

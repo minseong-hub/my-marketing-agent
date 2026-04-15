@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { CheckSquare, Plus, ChevronRight, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlassCard, PageShell, PrimaryButton, ProgressBar, Pill, RelatedTools } from "@/components/store-ops/shared";
+import { AITaskPanel } from "@/components/store-ops/ai-task-panel";
 import { PRODUCTS, TODAY, type SeasonalProduct } from "@/lib/store-ops/seasonal-data";
 
 const LAUNCH_ITEMS = [
@@ -78,6 +79,7 @@ export default function ChecklistPage() {
       maxWidth="1200px"
       action={<PrimaryButton><Plus className="w-3.5 h-3.5" /> 상품 추가</PrimaryButton>}
     >
+      <AITaskPanel category="체크리스트" />
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4">
         <div className="space-y-2">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em] mb-1.5 px-1">

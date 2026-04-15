@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Tag, Plus, CalendarRange, Percent, NotebookPen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlassCard, PageShell, PrimaryButton, Pill, RelatedTools, ToneKey } from "@/components/store-ops/shared";
+import { AITaskPanel } from "@/components/store-ops/ai-task-panel";
 
 type Status = "진행 중" | "예정" | "종료";
 
@@ -56,6 +57,7 @@ export default function PromotionsPage() {
       maxWidth="1200px"
       action={<PrimaryButton><Plus className="w-3.5 h-3.5" /> 프로모션 등록</PrimaryButton>}
     >
+      <AITaskPanel category="프로모션 관리" />
       <div className="grid grid-cols-3 gap-3 mb-5">
         <SummaryCard label="진행 중" value={summary.active} tone="emerald" />
         <SummaryCard label="예정" value={summary.upcoming} tone="blue" />

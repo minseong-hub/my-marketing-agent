@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Archive, CheckCircle2, Trophy, AlertOctagon, Lightbulb, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlassCard, PageShell, PrimaryButton, Pill, RelatedTools, ToneKey } from "@/components/store-ops/shared";
+import { AITaskPanel } from "@/components/store-ops/ai-task-panel";
 
 type LaunchRecord = {
   id: string;
@@ -63,6 +64,7 @@ export default function HistoryPage() {
       maxWidth="1200px"
       action={<PrimaryButton><Plus className="w-3.5 h-3.5" /> 기록 추가</PrimaryButton>}
     >
+      <AITaskPanel category="운영 기록" />
       <div className="flex items-center gap-2 mb-5 flex-wrap">
         {TABS.map((t) => (
           <button

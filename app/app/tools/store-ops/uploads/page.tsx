@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import {
   GlassCard, PageShell, PrimaryButton, Pill, ProgressBar, RelatedTools, ToneKey,
 } from "@/components/store-ops/shared";
+import { AITaskPanel } from "@/components/store-ops/ai-task-panel";
 import {
   PRODUCTS, isVisibleProduct, UploadStatus, type SeasonalProduct,
 } from "@/lib/store-ops/seasonal-data";
@@ -68,6 +69,7 @@ export default function UploadsPage() {
       maxWidth="1400px"
       action={<PrimaryButton><Plus className="w-3.5 h-3.5" /> 업로드 항목 추가</PrimaryButton>}
     >
+      <AITaskPanel category="상품 업로드 관리" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         <SummaryCard label="등록 대기" value={summary.pending} tone="blue" hint="미등록 + 준비중" />
         <SummaryCard label="수정 필요" value={summary.fix} tone="amber" hint="가격/이미지 불일치" />

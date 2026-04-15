@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import {
   GlassCard, PageShell, PrimaryButton, Pill, ProgressBar, RelatedTools, ToneKey,
 } from "@/components/store-ops/shared";
+import { AITaskPanel } from "@/components/store-ops/ai-task-panel";
 import {
   PRODUCTS, deriveStockStatus, isVisibleProduct, StockStatus, type SeasonalProduct,
 } from "@/lib/store-ops/seasonal-data";
@@ -70,6 +71,7 @@ export default function InventoryPage() {
       maxWidth="1300px"
       action={<PrimaryButton><Plus className="w-3.5 h-3.5" /> 재고 항목 추가</PrimaryButton>}
     >
+      <AITaskPanel category="재고 관리" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         <SummaryCard label="재고 부족" value={summary.low} tone="amber" hint="안전재고 미달" />
         <SummaryCard label="품절" value={summary.out} tone="rose" hint="즉시 발주" />

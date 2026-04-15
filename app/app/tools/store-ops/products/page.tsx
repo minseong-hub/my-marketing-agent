@@ -25,6 +25,7 @@ import {
   RelatedTools,
   ToneKey,
 } from "@/components/store-ops/shared";
+import { AITaskPanel } from "@/components/store-ops/ai-task-panel";
 import {
   PRODUCTS,
   SEASON_LABEL,
@@ -99,6 +100,7 @@ export default function ProductsPage() {
       maxWidth="1300px"
       action={<PrimaryButton><Plus className="w-3.5 h-3.5" /> 상품 등록</PrimaryButton>}
     >
+      <AITaskPanel category="상품 관리" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         <SummaryCard label="판매중 시즌상품" value={counts.selling} tone="emerald" />
         <SummaryCard label="시즌 준비중" value={counts.prepping} tone="blue" />

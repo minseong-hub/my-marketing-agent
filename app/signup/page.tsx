@@ -1,11 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+function ConsentRow({
+  checked,
+  onChange,
+  required,
+  children,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="flex items-start gap-2.5 cursor-pointer group">
+      <div className="relative mt-0.5 flex-shrink-0">
+        <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="sr-only" />
+        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${checked ? "bg-blue-500 border-blue-400" : "bg-white/10 border-white/30 group-hover:border-white/50"}`}>
+          {checked && (
+            <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 10 10">
+              <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </div>
+      </div>
+      <span className="text-xs text-white/60 leading-relaxed">{children}</span>
+    </label>
+  );
+}
 
 const INDUSTRY_OPTIONS = [
   "식품 / 농산물",
@@ -53,7 +81,7 @@ export default function SignupPage() {
     brandDisplayName: "",
     industry: "",
   });
-  const [agreed, setAgreed] = useState(false);
+  const [consent, setConsent] = useState({ terms: false, privacy: false, marketing: false });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -61,8 +89,8 @@ export default function SignupPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (!agreed) {
-      setError("이용약관 및 개인정보처리방침에 동의해주세요.");
+    if (!consent.terms || !consent.privacy) {
+      setError("이용약관 및 개인정보처리방침 동의는 필수입니다.");
       return;
     }
     setLoading(true);
@@ -71,7 +99,7 @@ export default function SignupPage() {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, termsAgreed: consent.terms, privacyAgreed: consent.privacy, marketingConsent: consent.marketing }),
       });
       const data = await res.json();
 
@@ -272,35 +300,35 @@ export default function SignupPage() {
               </div>
 
               {/* 약관 동의 */}
-              <div className="pt-1">
-                <label className="flex items-start gap-2.5 cursor-pointer group">
-                  <div className="relative mt-0.5 flex-shrink-0">
-                    <input
-                      type="checkbox"
-                      checked={agreed}
-                      onChange={(e) => setAgreed(e.target.checked)}
-                      className="sr-only"
-                    />
-                    <div
-                      className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                        agreed
-                          ? "bg-blue-500 border-blue-400"
-                          : "bg-white/10 border-white/30 group-hover:border-white/50"
-                      }`}
-                    >
-                      {agreed && (
-                        <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 10 10">
-                          <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      )}
-                    </div>
-                  </div>
-                  <span className="text-xs text-white/60 leading-relaxed">
-                    <span className="text-blue-200 underline cursor-pointer hover:text-white">이용약관</span> 및{" "}
-                    <span className="text-blue-200 underline cursor-pointer hover:text-white">개인정보처리방침</span>에
-                    동의합니다.
-                  </span>
-                </label>
+              <div className="pt-1 space-y-2.5">
+                {/* 이용약관 (필수) */}
+                <ConsentRow
+                  checked={consent.terms}
+                  onChange={(v) => setConsent((c) => ({ ...c, terms: v }))}
+                  required
+                >
+                  <Link href="/terms" target="_blank" className="text-blue-200 underline hover:text-white">이용약관</Link>에 동의합니다.{" "}
+                  <span className="text-white/40">(필수)</span>
+                </ConsentRow>
+
+                {/* 개인정보처리방침 (필수) */}
+                <ConsentRow
+                  checked={consent.privacy}
+                  onChange={(v) => setConsent((c) => ({ ...c, privacy: v }))}
+                  required
+                >
+                  <Link href="/privacy" target="_blank" className="text-blue-200 underline hover:text-white">개인정보처리방침</Link>에 동의합니다.{" "}
+                  <span className="text-white/40">(필수)</span>
+                </ConsentRow>
+
+                {/* 마케팅 수신 동의 (선택) */}
+                <ConsentRow
+                  checked={consent.marketing}
+                  onChange={(v) => setConsent((c) => ({ ...c, marketing: v }))}
+                >
+                  마케팅 정보 수신에 동의합니다.{" "}
+                  <span className="text-white/40">(선택)</span>
+                </ConsentRow>
               </div>
 
               {error && (
@@ -311,7 +339,7 @@ export default function SignupPage() {
 
               <button
                 type="submit"
-                disabled={loading || !agreed}
+                disabled={loading || !consent.terms || !consent.privacy}
                 className="w-full h-11 bg-white text-blue-700 hover:bg-blue-50 font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-1"
               >
                 {loading ? "가입 중..." : "무료로 시작하기"}

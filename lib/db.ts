@@ -106,6 +106,9 @@ function getDb(): Database.Database {
     if (!names.includes("trial_ends_at")) _db.exec("ALTER TABLE users ADD COLUMN trial_ends_at TEXT");
     if (!names.includes("first_payment_done")) _db.exec("ALTER TABLE users ADD COLUMN first_payment_done INTEGER NOT NULL DEFAULT 0");
     if (!names.includes("industry")) _db.exec("ALTER TABLE users ADD COLUMN industry TEXT NOT NULL DEFAULT ''");
+    if (!names.includes("terms_agreed_at")) _db.exec("ALTER TABLE users ADD COLUMN terms_agreed_at TEXT");
+    if (!names.includes("privacy_agreed_at")) _db.exec("ALTER TABLE users ADD COLUMN privacy_agreed_at TEXT");
+    if (!names.includes("marketing_consent")) _db.exec("ALTER TABLE users ADD COLUMN marketing_consent INTEGER NOT NULL DEFAULT 0");
   } catch {}
 
   try {
@@ -178,6 +181,9 @@ export interface UserRow {
   trial_started_at: string | null;
   trial_ends_at: string | null;
   first_payment_done: number;
+  terms_agreed_at: string | null;
+  privacy_agreed_at: string | null;
+  marketing_consent: number;
   created_at: string;
 }
 
@@ -279,10 +285,10 @@ export const db = {
   countUsers(): number {
     return (getDb().prepare("SELECT COUNT(*) as c FROM users").get() as { c: number }).c;
   },
-  createUser(user: Omit<UserRow, "created_at" | "role" | "status" | "plan_id" | "plan_slug" | "plan_status" | "trial_started_at" | "trial_ends_at" | "first_payment_done"> & Partial<Pick<UserRow, "role" | "status" | "plan_id">>): UserRow {
+  createUser(user: Omit<UserRow, "created_at" | "role" | "status" | "plan_id" | "plan_slug" | "plan_status" | "trial_started_at" | "trial_ends_at" | "first_payment_done" | "terms_agreed_at" | "privacy_agreed_at" | "marketing_consent"> & Partial<Pick<UserRow, "role" | "status" | "plan_id" | "terms_agreed_at" | "privacy_agreed_at" | "marketing_consent">>): UserRow {
     const stmt = getDb().prepare(`
-      INSERT INTO users (id, name, email, password_hash, business_name, brand_display_name, industry, role, status, plan_id)
-      VALUES (@id, @name, @email, @password_hash, @business_name, @brand_display_name, @industry, @role, @status, @plan_id)
+      INSERT INTO users (id, name, email, password_hash, business_name, brand_display_name, industry, role, status, plan_id, terms_agreed_at, privacy_agreed_at, marketing_consent)
+      VALUES (@id, @name, @email, @password_hash, @business_name, @brand_display_name, @industry, @role, @status, @plan_id, @terms_agreed_at, @privacy_agreed_at, @marketing_consent)
     `);
     stmt.run({
       id: user.id,
@@ -295,6 +301,9 @@ export const db = {
       role: user.role ?? "user",
       status: user.status ?? "active",
       plan_id: user.plan_id ?? null,
+      terms_agreed_at: user.terms_agreed_at ?? null,
+      privacy_agreed_at: user.privacy_agreed_at ?? null,
+      marketing_consent: user.marketing_consent ?? 0,
     });
     return getDb().prepare("SELECT * FROM users WHERE id = ?").get(user.id) as UserRow;
   },

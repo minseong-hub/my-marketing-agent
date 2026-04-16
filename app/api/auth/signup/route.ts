@@ -7,11 +7,18 @@ import { randomUUID } from "crypto";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, password, businessName, brandDisplayName, industry } = body;
+    const { name, email, password, businessName, brandDisplayName, industry, termsAgreed, privacyAgreed, marketingConsent } = body;
 
     if (!name || !email || !password || !businessName || !brandDisplayName) {
       return NextResponse.json(
         { error: "모든 필드를 입력해주세요." },
+        { status: 400 }
+      );
+    }
+
+    if (!termsAgreed || !privacyAgreed) {
+      return NextResponse.json(
+        { error: "이용약관 및 개인정보처리방침에 동의해주세요." },
         { status: 400 }
       );
     }
@@ -32,6 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
+    const now = new Date().toISOString();
     const user = db.createUser({
       id: randomUUID(),
       name,
@@ -40,6 +48,9 @@ export async function POST(request: NextRequest) {
       business_name: businessName,
       brand_display_name: brandDisplayName,
       industry: industry ?? "",
+      terms_agreed_at: termsAgreed ? now : null,
+      privacy_agreed_at: privacyAgreed ? now : null,
+      marketing_consent: marketingConsent ? 1 : 0,
     });
 
     const token = await signToken({

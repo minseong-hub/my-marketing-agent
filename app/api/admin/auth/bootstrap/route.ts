@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
       password_hash: hash,
       business_name: "Owner",
       brand_display_name: "Owner",
+      industry: "",
       role: "admin",
       status: "active",
       plan_id: null,

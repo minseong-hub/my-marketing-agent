@@ -7,7 +7,7 @@ import { randomUUID } from "crypto";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, password, businessName, brandDisplayName } = body;
+    const { name, email, password, businessName, brandDisplayName, industry } = body;
 
     if (!name || !email || !password || !businessName || !brandDisplayName) {
       return NextResponse.json(
@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       password_hash: passwordHash,
       business_name: businessName,
       brand_display_name: brandDisplayName,
+      industry: industry ?? "",
     });
 
     const token = await signToken({

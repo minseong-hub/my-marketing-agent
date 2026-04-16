@@ -105,6 +105,7 @@ function getDb(): Database.Database {
     if (!names.includes("trial_started_at")) _db.exec("ALTER TABLE users ADD COLUMN trial_started_at TEXT");
     if (!names.includes("trial_ends_at")) _db.exec("ALTER TABLE users ADD COLUMN trial_ends_at TEXT");
     if (!names.includes("first_payment_done")) _db.exec("ALTER TABLE users ADD COLUMN first_payment_done INTEGER NOT NULL DEFAULT 0");
+    if (!names.includes("industry")) _db.exec("ALTER TABLE users ADD COLUMN industry TEXT NOT NULL DEFAULT ''");
   } catch {}
 
   try {
@@ -168,6 +169,7 @@ export interface UserRow {
   password_hash: string;
   business_name: string;
   brand_display_name: string;
+  industry: string;
   role: string;
   status: string;
   plan_id: string | null;
@@ -279,8 +281,8 @@ export const db = {
   },
   createUser(user: Omit<UserRow, "created_at" | "role" | "status" | "plan_id" | "plan_slug" | "plan_status" | "trial_started_at" | "trial_ends_at" | "first_payment_done"> & Partial<Pick<UserRow, "role" | "status" | "plan_id">>): UserRow {
     const stmt = getDb().prepare(`
-      INSERT INTO users (id, name, email, password_hash, business_name, brand_display_name, role, status, plan_id)
-      VALUES (@id, @name, @email, @password_hash, @business_name, @brand_display_name, @role, @status, @plan_id)
+      INSERT INTO users (id, name, email, password_hash, business_name, brand_display_name, industry, role, status, plan_id)
+      VALUES (@id, @name, @email, @password_hash, @business_name, @brand_display_name, @industry, @role, @status, @plan_id)
     `);
     stmt.run({
       id: user.id,
@@ -289,6 +291,7 @@ export const db = {
       password_hash: user.password_hash,
       business_name: user.business_name,
       brand_display_name: user.brand_display_name,
+      industry: user.industry ?? "",
       role: user.role ?? "user",
       status: user.status ?? "active",
       plan_id: user.plan_id ?? null,

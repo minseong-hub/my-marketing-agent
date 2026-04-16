@@ -28,9 +28,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Beta | `Beta V 00.xx.xx` | `Beta V 00.01.00` |
 | Official | `Official V 01.00.00+` | `Official V 01.00.00` |
 
+- 버전 업 기준은 Claude가 판단 (사용자 지시 불필요)
+  - 새 툴/섹션 추가, 핵심 기능 구현 → second number +1
+  - UI 수정, 버그 픽스, 소규모 기능 → third number +1
+  - 단순 텍스트·네이밍·설정 변경 → 버전 유지
 - "확정" 선언 시 → CLAUDE.md 상태 업데이트 + GitHub push (버전 번호 변경 없음)
-- 큰 기능 수정 → second number +1
-- 작은 기능/UI/버그 수정 → third number +1
 - major/risky update 전에는 직전 버전 백업
 - 문제 발생 시 직전 버전으로 rollback 후 이어서 작업
 - major summary 시 현재 버전명을 함께 표시

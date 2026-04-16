@@ -7,22 +7,38 @@ import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const INDUSTRY_OPTIONS = [
+  "식품 / 농산물",
+  "의류 / 패션",
+  "뷰티 / 화장품",
+  "전자제품 / 디지털",
+  "생활용품 / 인테리어",
+  "스포츠 / 레저",
+  "유아 / 완구",
+  "반려동물",
+  "기타",
+];
+
 function SSymbol({ size = 32 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
       <defs>
-        <linearGradient id="s-signup-grad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#60A5FA" />
-          <stop offset="100%" stopColor="#818CF8" />
+        <linearGradient id="uf-signup-g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#3B82F6" />
+          <stop offset="100%" stopColor="#1D4ED8" />
         </linearGradient>
       </defs>
-      <rect width="48" height="48" rx="12" fill="url(#s-signup-grad)" />
-      <path
-        d="M30 16H20a4 4 0 0 0-4 4v0a4 4 0 0 0 4 4h8a4 4 0 0 1 4 4v0a4 4 0 0 1-4 4H18"
-        stroke="white"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
+      <rect width="48" height="48" rx="12" fill="url(#uf-signup-g)" />
+      <rect width="48" height="48" rx="12" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+      <text
+        x="24" y="31"
+        textAnchor="middle"
+        fill="white"
+        fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+        fontSize="16"
+        fontWeight="800"
+        letterSpacing="-0.5"
+      >UpF</text>
     </svg>
   );
 }
@@ -35,7 +51,9 @@ export default function SignupPage() {
     password: "",
     businessName: "",
     brandDisplayName: "",
+    industry: "",
   });
+  const [agreed, setAgreed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,6 +61,10 @@ export default function SignupPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (!agreed) {
+      setError("이용약관 및 개인정보처리방침에 동의해주세요.");
+      return;
+    }
     setLoading(true);
 
     try {
@@ -68,9 +90,9 @@ export default function SignupPage() {
   }
 
   const benefits = [
-    "브랜드 전용 콘텐츠 관리 공간",
-    "5가지 채널 통합 스케줄링",
-    "스마트 분석 대시보드",
+    "온라인스토어 AI 운영비서",
+    "5가지 마케팅 채널 콘텐츠 자동화",
+    "광고 · 마진 스마트 분석 대시보드",
   ];
 
   return (
@@ -96,10 +118,10 @@ export default function SignupPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-extrabold text-white mb-2">
-              브랜드 스튜디오 만들기
+              내 전용 운영비서<br />업플로로 자동화하세요
             </h1>
             <p className="text-sm text-blue-100/70">
-              무료로 시작하고 브랜드 전용 마케팅 공간을 만드세요.
+              무료 회원가입으로 업플로의 운영비서를 체험해보세요.
             </p>
           </div>
 
@@ -230,6 +252,57 @@ export default function SignupPage() {
                 />
               </div>
 
+              {/* 업종 */}
+              <div className="space-y-1.5">
+                <Label htmlFor="industry" className="text-sm font-medium text-white/80">
+                  업종
+                </Label>
+                <select
+                  id="industry"
+                  value={form.industry}
+                  onChange={(e) => setForm({ ...form, industry: e.target.value })}
+                  required
+                  className="w-full h-10 rounded-xl px-3 text-sm bg-white/10 border border-white/20 text-white focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/40 [&>option]:bg-blue-900 [&>option]:text-white"
+                >
+                  <option value="" disabled>업종을 선택하세요</option>
+                  {INDUSTRY_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 약관 동의 */}
+              <div className="pt-1">
+                <label className="flex items-start gap-2.5 cursor-pointer group">
+                  <div className="relative mt-0.5 flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={agreed}
+                      onChange={(e) => setAgreed(e.target.checked)}
+                      className="sr-only"
+                    />
+                    <div
+                      className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                        agreed
+                          ? "bg-blue-500 border-blue-400"
+                          : "bg-white/10 border-white/30 group-hover:border-white/50"
+                      }`}
+                    >
+                      {agreed && (
+                        <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 10 10">
+                          <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-xs text-white/60 leading-relaxed">
+                    <span className="text-blue-200 underline cursor-pointer hover:text-white">이용약관</span> 및{" "}
+                    <span className="text-blue-200 underline cursor-pointer hover:text-white">개인정보처리방침</span>에
+                    동의합니다.
+                  </span>
+                </label>
+              </div>
+
               {error && (
                 <div className="rounded-lg bg-red-500/20 border border-red-400/30 px-4 py-2.5">
                   <p className="text-sm text-red-200">{error}</p>
@@ -238,8 +311,8 @@ export default function SignupPage() {
 
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full h-11 bg-white text-blue-700 hover:bg-blue-50 font-semibold rounded-xl transition-colors disabled:opacity-60 text-sm mt-1"
+                disabled={loading || !agreed}
+                className="w-full h-11 bg-white text-blue-700 hover:bg-blue-50 font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-1"
               >
                 {loading ? "가입 중..." : "무료로 시작하기"}
               </button>

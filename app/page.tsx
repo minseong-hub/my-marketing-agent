@@ -20,38 +20,42 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 
-// ── S 심볼 컴포넌트
+// ── UpFlow 로고 심볼
 function SSymbol({ size = 48, className = "" }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
       <defs>
-        <linearGradient id="s-grad" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id="uf-grad" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#3B82F6" />
           <stop offset="100%" stopColor="#1D4ED8" />
         </linearGradient>
       </defs>
-      <rect width="48" height="48" rx="12" fill="url(#s-grad)" />
-      <path
-        d="M30 16H20a4 4 0 0 0-4 4v0a4 4 0 0 0 4 4h8a4 4 0 0 1 4 4v0a4 4 0 0 1-4 4H18"
-        stroke="white"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
+      <rect width="48" height="48" rx="12" fill="url(#uf-grad)" />
+      <rect width="48" height="48" rx="12" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+      <text
+        x="24" y="31"
+        textAnchor="middle"
+        fill="white"
+        fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+        fontSize="16"
+        fontWeight="800"
+        letterSpacing="-0.5"
+      >UpF</text>
     </svg>
   );
 }
 
-// ── S 심볼 Large (랜딩 그래픽용)
+// ── UpFlow 로고 심볼 Large (랜딩 그래픽용)
 function SSymbolLarge() {
   return (
     <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
       <defs>
-        <linearGradient id="s-grad-lg" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id="uf-grad-lg" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#60A5FA" />
           <stop offset="50%" stopColor="#3B82F6" />
           <stop offset="100%" stopColor="#1D4ED8" />
         </linearGradient>
-        <filter id="s-glow">
+        <filter id="uf-glow">
           <feGaussianBlur stdDeviation="4" result="coloredBlur" />
           <feMerge>
             <feMergeNode in="coloredBlur" />
@@ -59,15 +63,19 @@ function SSymbolLarge() {
           </feMerge>
         </filter>
       </defs>
-      <rect width="120" height="120" rx="30" fill="url(#s-grad-lg)" opacity="0.9" />
-      <rect width="120" height="120" rx="30" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" />
-      <path
-        d="M76 40H50a10 10 0 0 0-10 10v0a10 10 0 0 0 10 10h20a10 10 0 0 1 10 10v0a10 10 0 0 1-10 10H44"
-        stroke="white"
-        strokeWidth="7"
-        strokeLinecap="round"
-        filter="url(#s-glow)"
-      />
+      <rect width="120" height="120" rx="30" fill="url(#uf-grad-lg)" opacity="0.9" />
+      <rect width="120" height="120" rx="30" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" />
+      <text
+        x="60" y="74"
+        textAnchor="middle"
+        fill="white"
+        fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+        fontSize="40"
+        fontWeight="800"
+        letterSpacing="-2"
+        filter="url(#uf-glow)"
+      >UpF</text>
+      <path d="M36 88 L48 88 M56 88 L68 88 M76 88 L88 88" stroke="rgba(255,255,255,0.22)" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -400,45 +408,49 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen overflow-x-hidden">
       {/* ── 네비게이션 바 */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A43D1]/28 backdrop-blur-xl border-b border-white/10">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200/80 shadow-sm">
         <div className="max-w-6xl mx-auto px-6 h-[88px] flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="relative shrink-0">
-              <div className="absolute inset-0 rounded-2xl bg-[#145CFF]/30 blur-md" />
+              <div className="absolute inset-0 rounded-2xl bg-[#145CFF]/15 blur-md" />
               <svg width="42" height="42" viewBox="0 0 48 48" fill="none" className="relative">
                 <defs>
-                  <linearGradient id="s-grad-premium" x1="0" y1="0" x2="1" y2="1">
+                  <linearGradient id="uf-grad-premium" x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0%" stopColor="#8FC2FF" />
                     <stop offset="55%" stopColor="#145CFF" />
                     <stop offset="100%" stopColor="#0D47D9" />
                   </linearGradient>
                 </defs>
-                <rect width="48" height="48" rx="14" fill="url(#s-grad-premium)" />
-                <path
-                  d="M30 16H20a4 4 0 0 0-4 4v0a4 4 0 0 0 4 4h8a4 4 0 0 1 4 4v0a4 4 0 0 1-4 4H18"
-                  stroke="white"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
+                <rect width="48" height="48" rx="14" fill="url(#uf-grad-premium)" />
+                <rect width="48" height="48" rx="14" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+                <text
+                  x="24" y="31"
+                  textAnchor="middle"
+                  fill="white"
+                  fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+                  fontSize="16"
+                  fontWeight="800"
+                  letterSpacing="-0.5"
+                >UpF</text>
               </svg>
             </div>
             <div className="flex flex-col justify-center">
-              <span className="text-[27px] md:text-[30px] font-extrabold text-white leading-none tracking-[-0.03em]">
-                업플로
+              <span className="text-[27px] md:text-[30px] font-extrabold text-[#0D47D9] leading-none tracking-[-0.03em]">
+                UpFlow
               </span>
-              <span className="text-[12px] text-white/55 font-medium mt-1 tracking-[0.01em]">
+              <span className="text-[12px] text-slate-400 font-medium mt-1 tracking-[0.01em]">
                 온라인 비즈니스 운영을 한 곳에서
               </span>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login">
-              <button className="inline-flex items-center justify-center whitespace-nowrap transition-all duration-300 h-10 rounded-xl px-4 text-sm font-semibold text-white/85 border border-white/10 bg-white/5 hover:bg-white/[0.12] hover:text-white hover:border-white/20 hover:shadow-[0_8px_30px_rgba(255,255,255,0.08)] hover:-translate-y-[1px] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145CFF] focus-visible:ring-offset-2">
+              <button className="inline-flex items-center justify-center whitespace-nowrap transition-all duration-300 h-10 rounded-xl px-4 text-sm font-semibold text-[#145CFF] border border-[#145CFF]/20 bg-blue-50/60 hover:bg-blue-100/70 hover:border-[#145CFF]/40 hover:-translate-y-[1px] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145CFF] focus-visible:ring-offset-2">
                 로그인
               </button>
             </Link>
             <Link href="/signup">
-              <button className="inline-flex items-center justify-center whitespace-nowrap transition-all duration-300 h-10 rounded-xl px-5 text-sm font-semibold text-[#0D47D9] bg-white hover:bg-[#F4F8FF] hover:text-[#145CFF] hover:shadow-[0_10px_30px_rgba(20,92,255,0.22)] hover:-translate-y-[1px] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145CFF] focus-visible:ring-offset-2">
+              <button className="inline-flex items-center justify-center whitespace-nowrap transition-all duration-300 h-10 rounded-xl px-5 text-sm font-semibold text-white bg-[#145CFF] hover:bg-[#0D47D9] hover:shadow-[0_10px_30px_rgba(20,92,255,0.30)] hover:-translate-y-[1px] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145CFF] focus-visible:ring-offset-2">
                 무료로 시작하기
               </button>
             </Link>
@@ -482,8 +494,7 @@ export default function LandingPage() {
               </h1>
 
               <p className="text-lg text-blue-100/80 leading-relaxed mb-8 max-w-xl">
-                업플로는 온라인 쇼핑몰 셀러를 위한 멀티툴 SaaS 플랫폼입니다.
-                스토어 운영부터 SNS 마케팅, 광고, CRM까지 한 곳에서 자동화하세요.
+                업플로는 온라인 쇼핑몰 셀러를 위한 멀티툴 SaaS 플랫폼입니다.<br />스토어 운영부터 SNS 마케팅, 광고, CRM까지 한 곳에서 자동화하세요.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mb-10">

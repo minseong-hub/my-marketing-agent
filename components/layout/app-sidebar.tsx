@@ -18,23 +18,27 @@ import {
 import { cn } from "@/lib/utils";
 import { TOOLS, NavItem } from "@/lib/tools-config";
 
-// ── S Symbol
+// ── UpFlow 로고 심볼
 function SSymbol({ size = 28 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden>
       <defs>
-        <linearGradient id="s-sb-g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#60A5FA" />
-          <stop offset="100%" stopColor="#818CF8" />
+        <linearGradient id="uf-sb-g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#3B82F6" />
+          <stop offset="100%" stopColor="#1D4ED8" />
         </linearGradient>
       </defs>
-      <rect width="48" height="48" rx="12" fill="url(#s-sb-g)" />
-      <path
-        d="M30 16H20a4 4 0 0 0-4 4v0a4 4 0 0 0 4 4h8a4 4 0 0 1 4 4v0a4 4 0 0 1-4 4H18"
-        stroke="white"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
+      <rect width="48" height="48" rx="12" fill="url(#uf-sb-g)" />
+      <rect width="48" height="48" rx="12" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+      <text
+        x="24" y="31"
+        textAnchor="middle"
+        fill="white"
+        fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+        fontSize="16"
+        fontWeight="800"
+        letterSpacing="-0.5"
+      >UpF</text>
     </svg>
   );
 }

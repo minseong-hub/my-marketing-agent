@@ -501,9 +501,8 @@ export default function LandingPage() {
       .catch(() => {});
   }, []);
 
-  function handleAuthClick(e: React.MouseEvent, dest: string) {
+  function handleAuthClick(dest: string) {
     if (isLoggedIn) {
-      e.preventDefault();
       setShowMemberModal(true);
     } else {
       router.push(dest);
@@ -556,14 +555,14 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             {/* 로그인 버튼 */}
             <button
-              onClick={(e) => handleAuthClick(e, "/login")}
+              onClick={() => handleAuthClick("/login")}
               className="inline-flex items-center justify-center whitespace-nowrap transition-all duration-300 h-10 rounded-xl px-4 text-sm font-semibold text-[#145CFF] border border-[#145CFF]/20 bg-blue-50/60 hover:bg-blue-100/70 hover:border-[#145CFF]/40 hover:-translate-y-[1px] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145CFF] focus-visible:ring-offset-2"
             >
               로그인
             </button>
             {/* 무료로 시작하기 버튼 */}
             <button
-              onClick={(e) => handleAuthClick(e, "/signup")}
+              onClick={() => handleAuthClick("/signup")}
               className="inline-flex items-center justify-center whitespace-nowrap transition-all duration-300 h-10 rounded-xl px-5 text-sm font-semibold text-white bg-[#145CFF] hover:bg-[#0D47D9] hover:shadow-[0_10px_30px_rgba(20,92,255,0.30)] hover:-translate-y-[1px] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145CFF] focus-visible:ring-offset-2"
             >
               무료로 시작하기
@@ -612,17 +611,13 @@ export default function LandingPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mb-10">
-                <button onClick={(e) => handleAuthClick(e, "/signup")}>
-                  <Button size="lg" className="bg-white text-blue-700 hover:bg-blue-50 shadow-lg gap-2 font-semibold px-8">
-                    무료로 시작하기
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </button>
-                <button onClick={(e) => handleAuthClick(e, "/login")}>
-                  <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent font-semibold px-8">
-                    로그인
-                  </Button>
-                </button>
+                <Button size="lg" className="bg-white text-blue-700 hover:bg-blue-50 shadow-lg gap-2 font-semibold px-8" onClick={() => handleAuthClick("/signup")}>
+                  무료로 시작하기
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent font-semibold px-8" onClick={() => handleAuthClick("/login")}>
+                  로그인
+                </Button>
               </div>
 
               {/* 통계 배지들 */}
@@ -726,24 +721,22 @@ export default function LandingPage() {
               무료로, 지금 바로 시작하세요.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <button onClick={(e) => handleAuthClick(e, "/signup")}>
-                <Button
-                  size="lg"
-                  className="bg-white text-blue-700 hover:bg-blue-50 shadow-md gap-2 font-semibold px-8"
-                >
-                  무료로 시작하기
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </button>
-              <button onClick={(e) => handleAuthClick(e, "/login")}>
-                <Button
-                  size="lg"
-                  variant="ghost"
-                  className="text-white border border-white/30 hover:bg-white/10 font-semibold px-8"
-                >
-                  이미 계정이 있나요?
-                </Button>
-              </button>
+              <Button
+                size="lg"
+                className="bg-white text-blue-700 hover:bg-blue-50 shadow-md gap-2 font-semibold px-8"
+                onClick={() => handleAuthClick("/signup")}
+              >
+                무료로 시작하기
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+              <Button
+                size="lg"
+                variant="ghost"
+                className="text-white border border-white/30 hover:bg-white/10 font-semibold px-8"
+                onClick={() => handleAuthClick("/login")}
+              >
+                이미 계정이 있나요?
+              </Button>
             </div>
           </motion.div>
         </div>

@@ -14,6 +14,7 @@ import {
   Eye,
   EyeOff,
   Instagram,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -85,6 +86,52 @@ function GlassCardDark({ children, className = "" }: { children: React.ReactNode
   return (
     <div className={`bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl ${className}`}>
       {children}
+    </div>
+  );
+}
+
+// ── "이미 회원" 모달
+function AlreadyMemberModal({ onClose }: { onClose: () => void }) {
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
+        className="relative bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-4">
+          <CheckCircle2 className="w-6 h-6 text-[#145CFF]" />
+        </div>
+        <h2 className="text-lg font-extrabold text-slate-900 mb-1.5">이미 회원입니다</h2>
+        <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+          이미 로그인된 상태입니다.<br />대시보드로 이동하세요.
+        </p>
+        <Link href="/app/select-tool" onClick={onClose}>
+          <button className="w-full h-11 bg-[#145CFF] hover:bg-[#0D47D9] text-white font-semibold rounded-xl transition-colors text-sm mb-2.5">
+            도구 선택으로 이동
+          </button>
+        </Link>
+        <button
+          onClick={onClose}
+          className="w-full h-9 text-slate-400 hover:text-slate-600 text-sm transition-colors"
+        >
+          닫기
+        </button>
+      </motion.div>
     </div>
   );
 }
@@ -181,7 +228,13 @@ function FloatingCards() {
 }
 
 // ── 마우스 인터랙션 메인 그래픽
-function InteractiveGraphic() {
+function InteractiveGraphic({
+  isLoggedIn,
+  onAlreadyMember,
+}: {
+  isLoggedIn: boolean;
+  onAlreadyMember: () => void;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isNear, setIsNear] = useState(false);
   const [loginVisible, setLoginVisible] = useState(false);
@@ -274,7 +327,7 @@ function InteractiveGraphic() {
         <FloatingCards />
       </motion.div>
 
-      {/* 로그인 폼 레이어 */}
+      {/* 호버 레이어: 로그인 폼 (비로그인) / 이미 회원 안내 (로그인) */}
       <motion.div
         className="absolute inset-0 flex items-center justify-center"
         initial={{ opacity: 0, y: 20, scale: 0.85 }}
@@ -286,64 +339,81 @@ function InteractiveGraphic() {
         style={{ pointerEvents: loginVisible ? "auto" : "none" }}
         transition={{ duration: 0.35, ease: "easeOut" }}
       >
-        <GlassCardDark className="w-full p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <SSymbol size={32} />
-            <div>
-              <p className="text-white font-extrabold text-base leading-none">업플로</p>
-              <p className="text-white/50 text-[10px] mt-0.5 tracking-widest font-semibold">UpFlow</p>
+        {isLoggedIn ? (
+          /* 이미 로그인 — 대시보드 안내 카드 */
+          <GlassCardDark className="w-full p-6 text-center">
+            <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center mx-auto mb-3">
+              <CheckCircle2 className="w-5 h-5 text-emerald-300" />
             </div>
-          </div>
-          <form onSubmit={handleLogin} className="space-y-3">
-            <div>
-              <Label className="text-white/70 text-xs mb-1 block">이메일</Label>
-              <Input
-                type="email"
-                placeholder="name@example.com"
-                value={loginForm.email}
-                onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                required
-                className="h-9 bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm focus:border-blue-500 focus:ring-blue-500/40"
-              />
-            </div>
-            <div>
-              <Label className="text-white/70 text-xs mb-1 block">비밀번호</Label>
-              <div className="relative">
-                <Input
-                  type={showPw ? "text" : "password"}
-                  placeholder="비밀번호 입력"
-                  value={loginForm.password}
-                  onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                  required
-                  className="h-9 bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm pr-9 focus:border-blue-500 focus:ring-blue-500/40"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPw(!showPw)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
-                >
-                  {showPw ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                </button>
+            <p className="text-white font-extrabold text-base mb-1">이미 회원입니다</p>
+            <p className="text-white/50 text-xs mb-4">이미 로그인된 상태입니다.</p>
+            <Link href="/app/select-tool">
+              <button className="w-full h-9 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold rounded-xl transition-colors">
+                도구 선택으로 이동 →
+              </button>
+            </Link>
+          </GlassCardDark>
+        ) : (
+          /* 비로그인 — 기존 로그인 폼 */
+          <GlassCardDark className="w-full p-6">
+            <div className="flex items-center gap-2 mb-5">
+              <SSymbol size={32} />
+              <div>
+                <p className="text-white font-extrabold text-base leading-none">업플로</p>
+                <p className="text-white/50 text-[10px] mt-0.5 tracking-widest font-semibold">UpFlow</p>
               </div>
             </div>
-            {loginError && (
-              <p className="text-red-300 text-xs">{loginError}</p>
-            )}
-            <button
-              type="submit"
-              disabled={loginLoading}
-              className="w-full h-9 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-60 shadow-lg shadow-blue-600/30"
-            >
-              {loginLoading ? "로그인 중..." : "로그인"}
-            </button>
-          </form>
-          <p className="text-center text-white/40 text-xs mt-3">
-            계정이 없으신가요?{" "}
-            <Link href="/signup" className="text-blue-300 hover:text-blue-200 font-medium">
-              회원가입
-            </Link>
-          </p>
-        </GlassCardDark>
+            <form onSubmit={handleLogin} className="space-y-3">
+              <div>
+                <Label className="text-white/70 text-xs mb-1 block">이메일</Label>
+                <Input
+                  type="email"
+                  placeholder="name@example.com"
+                  value={loginForm.email}
+                  onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
+                  required
+                  className="h-9 bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm focus:border-blue-500 focus:ring-blue-500/40"
+                />
+              </div>
+              <div>
+                <Label className="text-white/70 text-xs mb-1 block">비밀번호</Label>
+                <div className="relative">
+                  <Input
+                    type={showPw ? "text" : "password"}
+                    placeholder="비밀번호 입력"
+                    value={loginForm.password}
+                    onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                    required
+                    className="h-9 bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm pr-9 focus:border-blue-500 focus:ring-blue-500/40"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw(!showPw)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+                  >
+                    {showPw ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+              {loginError && (
+                <p className="text-red-300 text-xs">{loginError}</p>
+              )}
+              <button
+                type="submit"
+                disabled={loginLoading}
+                className="w-full h-9 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-60 shadow-lg shadow-blue-600/30"
+              >
+                {loginLoading ? "로그인 중..." : "로그인"}
+              </button>
+            </form>
+            <p className="text-center text-white/40 text-xs mt-3">
+              계정이 없으신가요?{" "}
+              <Link href="/signup" className="text-blue-300 hover:text-blue-200 font-medium">
+                회원가입
+              </Link>
+            </p>
+          </GlassCardDark>
+        )}
       </motion.div>
 
       {/* 마우스 힌트 */}
@@ -352,7 +422,7 @@ function InteractiveGraphic() {
         animate={{ opacity: isNear ? 0 : 1 }}
         transition={{ duration: 0.3 }}
       >
-        마우스를 올려 로그인
+        {isLoggedIn ? "마우스를 올려 대시보드로" : "마우스를 올려 로그인"}
       </motion.p>
     </div>
   );
@@ -405,8 +475,34 @@ const features = [
 ];
 
 export default function LandingPage() {
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showMemberModal, setShowMemberModal] = useState(false);
+
+  // Auth check on mount — determines whether to show modal or navigate
+  useEffect(() => {
+    fetch("/api/auth/check")
+      .then((r) => r.json())
+      .then((d) => { if (d.loggedIn) setIsLoggedIn(true); })
+      .catch(() => {});
+  }, []);
+
+  function handleAuthClick(e: React.MouseEvent, dest: string) {
+    if (isLoggedIn) {
+      e.preventDefault();
+      setShowMemberModal(true);
+    } else {
+      router.push(dest);
+    }
+  }
+
   return (
     <div className="min-h-screen overflow-x-hidden">
+      {/* 이미 회원 모달 */}
+      {showMemberModal && (
+        <AlreadyMemberModal onClose={() => setShowMemberModal(false)} />
+      )}
+
       {/* ── 네비게이션 바 */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200/80 shadow-sm">
         <div className="max-w-6xl mx-auto px-6 h-[88px] flex items-center justify-between">
@@ -444,16 +540,20 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login">
-              <button className="inline-flex items-center justify-center whitespace-nowrap transition-all duration-300 h-10 rounded-xl px-4 text-sm font-semibold text-[#145CFF] border border-[#145CFF]/20 bg-blue-50/60 hover:bg-blue-100/70 hover:border-[#145CFF]/40 hover:-translate-y-[1px] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145CFF] focus-visible:ring-offset-2">
-                로그인
-              </button>
-            </Link>
-            <Link href="/signup">
-              <button className="inline-flex items-center justify-center whitespace-nowrap transition-all duration-300 h-10 rounded-xl px-5 text-sm font-semibold text-white bg-[#145CFF] hover:bg-[#0D47D9] hover:shadow-[0_10px_30px_rgba(20,92,255,0.30)] hover:-translate-y-[1px] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145CFF] focus-visible:ring-offset-2">
-                무료로 시작하기
-              </button>
-            </Link>
+            {/* 로그인 버튼 */}
+            <button
+              onClick={(e) => handleAuthClick(e, "/login")}
+              className="inline-flex items-center justify-center whitespace-nowrap transition-all duration-300 h-10 rounded-xl px-4 text-sm font-semibold text-[#145CFF] border border-[#145CFF]/20 bg-blue-50/60 hover:bg-blue-100/70 hover:border-[#145CFF]/40 hover:-translate-y-[1px] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145CFF] focus-visible:ring-offset-2"
+            >
+              로그인
+            </button>
+            {/* 무료로 시작하기 버튼 */}
+            <button
+              onClick={(e) => handleAuthClick(e, "/signup")}
+              className="inline-flex items-center justify-center whitespace-nowrap transition-all duration-300 h-10 rounded-xl px-5 text-sm font-semibold text-white bg-[#145CFF] hover:bg-[#0D47D9] hover:shadow-[0_10px_30px_rgba(20,92,255,0.30)] hover:-translate-y-[1px] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145CFF] focus-visible:ring-offset-2"
+            >
+              무료로 시작하기
+            </button>
           </div>
         </div>
       </header>
@@ -498,17 +598,17 @@ export default function LandingPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mb-10">
-                <Link href="/signup">
+                <button onClick={(e) => handleAuthClick(e, "/signup")}>
                   <Button size="lg" className="bg-white text-blue-700 hover:bg-blue-50 shadow-lg gap-2 font-semibold px-8">
                     무료로 시작하기
                     <ArrowRight className="w-4 h-4" />
                   </Button>
-                </Link>
-                <Link href="/login">
+                </button>
+                <button onClick={(e) => handleAuthClick(e, "/login")}>
                   <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent font-semibold px-8">
                     로그인
                   </Button>
-                </Link>
+                </button>
               </div>
 
               {/* 통계 배지들 */}
@@ -533,7 +633,10 @@ export default function LandingPage() {
               transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
               className="flex items-center justify-center"
             >
-              <InteractiveGraphic />
+              <InteractiveGraphic
+                isLoggedIn={isLoggedIn}
+                onAlreadyMember={() => setShowMemberModal(true)}
+              />
             </motion.div>
           </div>
         </div>
@@ -609,7 +712,7 @@ export default function LandingPage() {
               무료로, 지금 바로 시작하세요.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link href="/signup">
+              <button onClick={(e) => handleAuthClick(e, "/signup")}>
                 <Button
                   size="lg"
                   className="bg-white text-blue-700 hover:bg-blue-50 shadow-md gap-2 font-semibold px-8"
@@ -617,8 +720,8 @@ export default function LandingPage() {
                   무료로 시작하기
                   <ArrowRight className="w-4 h-4" />
                 </Button>
-              </Link>
-              <Link href="/login">
+              </button>
+              <button onClick={(e) => handleAuthClick(e, "/login")}>
                 <Button
                   size="lg"
                   variant="ghost"
@@ -626,7 +729,7 @@ export default function LandingPage() {
                 >
                   이미 계정이 있나요?
                 </Button>
-              </Link>
+              </button>
             </div>
           </motion.div>
         </div>

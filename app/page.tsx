@@ -57,7 +57,7 @@ function SSymbolLarge() {
           <stop offset="100%" stopColor="#1D4ED8" />
         </linearGradient>
         <filter id="uf-glow">
-          <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+          <feGaussianBlur stdDeviation="0.8" result="coloredBlur" />
           <feMerge>
             <feMergeNode in="coloredBlur" />
             <feMergeNode in="SourceGraphic" />
@@ -76,7 +76,6 @@ function SSymbolLarge() {
         letterSpacing="-2"
         filter="url(#uf-glow)"
       >UpF</text>
-      <path d="M36 88 L48 88 M56 88 L68 88 M76 88 L88 88" stroke="rgba(255,255,255,0.22)" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -149,7 +148,7 @@ function FloatingCards() {
   }[] = [
     {
       title: "인스타그램",
-      desc: "성주참외 신상품",
+      desc: "비주얼 중심 + 반응 끌어올리기",
       badge: "예약됨",
       badgeColor: "bg-violet-400/80",
       brand: <Instagram className="w-7 h-7 text-pink-300 shrink-0" strokeWidth={1.9} />,
@@ -158,7 +157,7 @@ function FloatingCards() {
     },
     {
       title: "블로그",
-      desc: "봄 제철 과일 특집",
+      desc: "SEO최적화 + 정보형 글쓰기",
       badge: "작성중",
       badgeColor: "bg-amber-400/80",
       brand: (
@@ -169,7 +168,7 @@ function FloatingCards() {
     },
     {
       title: "오픈채팅",
-      desc: "회원 혜택 공지",
+      desc: "회원 공지 + 즉시 전환 유도",
       badge: "업로드완료",
       badgeColor: "bg-emerald-400/80",
       brand: (
@@ -182,7 +181,7 @@ function FloatingCards() {
     },
     {
       title: "스레드",
-      desc: "봄 시즌 오픈 예고",
+      desc: "분위기 예열 + 짧은 반응 테스트",
       badge: "기획중",
       badgeColor: "bg-sky-400/80",
       brand: (
@@ -237,6 +236,7 @@ function InteractiveGraphic({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isNear, setIsNear] = useState(false);
+  const [formFocused, setFormFocused] = useState(false);
   const [loginVisible, setLoginVisible] = useState(false);
   const router = useRouter();
 
@@ -258,15 +258,17 @@ function InteractiveGraphic({
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
+  // Keep popup open while mouse is near OR the form has focus
   useEffect(() => {
-    if (isNear) {
+    const shouldShow = isNear || formFocused;
+    if (shouldShow) {
       const t = setTimeout(() => setLoginVisible(true), 100);
       return () => clearTimeout(t);
     } else {
       const t = setTimeout(() => setLoginVisible(false), 200);
       return () => clearTimeout(t);
     }
-  }, [isNear]);
+  }, [isNear, formFocused]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -317,8 +319,8 @@ function InteractiveGraphic({
         >
           <GlassCardDark className="p-8">
             <SSymbolLarge />
-            <p className="text-white/70 text-xs text-center mt-3 font-semibold tracking-widest">
-              업플로
+            <p className="text-white text-xl text-center mt-3 font-semibold tracking-widest">
+              시작하기
             </p>
           </GlassCardDark>
         </motion.div>
@@ -355,6 +357,7 @@ function InteractiveGraphic({
           </GlassCardDark>
         ) : (
           /* 비로그인 — 기존 로그인 폼 */
+          <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
           <GlassCardDark className="w-full p-6">
             <div className="flex items-center gap-2 mb-5">
               <SSymbol size={32} />
@@ -363,7 +366,17 @@ function InteractiveGraphic({
                 <p className="text-white/50 text-[10px] mt-0.5 tracking-widest font-semibold">UpFlow</p>
               </div>
             </div>
-            <form onSubmit={handleLogin} className="space-y-3">
+            <form
+              onSubmit={handleLogin}
+              onFocus={() => setFormFocused(true)}
+              onBlur={(e) => {
+                // Only mark as unfocused when focus leaves the entire form
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                  setFormFocused(false);
+                }
+              }}
+              className="space-y-3"
+            >
               <div>
                 <Label className="text-white/70 text-xs mb-1 block">이메일</Label>
                 <Input
@@ -413,6 +426,7 @@ function InteractiveGraphic({
               </Link>
             </p>
           </GlassCardDark>
+          </div>
         )}
       </motion.div>
 

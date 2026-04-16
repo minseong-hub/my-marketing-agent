@@ -300,9 +300,9 @@ function InteractiveGraphic({
       <motion.div
         className="absolute inset-0 flex items-center justify-center"
         animate={{
-          opacity: isNear ? 0 : 1,
-          scale: isNear ? 0.85 : 1,
-          filter: isNear ? "blur(6px)" : "blur(0px)",
+          opacity: (isNear || loginVisible) ? 0 : 1,
+          scale: (isNear || loginVisible) ? 0.85 : 1,
+          filter: (isNear || loginVisible) ? "blur(6px)" : "blur(0px)",
         }}
         transition={{ duration: 0.35, ease: "easeInOut" }}
       >

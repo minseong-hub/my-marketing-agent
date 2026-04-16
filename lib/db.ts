@@ -148,8 +148,8 @@ function seedDefaults(d: Database.Database) {
   const settingCount = (d.prepare("SELECT COUNT(*) as c FROM settings").get() as { c: number }).c;
   if (settingCount === 0) {
     const s = d.prepare("INSERT INTO settings (key, value) VALUES (?, ?)");
-    s.run("brand_name", "심플 마케팅 연구소");
-    s.run("support_email", "help@simple-lab.app");
+    s.run("brand_name", "업플로");
+    s.run("support_email", "help@upflow.kr");
     s.run("maintenance_mode", "false");
     s.run("signup_enabled", "true");
     s.run("two_factor_required", "false");

@@ -74,8 +74,8 @@ export default function LoginPage() {
         <Link href="/" className="inline-flex items-center gap-2.5">
           <SSymbol size={32} />
           <div>
-            <span className="text-sm font-bold text-white block leading-none">심플 마케팅 연구소</span>
-            <span className="text-[10px] text-white/50">S Marketing Lab</span>
+            <span className="text-sm font-bold text-white block leading-none">업플로</span>
+            <span className="text-[10px] text-white/50">UpFlow</span>
           </div>
         </Link>
       </header>

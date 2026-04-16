@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "심플 마케팅 연구소 — 브랜드 마케팅 스튜디오",
-  description: "브랜드 SNS 콘텐츠 및 마케팅 운영 관리 도구",
+  title: "업플로 — 온라인 비즈니스 운영 자동화",
+  description: "온라인 쇼핑몰 셀러를 위한 멀티툴 SaaS 플랫폼",
 };
 
 export default function RootLayout({

@@ -310,7 +310,7 @@ function SidebarContent({
                 {brandDisplayName}
               </p>
               <p className="text-[10px] text-slate-400 leading-none mt-0.5 font-semibold tracking-widest">
-                SIMPLE LAB
+                UpFlow
               </p>
             </div>
           )}

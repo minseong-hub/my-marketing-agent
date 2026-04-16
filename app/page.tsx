@@ -257,7 +257,7 @@ function InteractiveGraphic() {
           <GlassCardDark className="p-8">
             <SSymbolLarge />
             <p className="text-white/70 text-xs text-center mt-3 font-semibold tracking-widest">
-              심플 마케팅 연구소
+              업플로
             </p>
           </GlassCardDark>
         </motion.div>
@@ -282,8 +282,8 @@ function InteractiveGraphic() {
           <div className="flex items-center gap-2 mb-5">
             <SSymbol size={32} />
             <div>
-              <p className="text-white font-extrabold text-base leading-none">심플 마케팅 연구소</p>
-              <p className="text-white/50 text-[10px] mt-0.5 tracking-widest font-semibold">SIMPLE LAB</p>
+              <p className="text-white font-extrabold text-base leading-none">업플로</p>
+              <p className="text-white/50 text-[10px] mt-0.5 tracking-widest font-semibold">UpFlow</p>
             </div>
           </div>
           <form onSubmit={handleLogin} className="space-y-3">
@@ -424,10 +424,10 @@ export default function LandingPage() {
             </div>
             <div className="flex flex-col justify-center">
               <span className="text-[27px] md:text-[30px] font-extrabold text-white leading-none tracking-[-0.03em]">
-                심플 마케팅 연구소
+                업플로
               </span>
               <span className="text-[12px] text-white/55 font-medium mt-1 tracking-[0.01em]">
-                브랜드 운영을 더 정교하고 간단하게
+                온라인 비즈니스 운영을 한 곳에서
               </span>
             </div>
           </div>
@@ -473,7 +473,7 @@ export default function LandingPage() {
             >
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/90 text-xs font-semibold px-4 py-1.5 rounded-full mb-6 border border-white/20">
                 <Zap className="w-3.5 h-3.5 text-yellow-300" />
-                브랜드 마케팅, 이제 더 심플하게
+                온라인 비즈니스 운영, 이제 자동으로
               </div>
 
               <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight tracking-tight mb-6">
@@ -482,8 +482,8 @@ export default function LandingPage() {
               </h1>
 
               <p className="text-lg text-blue-100/80 leading-relaxed mb-8 max-w-xl">
-                심플 마케팅 연구소는 브랜드별 독립 공간에서 SNS 콘텐츠 기획부터 발행
-                스케줄링까지 모든 마케팅 운영을 통합 관리하는 SaaS 도구입니다.
+                업플로는 온라인 쇼핑몰 셀러를 위한 멀티툴 SaaS 플랫폼입니다.
+                스토어 운영부터 SNS 마케팅, 광고, CRM까지 한 곳에서 자동화하세요.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mb-10">
@@ -627,12 +627,12 @@ export default function LandingPage() {
           <div className="flex items-center gap-2">
             <SSymbol size={24} />
             <div>
-              <span className="text-sm font-extrabold text-slate-300 block">심플 마케팅 연구소</span>
-              <span className="text-[10px] text-slate-600 tracking-widest font-semibold">SIMPLE LAB</span>
+              <span className="text-sm font-extrabold text-slate-300 block">업플로</span>
+              <span className="text-[10px] text-slate-600 tracking-widest font-semibold">UpFlow</span>
             </div>
           </div>
           <p className="text-xs text-slate-600">
-            © 2026 S Marketing Lab. All rights reserved.
+            © 2026 UpFlow. All rights reserved.
           </p>
         </div>
       </footer>

@@ -34,8 +34,8 @@ export function Sidebar() {
             <Leaf className="w-4 h-4 text-white" />
           </div>
           <div>
-            <p className="text-sm font-bold text-slate-800 leading-none">산물</p>
-            <p className="text-[11px] text-slate-400 leading-none mt-0.5 font-medium tracking-wide">CONTENT STUDIO</p>
+            <p className="text-sm font-bold text-slate-800 leading-none">업플로</p>
+            <p className="text-[11px] text-slate-400 leading-none mt-0.5 font-medium tracking-wide">UpFlow</p>
           </div>
         </Link>
       </div>

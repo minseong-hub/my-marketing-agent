@@ -85,8 +85,8 @@ export default function SignupPage() {
         <Link href="/" className="inline-flex items-center gap-2.5">
           <SSymbol size={32} />
           <div>
-            <span className="text-sm font-bold text-white block leading-none">심플 마케팅 연구소</span>
-            <span className="text-[10px] text-white/50">S Marketing Lab</span>
+            <span className="text-sm font-bold text-white block leading-none">업플로</span>
+            <span className="text-[10px] text-white/50">UpFlow</span>
           </div>
         </Link>
       </header>
@@ -202,7 +202,7 @@ export default function SignupPage() {
                 </Label>
                 <Input
                   id="businessName"
-                  placeholder="예: 산물 농산물"
+                  placeholder="예: 홍길동 쇼핑"
                   value={form.businessName}
                   onChange={(e) => setForm({ ...form, businessName: e.target.value })}
                   required
@@ -220,7 +220,7 @@ export default function SignupPage() {
                 </Label>
                 <Input
                   id="brandDisplayName"
-                  placeholder="예: 산물"
+                  placeholder="예: 홍길동샵"
                   value={form.brandDisplayName}
                   onChange={(e) =>
                     setForm({ ...form, brandDisplayName: e.target.value })

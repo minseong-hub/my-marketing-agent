@@ -105,7 +105,7 @@ const CATEGORY_RULES: {
 // ─── Prompt builder (for future LLM integration) ──────────────────────────────
 export function buildPrompt(rawInput: string): string {
   return `
-당신은 농산물 온라인 쇼핑몰 '산물'의 운영 업무 파서입니다.
+당신은 온라인 비즈니스 운영 자동화 플랫폼 '업플로'의 운영 업무 파서입니다.
 사용자 입력을 JSON 형태로 구조화하세요.
 
 입력: "${rawInput}"

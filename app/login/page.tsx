@@ -4,9 +4,27 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4" />
+      <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853" />
+      <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332Z" fill="#FBBC05" />
+      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.96L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58Z" fill="#EA4335" />
+    </svg>
+  );
+}
+
+function KakaoIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path fillRule="evenodd" clipRule="evenodd" d="M9 0C4.029 0 0 3.168 0 7.08c0 2.502 1.665 4.71 4.185 5.958L3.15 17.1c-.09.36.315.645.63.42L8.91 13.95c.03 0 .06.005.09.008.03.003.06.005.09.005C13.97 13.963 18 10.796 18 7.08 18 3.168 13.971 0 9 0Z" fill="#3A1D1D" />
+    </svg>
+  );
+}
 
 function SSymbol({ size = 40 }: { size?: number }) {
   return (
@@ -94,6 +112,33 @@ export default function LoginPage() {
             <p className="text-sm text-blue-100/70">
               계정에 로그인하여 대시보드로 이동하세요.
             </p>
+          </div>
+
+          {/* 소셜 로그인 */}
+          <div className="space-y-2.5 mb-5">
+            <a
+              href="/api/auth/google"
+              className="flex items-center justify-center gap-3 w-full h-11 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-xl transition-colors text-sm shadow-sm"
+            >
+              <GoogleIcon />
+              Google로 로그인
+            </a>
+            <a
+              href="/api/auth/kakao"
+              className="flex items-center justify-center gap-3 w-full h-11 font-semibold rounded-xl transition-colors text-sm shadow-sm"
+              style={{ backgroundColor: "#FEE500", color: "#3A1D1D" }}
+            >
+              <KakaoIcon />
+              카카오로 로그인
+            </a>
+          </div>
+
+          {/* 구분선 */}
+          <div className="relative mb-5">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/20" /></div>
+            <div className="relative flex justify-center">
+              <span className="px-3 bg-transparent text-xs text-white/40 font-medium">또는 이메일로 로그인</span>
+            </div>
           </div>
 
           {/* 글래스 카드 */}

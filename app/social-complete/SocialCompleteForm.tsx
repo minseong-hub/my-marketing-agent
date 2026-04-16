@@ -3,9 +3,29 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+const INDUSTRY_OPTIONS = [
+  "식품 / 농산물", "의류 / 패션", "뷰티 / 화장품", "전자제품 / 디지털",
+  "생활용품 / 인테리어", "스포츠 / 레저", "유아 / 완구", "반려동물", "기타",
+];
+const BUSINESS_TYPE_OPTIONS = [
+  "개인 사업자", "법인 사업자", "개인 (사업자 미등록)", "프리랜서",
+];
+const SALES_CHANNEL_OPTIONS = [
+  "스마트스토어", "쿠팡", "11번가", "G마켓 / 옥션", "카카오쇼핑", "자사몰", "인스타그램 쇼핑", "기타",
+];
+
+const PROVIDER_LABEL: Record<string, string> = { google: "Google", kakao: "카카오" };
+
+function formatPhone(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
 
 function ConsentRow({
   checked, onChange, children,
@@ -27,71 +47,20 @@ function ConsentRow({
   );
 }
 
-const INDUSTRY_OPTIONS = [
-  "식품 / 농산물", "의류 / 패션", "뷰티 / 화장품", "전자제품 / 디지털",
-  "생활용품 / 인테리어", "스포츠 / 레저", "유아 / 완구", "반려동물", "기타",
-];
-const BUSINESS_TYPE_OPTIONS = [
-  "개인 사업자", "법인 사업자", "개인 (사업자 미등록)", "프리랜서",
-];
-const SALES_CHANNEL_OPTIONS = [
-  "스마트스토어", "쿠팡", "11번가", "G마켓 / 옥션", "카카오쇼핑", "자사몰", "인스타그램 쇼핑", "기타",
-];
-
-function formatPhone(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 11);
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
-}
-
-function SSymbol({ size = 32 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-      <defs>
-        <linearGradient id="uf-signup-g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#3B82F6" />
-          <stop offset="100%" stopColor="#1D4ED8" />
-        </linearGradient>
-      </defs>
-      <rect width="48" height="48" rx="12" fill="url(#uf-signup-g)" />
-      <rect width="48" height="48" rx="12" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-      <text x="24" y="31" textAnchor="middle" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" fontSize="16" fontWeight="800" letterSpacing="-0.5">UpF</text>
-    </svg>
-  );
-}
-
-// Google SVG icon
-function GoogleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4" />
-      <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853" />
-      <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332Z" fill="#FBBC05" />
-      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.96L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58Z" fill="#EA4335" />
-    </svg>
-  );
-}
-
-// Kakao SVG icon
-function KakaoIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <path fillRule="evenodd" clipRule="evenodd" d="M9 0C4.029 0 0 3.168 0 7.08c0 2.502 1.665 4.71 4.185 5.958L3.15 17.1c-.09.36.315.645.63.42L8.91 13.95c.03 0 .06.005.09.008.03.003.06.005.09.005C13.97 13.963 18 10.796 18 7.08 18 3.168 13.971 0 9 0Z" fill="#3A1D1D" />
-    </svg>
-  );
-}
-
-export default function SignupPage() {
+export default function SocialCompleteForm({
+  provider, email, name: initialName,
+}: { provider: "google" | "kakao"; email: string; name: string }) {
   const router = useRouter();
   const [form, setForm] = useState({
-    name: "", email: "", password: "",
-    phone: "", businessName: "", brandDisplayName: "",
-    businessType: "", industry: "", productCategories: "",
+    phone: "",
+    businessName: "",
+    brandDisplayName: "",
+    businessType: "",
+    industry: "",
+    productCategories: "",
   });
   const [salesChannels, setSalesChannels] = useState<string[]>([]);
   const [consent, setConsent] = useState({ terms: false, privacy: false, marketing: false });
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -108,18 +77,11 @@ export default function SignupPage() {
     }
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/signup", {
+      const res = await fetch("/api/auth/social/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          password: form.password,
-          phone: form.phone,
-          businessName: form.businessName,
-          brandDisplayName: form.brandDisplayName,
-          businessType: form.businessType,
-          industry: form.industry,
+          ...form,
           salesChannels,
           productCategories: form.productCategories ? [form.productCategories] : [],
           termsAgreed: consent.terms,
@@ -129,7 +91,7 @@ export default function SignupPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "회원가입에 실패했습니다.");
+        setError(data.error || "가입에 실패했습니다.");
         return;
       }
       router.push("/app/select-tool");
@@ -141,21 +103,23 @@ export default function SignupPage() {
     }
   }
 
-  const benefits = [
-    "온라인스토어 AI 운영비서",
-    "5가지 마케팅 채널 콘텐츠 자동화",
-    "광고 · 마진 스마트 분석 대시보드",
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-500 flex flex-col relative overflow-hidden">
-      <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-blue-400/20 blur-3xl animate-orb pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-blue-500/25 blur-3xl animate-orb-delay pointer-events-none" />
-      <div className="absolute top-1/3 right-1/3 w-48 h-48 rounded-full bg-blue-300/15 blur-3xl animate-float-slow pointer-events-none" />
+      <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-blue-400/20 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-blue-500/25 blur-3xl pointer-events-none" />
 
       <header className="relative z-10 px-6 py-5">
-        <Link href="/" className="inline-flex items-center gap-2.5">
-          <SSymbol size={32} />
+        <Link href="/" className="inline-flex items-center gap-2">
+          <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+            <defs>
+              <linearGradient id="uf-sc-g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#3B82F6" />
+                <stop offset="100%" stopColor="#1D4ED8" />
+              </linearGradient>
+            </defs>
+            <rect width="48" height="48" rx="12" fill="url(#uf-sc-g)" />
+            <text x="24" y="31" textAnchor="middle" fill="white" fontFamily="-apple-system,sans-serif" fontSize="16" fontWeight="800">UpF</text>
+          </svg>
           <div>
             <span className="text-sm font-bold text-white block leading-none">업플로</span>
             <span className="text-[10px] text-white/50">UpFlow</span>
@@ -165,103 +129,17 @@ export default function SignupPage() {
 
       <div className="relative z-10 flex-1 flex items-start justify-center px-4 py-8">
         <div className="w-full max-w-md">
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-extrabold text-white mb-2">
-              내 전용 운영비서<br />업플로로 자동화하세요
-            </h1>
-            <p className="text-sm text-blue-100/70">
-              무료 회원가입으로 업플로의 운영비서를 체험해보세요.
-            </p>
-          </div>
-
-          {/* 혜택 배지 */}
-          <div className="flex flex-wrap justify-center gap-2 mb-6">
-            {benefits.map((b) => (
-              <div key={b} className="inline-flex items-center gap-1.5 text-xs font-medium text-white/80 bg-white/10 border border-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
-                {b}
-              </div>
-            ))}
-          </div>
-
-          {/* 소셜 로그인 */}
-          <div className="space-y-2.5 mb-5">
-            <a
-              href="/api/auth/google"
-              className="flex items-center justify-center gap-3 w-full h-11 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-xl transition-colors text-sm shadow-sm"
-            >
-              <GoogleIcon />
-              Google로 시작하기
-            </a>
-            <a
-              href="/api/auth/kakao"
-              className="flex items-center justify-center gap-3 w-full h-11 font-semibold rounded-xl transition-colors text-sm shadow-sm"
-              style={{ backgroundColor: "#FEE500", color: "#3A1D1D" }}
-            >
-              <KakaoIcon />
-              카카오로 시작하기
-            </a>
-          </div>
-
-          {/* 구분선 */}
-          <div className="relative mb-5">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/20" /></div>
-            <div className="relative flex justify-center">
-              <span className="px-3 bg-transparent text-xs text-white/40 font-medium">또는 이메일로 가입</span>
+          <div className="text-center mb-5">
+            <div className="inline-flex items-center gap-1.5 text-xs font-medium text-white/80 bg-white/10 border border-white/20 px-3 py-1.5 rounded-full mb-3">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
+              {PROVIDER_LABEL[provider]} 연동 완료
             </div>
+            <h1 className="text-xl font-extrabold text-white mb-1">프로필을 완성해주세요</h1>
+            <p className="text-sm text-blue-100/70">{email}</p>
           </div>
 
-          {/* 이메일 가입 폼 */}
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* 이름 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-white/80">이름</Label>
-                <Input
-                  placeholder="홍길동"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  required
-                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-500 focus:ring-blue-500/40"
-                />
-              </div>
-
-              {/* 이메일 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-white/80">이메일</Label>
-                <Input
-                  type="email"
-                  placeholder="name@example.com"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
-                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-500 focus:ring-blue-500/40"
-                />
-              </div>
-
-              {/* 비밀번호 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-white/80">비밀번호</Label>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="6자 이상 입력"
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    required
-                    minLength={6}
-                    className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 pr-10 focus:border-blue-500 focus:ring-blue-500/40"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
               {/* 휴대폰번호 */}
               <div className="space-y-1.5">
                 <Label className="text-sm font-medium text-white/80">휴대폰번호</Label>
@@ -285,7 +163,7 @@ export default function SignupPage() {
               {/* 상호명 */}
               <div className="space-y-1.5">
                 <Label className="text-sm font-medium text-white/80">
-                  상호명 <span className="text-xs text-white/40 ml-1.5 font-normal">(사업자 등록 상호)</span>
+                  상호명 <span className="text-xs text-white/40 font-normal ml-1">(사업자 등록 상호)</span>
                 </Label>
                 <Input
                   placeholder="예: 홍길동 쇼핑"
@@ -299,7 +177,7 @@ export default function SignupPage() {
               {/* 브랜드 표시명 */}
               <div className="space-y-1.5">
                 <Label className="text-sm font-medium text-white/80">
-                  브랜드 표시명 <span className="text-xs text-white/40 ml-1.5 font-normal">(앱 전역에 표시)</span>
+                  브랜드 표시명 <span className="text-xs text-white/40 font-normal ml-1">(앱 전역에 표시)</span>
                 </Label>
                 <Input
                   placeholder="예: 홍길동샵"
@@ -341,7 +219,7 @@ export default function SignupPage() {
               {/* 주요 판매 채널 (선택) */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-white/80">
-                  주요 판매 채널 <span className="text-xs text-white/40 font-normal ml-1">(선택)</span>
+                  주요 판매 채널 <span className="text-xs text-white/40 font-normal ml-1">(선택, 복수 선택 가능)</span>
                 </Label>
                 <div className="flex flex-wrap gap-2">
                   {SALES_CHANNEL_OPTIONS.map((ch) => (
@@ -385,8 +263,7 @@ export default function SignupPage() {
                   <span className="text-white/40">(필수)</span>
                 </ConsentRow>
                 <ConsentRow checked={consent.marketing} onChange={(v) => setConsent((c) => ({ ...c, marketing: v }))}>
-                  마케팅 정보 수신에 동의합니다.{" "}
-                  <span className="text-white/40">(선택)</span>
+                  마케팅 정보 수신에 동의합니다. <span className="text-white/40">(선택)</span>
                 </ConsentRow>
               </div>
 
@@ -401,17 +278,10 @@ export default function SignupPage() {
                 disabled={loading || !consent.terms || !consent.privacy}
                 className="w-full h-11 bg-white text-blue-700 hover:bg-blue-50 font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-1"
               >
-                {loading ? "가입 중..." : "무료로 시작하기"}
+                {loading ? "완성 중..." : "프로필 완성 및 시작하기"}
               </button>
             </form>
           </div>
-
-          <p className="text-center text-sm text-white/50 mt-5">
-            이미 계정이 있으신가요?{" "}
-            <Link href="/login" className="font-semibold text-blue-200 hover:text-white transition-colors">
-              로그인
-            </Link>
-          </p>
         </div>
       </div>
     </div>

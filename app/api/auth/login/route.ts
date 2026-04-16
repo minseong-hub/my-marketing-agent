@@ -23,6 +23,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Social-only accounts have no password
+    if (!user.password_hash) {
+      const providerLabel: Record<string, string> = { google: "Google", kakao: "카카오" };
+      const label = providerLabel[user.auth_provider] ?? user.auth_provider;
+      return NextResponse.json(
+        { error: `이 계정은 ${label} 로그인으로 가입되었습니다. ${label} 로그인을 이용해주세요.` },
+        { status: 401 }
+      );
+    }
+
     const isValid = await bcrypt.compare(password, user.password_hash);
     if (!isValid) {
       return NextResponse.json(

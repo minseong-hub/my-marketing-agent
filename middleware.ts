@@ -50,8 +50,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ===== /login, /signup — 이미 로그인이면 /app =====
-  if (pathname === "/login" || pathname === "/signup") {
+  // ===== /login, /signup, /social-complete, /account-conflict — 이미 로그인이면 /app =====
+  if (pathname === "/login" || pathname === "/signup" || pathname === "/social-complete" || pathname === "/account-conflict") {
     const payload = await verify(request.cookies.get(USER_COOKIE)?.value);
     if (payload) {
       return NextResponse.redirect(new URL("/app", request.url));
@@ -62,5 +62,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/app/:path*", "/login", "/signup"],
+  matcher: ["/admin/:path*", "/app/:path*", "/login", "/signup", "/social-complete", "/account-conflict"],
 };

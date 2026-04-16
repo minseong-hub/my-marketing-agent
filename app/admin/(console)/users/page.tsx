@@ -54,10 +54,11 @@ export default async function UsersPage({
             <tr>
               <Th>이메일</Th>
               <Th>이름 / 브랜드</Th>
+              <Th>가입 경로</Th>
               <Th>역할</Th>
               <Th>플랜</Th>
               <Th>결제 상태</Th>
-              <Th>체험</Th>
+              <Th>약관 동의</Th>
               <Th>가입일</Th>
               <Th className="text-right">관리</Th>
             </tr>
@@ -65,7 +66,7 @@ export default async function UsersPage({
           <tbody>
             {planFiltered.length === 0 && (
               <tr>
-                <Td colSpan={8} className="text-center text-slate-400">조건에 맞는 사용자가 없습니다.</Td>
+                <Td colSpan={9} className="text-center text-slate-400">조건에 맞는 사용자가 없습니다.</Td>
               </tr>
             )}
             {planFiltered.map((u) => {
@@ -77,6 +78,7 @@ export default async function UsersPage({
                     <div className="text-slate-900">{u.name}</div>
                     <div className="text-xs text-slate-500">{u.brand_display_name}</div>
                   </Td>
+                  <Td><AuthProviderBadge provider={u.auth_provider} /></Td>
                   <Td>
                     {u.role === "admin" ? <Badge tone="violet">admin</Badge> : <Badge>user</Badge>}
                   </Td>
@@ -92,16 +94,21 @@ export default async function UsersPage({
                   </Td>
                   <Td><PlanStatusBadge status={u.plan_status} /></Td>
                   <Td className="text-xs">
-                    {u.trial_ends_at ? (
-                      <div>
-                        <div className="text-slate-700">~{u.trial_ends_at.slice(0, 10)}</div>
-                        <div className="text-[10px] text-slate-400">
-                          {u.first_payment_done ? "첫결제 완료" : "첫결제 전"}
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="text-slate-400">-</span>
-                    )}
+                    <div className="space-y-0.5">
+                      {u.terms_agreed_at ? (
+                        <div className="text-emerald-600">이용약관 {u.terms_agreed_at.slice(0, 10)}</div>
+                      ) : (
+                        <div className="text-slate-400">이용약관 미동의</div>
+                      )}
+                      {u.privacy_agreed_at ? (
+                        <div className="text-emerald-600">개인정보 {u.privacy_agreed_at.slice(0, 10)}</div>
+                      ) : (
+                        <div className="text-slate-400">개인정보 미동의</div>
+                      )}
+                      {u.marketing_consent ? (
+                        <div className="text-blue-500">마케팅 수신</div>
+                      ) : null}
+                    </div>
                   </Td>
                   <Td className="text-xs text-slate-500">{u.created_at?.slice(0, 10)}</Td>
                   <Td className="text-right">
@@ -120,6 +127,12 @@ export default async function UsersPage({
       </Card>
     </>
   );
+}
+
+function AuthProviderBadge({ provider }: { provider: string }) {
+  if (provider === "google") return <Badge tone="rose">Google</Badge>;
+  if (provider === "kakao") return <Badge tone="amber">카카오</Badge>;
+  return <Badge>이메일</Badge>;
 }
 
 function PlanStatusBadge({ status }: { status: string }) {

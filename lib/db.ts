@@ -109,6 +109,13 @@ function getDb(): Database.Database {
     if (!names.includes("terms_agreed_at")) _db.exec("ALTER TABLE users ADD COLUMN terms_agreed_at TEXT");
     if (!names.includes("privacy_agreed_at")) _db.exec("ALTER TABLE users ADD COLUMN privacy_agreed_at TEXT");
     if (!names.includes("marketing_consent")) _db.exec("ALTER TABLE users ADD COLUMN marketing_consent INTEGER NOT NULL DEFAULT 0");
+    if (!names.includes("phone")) _db.exec("ALTER TABLE users ADD COLUMN phone TEXT NOT NULL DEFAULT ''");
+    if (!names.includes("business_type")) _db.exec("ALTER TABLE users ADD COLUMN business_type TEXT NOT NULL DEFAULT ''");
+    if (!names.includes("sales_channels")) _db.exec("ALTER TABLE users ADD COLUMN sales_channels TEXT NOT NULL DEFAULT '[]'");
+    if (!names.includes("product_categories")) _db.exec("ALTER TABLE users ADD COLUMN product_categories TEXT NOT NULL DEFAULT '[]'");
+    if (!names.includes("auth_provider")) _db.exec("ALTER TABLE users ADD COLUMN auth_provider TEXT NOT NULL DEFAULT 'email'");
+    if (!names.includes("provider_id")) _db.exec("ALTER TABLE users ADD COLUMN provider_id TEXT");
+    if (!names.includes("linked_providers")) _db.exec("ALTER TABLE users ADD COLUMN linked_providers TEXT NOT NULL DEFAULT '[]'");
   } catch {}
 
   try {
@@ -173,6 +180,13 @@ export interface UserRow {
   business_name: string;
   brand_display_name: string;
   industry: string;
+  phone: string;
+  business_type: string;
+  sales_channels: string;   // JSON array string
+  product_categories: string; // JSON array string
+  auth_provider: string;    // 'email' | 'google' | 'kakao'
+  provider_id: string | null;
+  linked_providers: string; // JSON array: {provider, providerId}[]
   role: string;
   status: string;
   plan_id: string | null;
@@ -285,10 +299,32 @@ export const db = {
   countUsers(): number {
     return (getDb().prepare("SELECT COUNT(*) as c FROM users").get() as { c: number }).c;
   },
-  createUser(user: Omit<UserRow, "created_at" | "role" | "status" | "plan_id" | "plan_slug" | "plan_status" | "trial_started_at" | "trial_ends_at" | "first_payment_done" | "terms_agreed_at" | "privacy_agreed_at" | "marketing_consent"> & Partial<Pick<UserRow, "role" | "status" | "plan_id" | "terms_agreed_at" | "privacy_agreed_at" | "marketing_consent">>): UserRow {
+  createUser(
+    user: Omit<UserRow,
+      | "created_at" | "role" | "status" | "plan_id" | "plan_slug" | "plan_status"
+      | "trial_started_at" | "trial_ends_at" | "first_payment_done"
+      | "terms_agreed_at" | "privacy_agreed_at" | "marketing_consent"
+      | "phone" | "business_type" | "sales_channels" | "product_categories"
+      | "auth_provider" | "provider_id" | "linked_providers"
+    > & Partial<Pick<UserRow,
+      | "role" | "status" | "plan_id"
+      | "terms_agreed_at" | "privacy_agreed_at" | "marketing_consent"
+      | "phone" | "business_type" | "sales_channels" | "product_categories"
+      | "auth_provider" | "provider_id" | "linked_providers"
+    >>
+  ): UserRow {
     const stmt = getDb().prepare(`
-      INSERT INTO users (id, name, email, password_hash, business_name, brand_display_name, industry, role, status, plan_id, terms_agreed_at, privacy_agreed_at, marketing_consent)
-      VALUES (@id, @name, @email, @password_hash, @business_name, @brand_display_name, @industry, @role, @status, @plan_id, @terms_agreed_at, @privacy_agreed_at, @marketing_consent)
+      INSERT INTO users (
+        id, name, email, password_hash, business_name, brand_display_name, industry,
+        phone, business_type, sales_channels, product_categories,
+        auth_provider, provider_id, linked_providers,
+        role, status, plan_id, terms_agreed_at, privacy_agreed_at, marketing_consent
+      ) VALUES (
+        @id, @name, @email, @password_hash, @business_name, @brand_display_name, @industry,
+        @phone, @business_type, @sales_channels, @product_categories,
+        @auth_provider, @provider_id, @linked_providers,
+        @role, @status, @plan_id, @terms_agreed_at, @privacy_agreed_at, @marketing_consent
+      )
     `);
     stmt.run({
       id: user.id,
@@ -298,6 +334,13 @@ export const db = {
       business_name: user.business_name,
       brand_display_name: user.brand_display_name,
       industry: user.industry ?? "",
+      phone: user.phone ?? "",
+      business_type: user.business_type ?? "",
+      sales_channels: user.sales_channels ?? "[]",
+      product_categories: user.product_categories ?? "[]",
+      auth_provider: user.auth_provider ?? "email",
+      provider_id: user.provider_id ?? null,
+      linked_providers: user.linked_providers ?? "[]",
       role: user.role ?? "user",
       status: user.status ?? "active",
       plan_id: user.plan_id ?? null,
@@ -306,6 +349,37 @@ export const db = {
       marketing_consent: user.marketing_consent ?? 0,
     });
     return getDb().prepare("SELECT * FROM users WHERE id = ?").get(user.id) as UserRow;
+  },
+  getUserByProvider(provider: string, providerId: string): UserRow | undefined {
+    const primary = getDb()
+      .prepare("SELECT * FROM users WHERE auth_provider = ? AND provider_id = ?")
+      .get(provider, providerId) as UserRow | undefined;
+    if (primary) return primary;
+    // Search linked_providers (JSON array of {provider, providerId})
+    const candidates = getDb()
+      .prepare("SELECT * FROM users WHERE linked_providers != '[]'")
+      .all() as UserRow[];
+    for (const u of candidates) {
+      try {
+        const linked = JSON.parse(u.linked_providers || "[]") as Array<{ provider: string; providerId: string }>;
+        if (linked.some((l) => l.provider === provider && l.providerId === providerId)) {
+          return u;
+        }
+      } catch {}
+    }
+    return undefined;
+  },
+  linkProviderToUser(userId: string, provider: string, providerId: string) {
+    const user = this.getUserById(userId);
+    if (!user) return;
+    let linked: Array<{ provider: string; providerId: string }> = [];
+    try { linked = JSON.parse(user.linked_providers || "[]"); } catch {}
+    if (!linked.some((l) => l.provider === provider && l.providerId === providerId)) {
+      linked.push({ provider, providerId });
+    }
+    getDb()
+      .prepare("UPDATE users SET linked_providers = ? WHERE id = ?")
+      .run(JSON.stringify(linked), userId);
   },
   updateUser(id: string, patch: Partial<Pick<UserRow, "name" | "role" | "status" | "plan_id" | "business_name" | "brand_display_name">>) {
     const keys = Object.keys(patch);

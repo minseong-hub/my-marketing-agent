@@ -85,7 +85,7 @@ export function AgentCard({ agentType, status, currentTask, lastLog, pendingAppr
           {lastLog ? (
             <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">{lastLog}</p>
           ) : currentTask ? (
-            <p className="text-xs text-slate-400 italic">"{currentTask}"</p>
+            <p className="text-xs text-slate-400 italic">&quot;{currentTask}&quot;</p>
           ) : (
             <p className="text-xs text-slate-300">아직 작업 내역이 없습니다.</p>
           )}

@@ -3,29 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-
-function ConsentRow({
-  checked, onChange, children,
-}: { checked: boolean; onChange: (v: boolean) => void; children: React.ReactNode }) {
-  return (
-    <label className="flex items-start gap-2.5 cursor-pointer group">
-      <div className="relative mt-0.5 flex-shrink-0">
-        <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="sr-only" />
-        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${checked ? "bg-blue-500 border-blue-400" : "bg-white/10 border-white/30 group-hover:border-white/50"}`}>
-          {checked && (
-            <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 10 10">
-              <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
-        </div>
-      </div>
-      <span className="text-xs text-white/60 leading-relaxed">{children}</span>
-    </label>
-  );
-}
+import { Starfield } from "@/components/primitives/Starfield";
+import { PixelButton } from "@/components/primitives/PixelButton";
 
 const INDUSTRY_OPTIONS = [
   "식품 / 농산물", "의류 / 패션", "뷰티 / 화장품", "전자제품 / 디지털",
@@ -45,40 +24,48 @@ function formatPhone(value: string) {
   return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
 }
 
-function SSymbol({ size = 32 }: { size?: number }) {
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  background: "#0f1640",
+  border: "1px solid #1f2a6b",
+  padding: "10px 12px",
+  fontFamily: '"JetBrains Mono", monospace',
+  fontSize: 11,
+  color: "#cfe9ff",
+  outline: "none",
+  boxSizing: "border-box",
+};
+
+function CField({
+  label, required, children,
+}: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-      <defs>
-        <linearGradient id="uf-signup-g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#3B82F6" />
-          <stop offset="100%" stopColor="#1D4ED8" />
-        </linearGradient>
-      </defs>
-      <rect width="48" height="48" rx="12" fill="url(#uf-signup-g)" />
-      <rect width="48" height="48" rx="12" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-      <text x="24" y="31" textAnchor="middle" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" fontSize="16" fontWeight="800" letterSpacing="-0.5">UpF</text>
-    </svg>
+    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+      <label style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: "#7e94c8", letterSpacing: "0.08em" }}>
+        {label}{required && <span style={{ color: "#ff4ec9", marginLeft: 4 }}>*</span>}
+      </label>
+      {children}
+    </div>
   );
 }
 
-// Google SVG icon
-function GoogleIcon() {
+function PixelCheckbox({ checked, onChange, children }: { checked: boolean; onChange: (v: boolean) => void; children: React.ReactNode }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4" />
-      <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853" />
-      <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332Z" fill="#FBBC05" />
-      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.96L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58Z" fill="#EA4335" />
-    </svg>
-  );
-}
-
-// Kakao SVG icon
-function KakaoIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <path fillRule="evenodd" clipRule="evenodd" d="M9 0C4.029 0 0 3.168 0 7.08c0 2.502 1.665 4.71 4.185 5.958L3.15 17.1c-.09.36.315.645.63.42L8.91 13.95c.03 0 .06.005.09.008.03.003.06.005.09.005C13.97 13.963 18 10.796 18 7.08 18 3.168 13.971 0 9 0Z" fill="#3A1D1D" />
-    </svg>
+    <label style={{ display: "flex", alignItems: "flex-start", gap: 8, cursor: "pointer" }}>
+      <div
+        onClick={() => onChange(!checked)}
+        style={{
+          width: 14, height: 14, border: `2px solid ${checked ? "#ff4ec9" : "#1f2a6b"}`,
+          background: checked ? "#ff4ec9" : "transparent", flexShrink: 0, marginTop: 1,
+          display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+        }}
+      >
+        {checked && <span style={{ color: "#060920", fontSize: 9, fontWeight: 900, lineHeight: 1 }}>✓</span>}
+      </div>
+      <span style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 11, color: "#7e94c8", lineHeight: 1.6 }}>
+        {children}
+      </span>
+    </label>
   );
 }
 
@@ -91,7 +78,6 @@ export default function SignupPage() {
   });
   const [salesChannels, setSalesChannels] = useState<string[]>([]);
   const [consent, setConsent] = useState({ terms: false, privacy: false, marketing: false });
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -112,305 +98,226 @@ export default function SignupPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          password: form.password,
-          phone: form.phone,
-          businessName: form.businessName,
-          brandDisplayName: form.brandDisplayName,
-          businessType: form.businessType,
-          industry: form.industry,
-          salesChannels,
+          name: form.name, email: form.email, password: form.password,
+          phone: form.phone, businessName: form.businessName,
+          brandDisplayName: form.brandDisplayName, businessType: form.businessType,
+          industry: form.industry, salesChannels,
           productCategories: form.productCategories ? [form.productCategories] : [],
-          termsAgreed: consent.terms,
-          privacyAgreed: consent.privacy,
+          termsAgreed: consent.terms, privacyAgreed: consent.privacy,
           marketingConsent: consent.marketing,
         }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "회원가입에 실패했습니다.");
-        return;
-      }
-      router.push("/app/select-tool");
+      if (!res.ok) { setError(data.error || "통신 장애 — 재교신 시도 중"); return; }
+      router.push("/app/assistants");
       router.refresh();
     } catch {
-      setError("서버 오류가 발생했습니다.");
+      setError("통신 장애 — 재교신 시도 중");
     } finally {
       setLoading(false);
     }
   }
 
-  const benefits = [
-    "온라인스토어 AI 운영비서",
-    "5가지 마케팅 채널 콘텐츠 자동화",
-    "광고 · 마진 스마트 분석 대시보드",
-  ];
+  const onFocus = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    e.target.style.border = "1px solid #5ce5ff";
+  };
+  const onBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    e.target.style.border = "1px solid #1f2a6b";
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-500 flex flex-col relative overflow-hidden">
-      <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-blue-400/20 blur-3xl animate-orb pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-blue-500/25 blur-3xl animate-orb-delay pointer-events-none" />
-      <div className="absolute top-1/3 right-1/3 w-48 h-48 rounded-full bg-blue-300/15 blur-3xl animate-float-slow pointer-events-none" />
-
-      <header className="relative z-10 px-6 py-5">
-        <Link href="/" className="inline-flex items-center gap-2.5">
-          <SSymbol size={32} />
-          <div>
-            <span className="text-sm font-bold text-white block leading-none">업플로</span>
-            <span className="text-[10px] text-white/50">UpFlow</span>
-          </div>
+    <div style={{ minHeight: "100vh", background: "#060920", display: "flex", flexDirection: "column" }}>
+      {/* Nav */}
+      <nav style={{ padding: "12px 20px", borderBottom: "1px solid #1f2a6b", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <Link href="/" style={{ textDecoration: "none" }}>
+          <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 10, color: "#ff4ec9", textShadow: "2px 2px 0 #8a2877" }}>
+            CREWMATE AI
+          </span>
         </Link>
-      </header>
+        <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#4a5a8a", letterSpacing: "0.1em" }}>
+          SECTOR-7G · AIRLOCK
+        </span>
+      </nav>
 
-      <div className="relative z-10 flex-1 flex items-start justify-center px-4 py-8">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-extrabold text-white mb-2">
-              내 전용 운영비서<br />업플로로 자동화하세요
-            </h1>
-            <p className="text-sm text-blue-100/70">
-              무료 회원가입으로 업플로의 운영비서를 체험해보세요.
+      {/* Body */}
+      <div style={{ flex: 1, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "24px 16px 40px", position: "relative" }}>
+        <Starfield density={0.5} />
+
+        <div className="relative z-10 w-full" style={{ maxWidth: 440 }}>
+          {/* Header */}
+          <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#5ce5ff", letterSpacing: "0.1em", marginBottom: 8 }}>
+              ▸ AIRLOCK — 신규 탑승 등록
             </p>
+            <h1 style={{ fontFamily: '"Press Start 2P", monospace', fontSize: "clamp(12px, 2vw, 16px)", color: "#cfe9ff", textShadow: "3px 3px 0 #ff4ec9", lineHeight: 1.8 }}>
+              크루와 함께<br />탑승하세요
+            </h1>
           </div>
 
-          {/* 혜택 배지 */}
-          <div className="flex flex-wrap justify-center gap-2 mb-6">
-            {benefits.map((b) => (
-              <div key={b} className="inline-flex items-center gap-1.5 text-xs font-medium text-white/80 bg-white/10 border border-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
-                {b}
-              </div>
-            ))}
-          </div>
-
-          {/* 소셜 로그인 */}
-          <div className="space-y-2.5 mb-5">
+          {/* Social login */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
             <a
               href="/api/auth/google"
-              className="flex items-center justify-center gap-3 w-full h-11 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-xl transition-colors text-sm shadow-sm"
+              className="pixel-frame"
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 12px", border: "1px solid #1f2a6b", background: "#0f1640", textDecoration: "none", fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: "#cfe9ff", letterSpacing: "0.05em" }}
             >
-              <GoogleIcon />
-              Google로 시작하기
+              Google로 탑승
             </a>
             <a
               href="/api/auth/kakao"
-              className="flex items-center justify-center gap-3 w-full h-11 font-semibold rounded-xl transition-colors text-sm shadow-sm"
-              style={{ backgroundColor: "#FEE500", color: "#3A1D1D" }}
+              className="pixel-frame"
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 12px", background: "#FEE500", border: "1px solid #FEE500", textDecoration: "none", fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: "#3A1D1D", letterSpacing: "0.05em" }}
             >
-              <KakaoIcon />
-              카카오로 시작하기
+              카카오로 탑승
             </a>
           </div>
 
-          {/* 구분선 */}
-          <div className="relative mb-5">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/20" /></div>
-            <div className="relative flex justify-center">
-              <span className="px-3 bg-transparent text-xs text-white/40 font-medium">또는 이메일로 가입</span>
-            </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+            <div style={{ flex: 1, height: 1, background: "#1f2a6b" }} />
+            <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#4a5a8a" }}>또는 이메일로</span>
+            <div style={{ flex: 1, height: 1, background: "#1f2a6b" }} />
           </div>
 
-          {/* 이메일 가입 폼 */}
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* 이름 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-white/80">이름</Label>
-                <Input
-                  placeholder="홍길동"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  required
-                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-500 focus:ring-blue-500/40"
-                />
-              </div>
+          {/* Main form */}
+          <div className="pixel-frame" style={{ border: "2px solid #5ce5ff", background: "#0a0e27", overflow: "hidden" }}>
+            {/* Title bar */}
+            <div style={{ padding: "8px 16px", borderBottom: "1px solid #5ce5ff33", background: "#060920", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: "#5ce5ff", letterSpacing: "0.1em" }}>
+                ● 신규 승무원 등록
+              </span>
+              <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#66ff9d", animation: "blink 1s steps(2) infinite" }}>
+                ● SECURE
+              </span>
+            </div>
 
-              {/* 이메일 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-white/80">이메일</Label>
-                <Input
-                  type="email"
-                  placeholder="name@example.com"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
-                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-500 focus:ring-blue-500/40"
-                />
-              </div>
+            <form onSubmit={handleSubmit} style={{ padding: "20px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
+              {/* 기본 정보 */}
+              <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#4a5a8a", letterSpacing: "0.1em" }}>
+                ▸ 기본 정보
+              </p>
 
-              {/* 비밀번호 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-white/80">비밀번호</Label>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="6자 이상 입력"
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    required
-                    minLength={6}
-                    className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 pr-10 focus:border-blue-500 focus:ring-blue-500/40"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
+              <CField label="이름" required>
+                <input style={inputStyle} placeholder="홍길동" value={form.name}
+                  onChange={e => setForm({ ...form, name: e.target.value })}
+                  onFocus={onFocus} onBlur={onBlur} required />
+              </CField>
 
-              {/* 휴대폰번호 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-white/80">휴대폰번호</Label>
-                <Input
-                  placeholder="010-0000-0000"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: formatPhone(e.target.value) })}
-                  required
-                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-500 focus:ring-blue-500/40"
-                />
-              </div>
+              <CField label="이메일" required>
+                <input style={inputStyle} type="email" placeholder="name@example.com" value={form.email}
+                  onChange={e => setForm({ ...form, email: e.target.value })}
+                  onFocus={onFocus} onBlur={onBlur} required />
+              </CField>
 
-              {/* 구분선 */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div>
-                <div className="relative flex justify-center">
-                  <span className="px-3 bg-transparent text-xs text-white/40 font-medium">브랜드 정보</span>
-                </div>
-              </div>
+              <CField label="비밀번호 (6자 이상)" required>
+                <input style={inputStyle} type="password" placeholder="비밀번호 입력" value={form.password}
+                  onChange={e => setForm({ ...form, password: e.target.value })}
+                  onFocus={onFocus} onBlur={onBlur} required minLength={6} />
+              </CField>
 
-              {/* 상호명 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-white/80">
-                  상호명 <span className="text-xs text-white/40 ml-1.5 font-normal">(사업자 등록 상호)</span>
-                </Label>
-                <Input
-                  placeholder="예: 홍길동 쇼핑"
-                  value={form.businessName}
-                  onChange={(e) => setForm({ ...form, businessName: e.target.value })}
-                  required
-                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-500 focus:ring-blue-500/40"
-                />
-              </div>
+              <CField label="휴대폰번호" required>
+                <input style={inputStyle} placeholder="010-0000-0000" value={form.phone}
+                  onChange={e => setForm({ ...form, phone: formatPhone(e.target.value) })}
+                  onFocus={onFocus} onBlur={onBlur} required />
+              </CField>
 
-              {/* 브랜드 표시명 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-white/80">
-                  브랜드 표시명 <span className="text-xs text-white/40 ml-1.5 font-normal">(앱 전역에 표시)</span>
-                </Label>
-                <Input
-                  placeholder="예: 홍길동샵"
-                  value={form.brandDisplayName}
-                  onChange={(e) => setForm({ ...form, brandDisplayName: e.target.value })}
-                  required
-                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-500 focus:ring-blue-500/40"
-                />
-              </div>
+              {/* 브랜드 정보 */}
+              <div style={{ borderTop: "1px solid #1f2a6b", paddingTop: 12 }}>
+                <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#4a5a8a", letterSpacing: "0.1em", marginBottom: 12 }}>
+                  ▸ 브랜드 정보
+                </p>
 
-              {/* 비즈니스 유형 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-white/80">비즈니스 유형</Label>
-                <select
-                  value={form.businessType}
-                  onChange={(e) => setForm({ ...form, businessType: e.target.value })}
-                  required
-                  className="w-full h-10 rounded-xl px-3 text-sm bg-white/10 border border-white/20 text-white focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/40 [&>option]:bg-blue-900 [&>option]:text-white"
-                >
-                  <option value="" disabled>비즈니스 유형을 선택하세요</option>
-                  {BUSINESS_TYPE_OPTIONS.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
-                </select>
-              </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                  <CField label="상호명 (사업자등록 상호)" required>
+                    <input style={inputStyle} placeholder="예: 홍길동 쇼핑" value={form.businessName}
+                      onChange={e => setForm({ ...form, businessName: e.target.value })}
+                      onFocus={onFocus} onBlur={onBlur} required />
+                  </CField>
 
-              {/* 업종 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-white/80">업종</Label>
-                <select
-                  value={form.industry}
-                  onChange={(e) => setForm({ ...form, industry: e.target.value })}
-                  required
-                  className="w-full h-10 rounded-xl px-3 text-sm bg-white/10 border border-white/20 text-white focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/40 [&>option]:bg-blue-900 [&>option]:text-white"
-                >
-                  <option value="" disabled>업종을 선택하세요</option>
-                  {INDUSTRY_OPTIONS.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
-                </select>
-              </div>
+                  <CField label="브랜드 표시명 (앱 전역 표시)" required>
+                    <input style={inputStyle} placeholder="예: 홍길동샵" value={form.brandDisplayName}
+                      onChange={e => setForm({ ...form, brandDisplayName: e.target.value })}
+                      onFocus={onFocus} onBlur={onBlur} required />
+                  </CField>
 
-              {/* 주요 판매 채널 (선택) */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-white/80">
-                  주요 판매 채널 <span className="text-xs text-white/40 font-normal ml-1">(선택)</span>
-                </Label>
-                <div className="flex flex-wrap gap-2">
-                  {SALES_CHANNEL_OPTIONS.map((ch) => (
-                    <button
-                      key={ch}
-                      type="button"
-                      onClick={() => toggleChannel(ch)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                        salesChannels.includes(ch)
-                          ? "bg-blue-500 border-blue-400 text-white"
-                          : "bg-white/10 border-white/20 text-white/60 hover:border-white/40"
-                      }`}
+                  <CField label="비즈니스 유형" required>
+                    <select
+                      style={{ ...inputStyle, background: "#0f1640" } as React.CSSProperties}
+                      value={form.businessType}
+                      onChange={e => setForm({ ...form, businessType: e.target.value })}
+                      onFocus={onFocus} onBlur={onBlur} required
                     >
-                      {ch}
-                    </button>
-                  ))}
+                      <option value="" disabled>선택하세요</option>
+                      {BUSINESS_TYPE_OPTIONS.map(opt => <option key={opt} value={opt} style={{ background: "#0f1640" }}>{opt}</option>)}
+                    </select>
+                  </CField>
+
+                  <CField label="업종" required>
+                    <select
+                      style={{ ...inputStyle, background: "#0f1640" } as React.CSSProperties}
+                      value={form.industry}
+                      onChange={e => setForm({ ...form, industry: e.target.value })}
+                      onFocus={onFocus} onBlur={onBlur} required
+                    >
+                      <option value="" disabled>선택하세요</option>
+                      {INDUSTRY_OPTIONS.map(opt => <option key={opt} value={opt} style={{ background: "#0f1640" }}>{opt}</option>)}
+                    </select>
+                  </CField>
+
+                  <CField label="주요 판매 채널 (선택)">
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {SALES_CHANNEL_OPTIONS.map(ch => (
+                        <button
+                          key={ch} type="button" onClick={() => toggleChannel(ch)}
+                          style={{
+                            fontFamily: '"JetBrains Mono", monospace', fontSize: 8,
+                            padding: "4px 10px", cursor: "pointer",
+                            border: `1px solid ${salesChannels.includes(ch) ? "#5ce5ff" : "#1f2a6b"}`,
+                            background: salesChannels.includes(ch) ? "#5ce5ff22" : "transparent",
+                            color: salesChannels.includes(ch) ? "#5ce5ff" : "#7e94c8",
+                          }}
+                        >
+                          {ch}
+                        </button>
+                      ))}
+                    </div>
+                  </CField>
+
+                  <CField label="대표 상품군 (선택)">
+                    <input style={inputStyle} placeholder="예: 유기농 식품, 핸드메이드 액세서리" value={form.productCategories}
+                      onChange={e => setForm({ ...form, productCategories: e.target.value })}
+                      onFocus={onFocus} onBlur={onBlur} />
+                  </CField>
                 </div>
               </div>
 
-              {/* 대표 상품군 (선택) */}
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-white/80">
-                  대표 상품군 <span className="text-xs text-white/40 font-normal ml-1">(선택)</span>
-                </Label>
-                <Input
-                  placeholder="예: 유기농 식품, 핸드메이드 액세서리"
-                  value={form.productCategories}
-                  onChange={(e) => setForm({ ...form, productCategories: e.target.value })}
-                  className="h-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-500 focus:ring-blue-500/40"
-                />
-              </div>
-
-              {/* 약관 동의 */}
-              <div className="pt-1 space-y-2.5">
-                <ConsentRow checked={consent.terms} onChange={(v) => setConsent((c) => ({ ...c, terms: v }))}>
-                  <Link href="/terms" target="_blank" className="text-blue-200 underline hover:text-white">이용약관</Link>에 동의합니다.{" "}
-                  <span className="text-white/40">(필수)</span>
-                </ConsentRow>
-                <ConsentRow checked={consent.privacy} onChange={(v) => setConsent((c) => ({ ...c, privacy: v }))}>
-                  <Link href="/privacy" target="_blank" className="text-blue-200 underline hover:text-white">개인정보처리방침</Link>에 동의합니다.{" "}
-                  <span className="text-white/40">(필수)</span>
-                </ConsentRow>
-                <ConsentRow checked={consent.marketing} onChange={(v) => setConsent((c) => ({ ...c, marketing: v }))}>
-                  마케팅 정보 수신에 동의합니다.{" "}
-                  <span className="text-white/40">(선택)</span>
-                </ConsentRow>
+              {/* 약관 */}
+              <div style={{ borderTop: "1px solid #1f2a6b", paddingTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+                <PixelCheckbox checked={consent.terms} onChange={v => setConsent(c => ({ ...c, terms: v }))}>
+                  <Link href="/terms" target="_blank" style={{ color: "#5ce5ff" }}>이용약관</Link>에 동의합니다. <span style={{ color: "#4a5a8a" }}>(필수)</span>
+                </PixelCheckbox>
+                <PixelCheckbox checked={consent.privacy} onChange={v => setConsent(c => ({ ...c, privacy: v }))}>
+                  <Link href="/privacy" target="_blank" style={{ color: "#5ce5ff" }}>개인정보처리방침</Link>에 동의합니다. <span style={{ color: "#4a5a8a" }}>(필수)</span>
+                </PixelCheckbox>
+                <PixelCheckbox checked={consent.marketing} onChange={v => setConsent(c => ({ ...c, marketing: v }))}>
+                  마케팅 정보 수신에 동의합니다. <span style={{ color: "#4a5a8a" }}>(선택)</span>
+                </PixelCheckbox>
               </div>
 
               {error && (
-                <div className="rounded-lg bg-red-500/20 border border-red-400/30 px-4 py-2.5">
-                  <p className="text-sm text-red-200">{error}</p>
+                <div style={{ border: "1px solid #ff4ec944", background: "#ff4ec911", padding: "8px 12px" }}>
+                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: "#ff4ec9" }}>✗ {error}</p>
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={loading || !consent.terms || !consent.privacy}
-                className="w-full h-11 bg-white text-blue-700 hover:bg-blue-50 font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-1"
-              >
-                {loading ? "가입 중..." : "무료로 시작하기"}
-              </button>
+              <PixelButton type="submit" variant="primary" size="md" full disabled={loading || !consent.terms || !consent.privacy}>
+                {loading ? "교신 중..." : "▶ 탑승 등록"}
+              </PixelButton>
             </form>
           </div>
 
-          <p className="text-center text-sm text-white/50 mt-5">
-            이미 계정이 있으신가요?{" "}
-            <Link href="/login" className="font-semibold text-blue-200 hover:text-white transition-colors">
-              로그인
-            </Link>
+          <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: "#4a5a8a", textAlign: "center", marginTop: 16 }}>
+            이미 계정 있음?{" "}
+            <Link href="/login" style={{ color: "#5ce5ff", textDecoration: "none" }}>입항 →</Link>
           </p>
         </div>
       </div>

@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
       brandDisplayName: existingByProvider.brand_display_name,
       role: (existingByProvider.role as "user" | "admin") ?? "user",
     });
-    const res = NextResponse.redirect(`${baseUrl}/app/select-tool`);
+    const res = NextResponse.redirect(`${baseUrl}/app/assistants`);
     res.cookies.set(COOKIE_NAME, token, setCookieOptions(60 * 60 * 24 * 7));
     return clearState(res);
   }

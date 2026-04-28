@@ -94,7 +94,7 @@ export default function SocialCompleteForm({
         setError(data.error || "가입에 실패했습니다.");
         return;
       }
-      router.push("/app/select-tool");
+      router.push("/app/assistants");
       router.refresh();
     } catch {
       setError("서버 오류가 발생했습니다.");

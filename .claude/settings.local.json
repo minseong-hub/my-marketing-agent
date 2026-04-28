@@ -15,7 +15,15 @@
       "Bash(npx tsc *)",
       "Bash(echo \"EXIT:$?\")",
       "Bash(ls -la \"C:\\\\Users\\\\intel\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\F--0-----------my-marketing-agent\\\\968ab41f-1011-4ebf-b4b6-10b5ef61c804\\\\tasks\\\\bzvw05odm.output\")",
-      "Bash(wait)"
+      "Bash(wait)",
+      "Bash(curl *)",
+      "Bash(sed -n '60,80p' \"D:\\\\김민성부자만들기프로젝트\\\\4. 바이브코딩\\\\my-marketing-agent\\\\app\\\\app\\\\tools\\\\store-ops\\\\checklist\\\\page.tsx\")",
+      "Bash(sed -n '60,80p' \"D:\\\\김민성부자만들기프로젝트\\\\4. 바이브코딩\\\\my-marketing-agent\\\\app\\\\app\\\\tools\\\\store-ops\\\\history\\\\page.tsx\")",
+      "Bash(cmd /c \"cd \\\\\"D:\\\\김민성부자만들기프로젝트\\\\4. 바이브코딩\\\\my-marketing-agent\\\\\" && npx tsc --noEmit 2>&1\")",
+      "Bash(echo \"exit:$?\")",
+      "Bash(du -sh data/)",
+      "Bash(ls -lh data/)",
+      "Bash(node -e ' *)"
     ]
   }
 }

@@ -91,6 +91,117 @@ function getDb(): Database.Database {
       note TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS agent_sessions (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      agent_type TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'idle',
+      current_task TEXT,
+      last_reported_at TEXT,
+      started_at TEXT NOT NULL DEFAULT (datetime('now')),
+      completed_at TEXT,
+      error_message TEXT,
+      metadata TEXT NOT NULL DEFAULT '{}',
+      conversation_history TEXT NOT NULL DEFAULT '[]'
+    );
+
+    CREATE TABLE IF NOT EXISTS agent_logs (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      agent_type TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      level TEXT NOT NULL DEFAULT 'info',
+      message TEXT NOT NULL,
+      technical_detail TEXT,
+      metadata TEXT NOT NULL DEFAULT '{}',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS approval_requests (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      agent_type TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      action_type TEXT NOT NULL,
+      payload TEXT NOT NULL DEFAULT '{}',
+      preview_data TEXT NOT NULL DEFAULT '{}',
+      urgency_level TEXT NOT NULL DEFAULT 'normal',
+      expires_at TEXT NOT NULL,
+      resolved_at TEXT,
+      resolved_by TEXT,
+      reject_reason TEXT,
+      resume_data TEXT NOT NULL DEFAULT '{}',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS agent_collaborations (
+      id TEXT PRIMARY KEY,
+      from_session_id TEXT NOT NULL,
+      to_agent_type TEXT NOT NULL,
+      to_session_id TEXT,
+      user_id TEXT NOT NULL,
+      message_type TEXT NOT NULL DEFAULT 'request',
+      subject TEXT NOT NULL,
+      content TEXT NOT NULL DEFAULT '{}',
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      processed_at TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS financial_records (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      category TEXT NOT NULL,
+      amount INTEGER NOT NULL DEFAULT 0,
+      description TEXT NOT NULL DEFAULT '',
+      channel TEXT,
+      product_name TEXT,
+      date TEXT NOT NULL,
+      tags TEXT NOT NULL DEFAULT '[]',
+      generated_by TEXT NOT NULL DEFAULT 'user',
+      source_session_id TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS ad_campaigns (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      platform TEXT NOT NULL,
+      campaign_name TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'draft',
+      keywords TEXT NOT NULL DEFAULT '[]',
+      ad_copy TEXT NOT NULL DEFAULT '{}',
+      budget INTEGER NOT NULL DEFAULT 0,
+      start_date TEXT,
+      end_date TEXT,
+      metrics TEXT NOT NULL DEFAULT '{}',
+      generated_by TEXT NOT NULL DEFAULT 'user',
+      source_session_id TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS detail_page_projects (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      product_name TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'analyzing',
+      analysis_result TEXT NOT NULL DEFAULT '{}',
+      plan_outline TEXT NOT NULL DEFAULT '{}',
+      sections TEXT NOT NULL DEFAULT '[]',
+      target_keywords TEXT NOT NULL DEFAULT '[]',
+      design_notes TEXT,
+      generated_by TEXT NOT NULL DEFAULT 'user',
+      source_session_id TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
 
   // Column migrations for existing DBs
@@ -264,6 +375,69 @@ export interface BillingEventRow {
   amount: number;
   note: string | null;
   created_at: string;
+}
+
+export interface AgentSessionRow {
+  id: string;
+  user_id: string;
+  agent_type: string;
+  status: string;
+  current_task: string | null;
+  last_reported_at: string | null;
+  started_at: string;
+  completed_at: string | null;
+  error_message: string | null;
+  metadata: string;
+  conversation_history: string;
+}
+
+export interface AgentLogRow {
+  id: string;
+  session_id: string;
+  agent_type: string;
+  user_id: string;
+  level: string;
+  message: string;
+  technical_detail: string | null;
+  metadata: string;
+  created_at: string;
+}
+
+export interface ApprovalRequestRow {
+  id: string;
+  session_id: string;
+  user_id: string;
+  agent_type: string;
+  status: string;
+  title: string;
+  description: string;
+  action_type: string;
+  payload: string;
+  preview_data: string;
+  urgency_level: string;
+  expires_at: string;
+  resolved_at: string | null;
+  resolved_by: string | null;
+  reject_reason: string | null;
+  resume_data: string;
+  created_at: string;
+}
+
+export interface FinancialRecordRow {
+  id: string;
+  user_id: string;
+  type: string;
+  category: string;
+  amount: number;
+  description: string;
+  channel: string | null;
+  product_name: string | null;
+  date: string;
+  tags: string;
+  generated_by: string;
+  source_session_id: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 function uid(prefix: string) {
@@ -641,6 +815,119 @@ export const db = {
     return getDb()
       .prepare("SELECT * FROM admin_logs ORDER BY created_at DESC LIMIT ?")
       .all(limit) as AdminLogRow[];
+  },
+
+  // ===== agent sessions =====
+  getAgentSession(userId: string, agentType: string): AgentSessionRow | undefined {
+    return getDb().prepare(
+      "SELECT * FROM agent_sessions WHERE user_id = ? AND agent_type = ? ORDER BY started_at DESC LIMIT 1"
+    ).get(userId, agentType) as AgentSessionRow | undefined;
+  },
+  getAgentSessionById(id: string): AgentSessionRow | undefined {
+    return getDb().prepare("SELECT * FROM agent_sessions WHERE id = ?").get(id) as AgentSessionRow | undefined;
+  },
+  createAgentSession(userId: string, agentType: string, task: string): AgentSessionRow {
+    const id = uid("asn");
+    getDb().prepare(
+      "INSERT INTO agent_sessions (id, user_id, agent_type, status, current_task) VALUES (?, ?, ?, 'running', ?)"
+    ).run(id, userId, agentType, task);
+    return getDb().prepare("SELECT * FROM agent_sessions WHERE id = ?").get(id) as AgentSessionRow;
+  },
+  updateAgentSession(id: string, patch: Partial<AgentSessionRow>) {
+    const entries: string[] = [];
+    const params: Record<string, unknown> = { id };
+    const allowed = ["status","current_task","last_reported_at","completed_at","error_message","metadata","conversation_history"];
+    for (const [k, v] of Object.entries(patch)) {
+      if (allowed.includes(k) && v !== undefined) {
+        entries.push(`${k} = @${k}`);
+        params[k] = typeof v === "object" ? JSON.stringify(v) : v;
+      }
+    }
+    if (entries.length === 0) return;
+    getDb().prepare(`UPDATE agent_sessions SET ${entries.join(", ")} WHERE id = @id`).run(params);
+  },
+  getAllAgentSessions(userId: string): AgentSessionRow[] {
+    return getDb().prepare(
+      "SELECT * FROM agent_sessions WHERE user_id = ? ORDER BY started_at DESC LIMIT 4"
+    ).all(userId) as AgentSessionRow[];
+  },
+
+  // ===== agent logs =====
+  createAgentLog(entry: { session_id: string; agent_type: string; user_id: string; level: string; message: string; technical_detail?: string; metadata?: Record<string,unknown> }): AgentLogRow {
+    const id = uid("alg");
+    getDb().prepare(
+      "INSERT INTO agent_logs (id, session_id, agent_type, user_id, level, message, technical_detail, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    ).run(id, entry.session_id, entry.agent_type, entry.user_id, entry.level, entry.message, entry.technical_detail ?? null, JSON.stringify(entry.metadata ?? {}));
+    return getDb().prepare("SELECT * FROM agent_logs WHERE id = ?").get(id) as AgentLogRow;
+  },
+  listAgentLogs(sessionId: string, limit = 50): AgentLogRow[] {
+    return getDb().prepare(
+      "SELECT * FROM agent_logs WHERE session_id = ? ORDER BY created_at DESC LIMIT ?"
+    ).all(sessionId, limit) as AgentLogRow[];
+  },
+  listRecentAgentLogs(userId: string, limit = 100): AgentLogRow[] {
+    return getDb().prepare(
+      "SELECT * FROM agent_logs WHERE user_id = ? ORDER BY created_at DESC LIMIT ?"
+    ).all(userId, limit) as AgentLogRow[];
+  },
+
+  // ===== approval requests =====
+  createApprovalRequest(r: {
+    session_id: string; user_id: string; agent_type: string;
+    title: string; description: string; action_type: string;
+    payload: Record<string,unknown>; preview_data?: Record<string,unknown>;
+    urgency_level?: string; expires_in_minutes?: number;
+    resume_data?: Record<string,unknown>;
+  }): ApprovalRequestRow {
+    const id = uid("apr");
+    const expiresAt = new Date(Date.now() + (r.expires_in_minutes ?? 60) * 60 * 1000).toISOString();
+    getDb().prepare(
+      `INSERT INTO approval_requests (id,session_id,user_id,agent_type,title,description,action_type,payload,preview_data,urgency_level,expires_at,resume_data)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`
+    ).run(id, r.session_id, r.user_id, r.agent_type, r.title, r.description, r.action_type,
+      JSON.stringify(r.payload), JSON.stringify(r.preview_data ?? {}),
+      r.urgency_level ?? "normal", expiresAt, JSON.stringify(r.resume_data ?? {}));
+    return getDb().prepare("SELECT * FROM approval_requests WHERE id = ?").get(id) as ApprovalRequestRow;
+  },
+  listPendingApprovals(userId: string): ApprovalRequestRow[] {
+    return getDb().prepare(
+      "SELECT * FROM approval_requests WHERE user_id = ? AND status = 'pending' ORDER BY created_at ASC"
+    ).all(userId) as ApprovalRequestRow[];
+  },
+  getApprovalRequest(id: string): ApprovalRequestRow | undefined {
+    return getDb().prepare("SELECT * FROM approval_requests WHERE id = ?").get(id) as ApprovalRequestRow | undefined;
+  },
+  resolveApproval(id: string, action: "approved" | "rejected", resolvedBy: string, rejectReason?: string) {
+    getDb().prepare(
+      "UPDATE approval_requests SET status = ?, resolved_at = datetime('now'), resolved_by = ?, reject_reason = ? WHERE id = ?"
+    ).run(action, resolvedBy, rejectReason ?? null, id);
+  },
+
+  // ===== financial records =====
+  createFinancialRecord(r: { user_id: string; type: string; category: string; amount: number; description?: string; channel?: string; product_name?: string; date: string; tags?: string[]; generated_by?: string; source_session_id?: string }): FinancialRecordRow {
+    const id = uid("fin");
+    getDb().prepare(
+      `INSERT INTO financial_records (id,user_id,type,category,amount,description,channel,product_name,date,tags,generated_by,source_session_id)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`
+    ).run(id, r.user_id, r.type, r.category, r.amount, r.description ?? "", r.channel ?? null, r.product_name ?? null, r.date, JSON.stringify(r.tags ?? []), r.generated_by ?? "user", r.source_session_id ?? null);
+    return getDb().prepare("SELECT * FROM financial_records WHERE id = ?").get(id) as FinancialRecordRow;
+  },
+  listFinancialRecords(userId: string, period?: string): FinancialRecordRow[] {
+    if (period) {
+      return getDb().prepare(
+        "SELECT * FROM financial_records WHERE user_id = ? AND date LIKE ? ORDER BY date DESC LIMIT 500"
+      ).all(userId, `${period}%`) as FinancialRecordRow[];
+    }
+    return getDb().prepare(
+      "SELECT * FROM financial_records WHERE user_id = ? ORDER BY date DESC LIMIT 500"
+    ).all(userId) as FinancialRecordRow[];
+  },
+  getFinancialSummary(userId: string, period: string): { total_revenue: number; total_expense: number; net_profit: number; ad_spend: number } {
+    const d = getDb();
+    const revenue = (d.prepare("SELECT IFNULL(SUM(amount),0) as v FROM financial_records WHERE user_id = ? AND type = 'revenue' AND date LIKE ?").get(userId, `${period}%`) as { v: number }).v;
+    const expense = (d.prepare("SELECT IFNULL(SUM(amount),0) as v FROM financial_records WHERE user_id = ? AND type = 'expense' AND date LIKE ?").get(userId, `${period}%`) as { v: number }).v;
+    const adSpend = (d.prepare("SELECT IFNULL(SUM(amount),0) as v FROM financial_records WHERE user_id = ? AND type = 'expense' AND category = 'ad' AND date LIKE ?").get(userId, `${period}%`) as { v: number }).v;
+    return { total_revenue: revenue, total_expense: expense, net_profit: revenue - expense, ad_spend: adSpend };
   },
 
   // ===== settings =====

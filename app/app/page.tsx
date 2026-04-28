@@ -1,12 +1,5 @@
-import { getSession } from "@/lib/auth";
-import DashboardClient from "./DashboardClient";
+import { redirect } from "next/navigation";
 
-export default async function AppDashboardPage() {
-  const session = await getSession();
-  return (
-    <DashboardClient
-      brandDisplayName={session?.brandDisplayName ?? "브랜드"}
-      userName={session?.name ?? ""}
-    />
-  );
+export default function AppRootPage() {
+  redirect("/app/assistants");
 }

@@ -255,6 +255,22 @@ function getDb(): Database.Database {
     CREATE INDEX IF NOT EXISTS idx_library_user ON library_items(user_id, kind, updated_at);
     CREATE INDEX IF NOT EXISTS idx_library_favorite ON library_items(user_id, is_favorite, updated_at);
 
+    -- AI 토큰 사용량 (비용 추정 및 한도 강제용)
+    CREATE TABLE IF NOT EXISTS token_usage (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      session_id TEXT,
+      agent_type TEXT NOT NULL,
+      model TEXT NOT NULL,
+      input_tokens INTEGER NOT NULL DEFAULT 0,
+      output_tokens INTEGER NOT NULL DEFAULT 0,
+      cache_read_tokens INTEGER NOT NULL DEFAULT 0,
+      cache_creation_tokens INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_token_usage_user ON token_usage(user_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_token_usage_session ON token_usage(session_id);
+
     -- 보안 감사: 인증 관련 사건 로그 (로그인 시도/성공/실패 등)
     CREATE TABLE IF NOT EXISTS auth_events (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -939,6 +955,43 @@ export const db = {
       )
       .run(entry.kind, entry.user_id, entry.email, entry.ip, entry.user_agent, entry.detail);
   },
+  // ===== token usage =====
+  recordTokenUsage(entry: {
+    user_id: string;
+    session_id: string | null;
+    agent_type: string;
+    model: string;
+    input_tokens: number;
+    output_tokens: number;
+    cache_read_tokens?: number;
+    cache_creation_tokens?: number;
+  }) {
+    getDb()
+      .prepare(
+        "INSERT INTO token_usage (user_id, session_id, agent_type, model, input_tokens, output_tokens, cache_read_tokens, cache_creation_tokens) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+      )
+      .run(
+        entry.user_id, entry.session_id, entry.agent_type, entry.model,
+        entry.input_tokens, entry.output_tokens,
+        entry.cache_read_tokens ?? 0, entry.cache_creation_tokens ?? 0
+      );
+  },
+  getMonthlyTokenUsage(userId: string, days = 30): {
+    input_tokens: number; output_tokens: number; cache_read_tokens: number; cache_creation_tokens: number; calls: number;
+  } {
+    const row = getDb().prepare(
+      `SELECT
+         COALESCE(SUM(input_tokens), 0) AS input_tokens,
+         COALESCE(SUM(output_tokens), 0) AS output_tokens,
+         COALESCE(SUM(cache_read_tokens), 0) AS cache_read_tokens,
+         COALESCE(SUM(cache_creation_tokens), 0) AS cache_creation_tokens,
+         COUNT(*) AS calls
+       FROM token_usage
+       WHERE user_id = ? AND created_at >= datetime('now', ?)`
+    ).get(userId, `-${days} days`) as { input_tokens: number; output_tokens: number; cache_read_tokens: number; cache_creation_tokens: number; calls: number };
+    return row;
+  },
+
   listAuthEvents(filters: { user_id?: string; email?: string; kind?: string; limit?: number } = {}) {
     const where: string[] = [];
     const params: any[] = [];

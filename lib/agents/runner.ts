@@ -99,7 +99,20 @@ async function executeAgentLoop(
 
   // 사용자/브랜드/상품 컨텍스트를 시스템 프롬프트 뒤에 동적으로 주입
   const userContext = buildUserContextBlock(userId);
-  const systemPrompt = (SYSTEM_PROMPTS[agentType] || "") + (userContext || "");
+  const baseSystem = SYSTEM_PROMPTS[agentType] || "";
+
+  // Prompt caching: 정적 시스템 프롬프트 + 도구 정의는 캐시 — 5분 TTL
+  // 사용자 컨텍스트는 사용자별로 다르므로 별도 블록 (캐시 키 분리)
+  const systemBlocks: Anthropic.TextBlockParam[] = [
+    { type: "text", text: baseSystem, cache_control: { type: "ephemeral" } },
+    ...(userContext ? [{ type: "text" as const, text: userContext, cache_control: { type: "ephemeral" as const } }] : []),
+  ];
+
+  // 누적 토큰 사용량 추적
+  let totalInputTokens = 0;
+  let totalOutputTokens = 0;
+  let totalCacheReadTokens = 0;
+  let totalCacheCreationTokens = 0;
 
   for (let i = 0; i < MAX_ITERATIONS; i++) {
     let response: Anthropic.Message;
@@ -107,10 +120,16 @@ async function executeAgentLoop(
       response = await claude.messages.create({
         model: MODEL,
         max_tokens: 4096,
-        system: systemPrompt,
+        system: systemBlocks,
         tools: COMMON_TOOLS,
         messages,
       });
+      // 토큰 집계
+      const u = response.usage;
+      totalInputTokens += u.input_tokens || 0;
+      totalOutputTokens += u.output_tokens || 0;
+      totalCacheReadTokens += (u as { cache_read_input_tokens?: number }).cache_read_input_tokens || 0;
+      totalCacheCreationTokens += (u as { cache_creation_input_tokens?: number }).cache_creation_input_tokens || 0;
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Claude API 오류";
       emit("error", `AI 연결 오류: ${msg}`);
@@ -293,7 +312,23 @@ async function executeAgentLoop(
     // stop_reason이 end_turn이면 완료
     if (response.stop_reason === "end_turn" && toolUses.length === 0) {
       if (textContent) {
-        emit("success", textContent.slice(0, 300));
+        // 짧은 요약은 success 로그로, 전문은 보관함에 저장
+        const preview = textContent.length > 200 ? textContent.slice(0, 200) + "…" : textContent;
+        emit("success", `✅ ${preview}`);
+        if (textContent.length > 200) {
+          try {
+            db.createLibraryItem(userId, {
+              agent_type: agentType,
+              kind: "agent_response",
+              title: `${agentName} 응답 — ${new Date().toLocaleString("ko-KR")}`,
+              content: textContent,
+              metadata: JSON.stringify({ task: task.slice(0, 200), session_id: sessionId }),
+              source_session_id: sessionId,
+              is_favorite: 0,
+            });
+            emit("info", `📦 응답 전문이 보관함에 저장되었습니다.`);
+          } catch {}
+        }
       }
       setStatus("completed");
       break;
@@ -310,4 +345,18 @@ async function executeAgentLoop(
       break;
     }
   }
+
+  // 토큰 사용량 기록
+  try {
+    db.recordTokenUsage({
+      user_id: userId,
+      session_id: sessionId,
+      agent_type: agentType,
+      model: MODEL,
+      input_tokens: totalInputTokens,
+      output_tokens: totalOutputTokens,
+      cache_read_tokens: totalCacheReadTokens,
+      cache_creation_tokens: totalCacheCreationTokens,
+    });
+  } catch {}
 }

@@ -16,6 +16,7 @@ import { DaliPageHealth } from "./widgets/specialty/DaliPageHealth";
 import { AddyROAS } from "./widgets/specialty/AddyROAS";
 import { PennyLedger } from "./widgets/specialty/PennyLedger";
 import { ChatBubble } from "./chat/ChatBubble";
+import { CommandPalette } from "@/components/system/CommandPalette";
 import { DESKS, type DeskAgentId } from "@/data/desks";
 
 const FONT_KR = '"IBM Plex Sans KR", sans-serif';
@@ -108,6 +109,7 @@ export function AgentDesk({ agentId }: { agentId: DeskAgentId }) {
       </div>
 
       <ChatBubble agentId={agentId} />
+      <CommandPalette />
       <ToastHost />
     </div>
   );

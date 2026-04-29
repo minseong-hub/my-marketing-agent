@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { EmptyState } from "@/components/primitives/EmptyState";
+import { SkeletonGrid } from "@/components/primitives/Skeleton";
 
 interface Product {
   id: string;
@@ -255,11 +257,17 @@ export default function ProductsClient() {
         )}
 
         {loading ? (
-          <p style={{ fontFamily: LABEL_FONT, fontSize: 15, color: "#7e94c8" }}>불러오는 중...</p>
+          <SkeletonGrid count={3} />
         ) : products.length === 0 ? (
-          <div style={{ border: "1px dashed #1f2a6b", padding: "40px 20px", textAlign: "center", fontFamily: LABEL_FONT, fontSize: 15, color: "#7e94c8" }}>
-            아직 등록된 상품이 없습니다. 상단의 <b style={{ color: "#cfe9ff" }}>＋ 새 상품 등록</b> 버튼을 눌러 시작해 주세요.
-          </div>
+          <EmptyState
+            icon="🏷️"
+            accent="#ff4ec9"
+            title="첫 상품을 등록하세요"
+            description="상품을 한 번 등록해 두면 데일리·마키·애디 비서가 모든 임무에서 자동으로 이 정보를 활용합니다. 매번 상품을 설명할 필요가 없어요."
+            example="상품명·셀링포인트·키워드만 입력하면 끝 (1분 소요)"
+            primaryAction={{ label: "새 상품 등록", onClick: startCreate }}
+            secondaryAction={{ label: "브랜드부터 입력", href: "/app/brand" }}
+          />
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 }}>
             {products.map((p) => (

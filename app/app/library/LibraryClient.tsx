@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { EmptyState } from "@/components/primitives/EmptyState";
+import { SkeletonGrid } from "@/components/primitives/Skeleton";
 
 interface LibraryItem {
   id: string;
@@ -211,11 +213,17 @@ export default function LibraryClient() {
         )}
 
         {loading ? (
-          <p style={{ fontFamily: LABEL_FONT, fontSize: 15, color: "#7e94c8" }}>불러오는 중...</p>
+          <SkeletonGrid count={6} />
         ) : items.length === 0 ? (
-          <div style={{ border: "1px dashed #1f2a6b", padding: "40px 20px", textAlign: "center", fontFamily: LABEL_FONT, fontSize: 15, color: "#7e94c8" }}>
-            보관된 항목이 없습니다. 비서에게 임무를 시키거나 직접 메모를 추가해 보세요.
-          </div>
+          <EmptyState
+            icon="📦"
+            accent="#5ce5ff"
+            title="아직 보관된 항목이 없어요"
+            description="비서에게 임무를 시키면 결과물이 자동으로 이곳에 저장됩니다. 좋은 결과는 ★ 표시로 즐겨찾기 해두면 다음에 빠르게 다시 쓸 수 있어요."
+            example="마키에게 '이번 주 인스타 캡션 3개' 시키면 보관함에 자동 저장"
+            primaryAction={{ label: "마키에게 임무 시키기", href: "/desk/marky" }}
+            secondaryAction={{ label: "메모 직접 추가", onClick: () => { setCreateMode(true); setEditTitle(""); setEditContent(""); } }}
+          />
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 }}>
             {items.map((it) => (

@@ -482,6 +482,9 @@ function LeftConsole({ agentType, status, sseConnected, quickTasks, approvals, i
 
           {/* 퍼포먼스 게이지 */}
           <div className="w-full space-y-2 mt-1">
+            <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 11, color: "#7e94c8", marginBottom: 4, fontStyle: "italic" }}>
+              ※ 예시 성과 — 실제 데이터 연동 시 변경됨
+            </p>
             {crew.stats.map(s => (
               <Bar key={s.label} v={s.v} c={s.c} label={s.label} segments={12} />
             ))}

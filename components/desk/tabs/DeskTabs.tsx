@@ -14,6 +14,8 @@ import { MarkyAudience } from "../widgets/specialty/MarkyAudience";
 import { DaliPageHealth } from "../widgets/specialty/DaliPageHealth";
 import { AddyROAS } from "../widgets/specialty/AddyROAS";
 import { PennyLedger } from "../widgets/specialty/PennyLedger";
+import { CardNewsStudio } from "@/components/studio/CardNewsStudio";
+import { AdCreativeStudio } from "@/components/studio/AdCreativeStudio";
 import { showToast } from "../ToastHost";
 
 const FONT_KR = '"IBM Plex Sans KR", sans-serif';
@@ -61,6 +63,20 @@ export function MarkyAudienceTab({ agentId }: { agentId: DeskAgentId }) {
       />
       <MarkyAudience />
       <QuickStats agentId={agentId} />
+    </div>
+  );
+}
+
+// 2-A) 카드뉴스 자동화 (마키 SPECIAL)
+export function MarkyCardNewsTab({ agentId }: { agentId: DeskAgentId }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <SectionHeader
+        title="🎨 카드뉴스 자동화"
+        sub="주제 한 줄 → 마키가 6장 카드 카피 + 디자인 + 해시태그까지 자동 작성. PNG로 즉시 다운로드, 결과는 보관함에 저장됩니다."
+        accent={DESKS[agentId].agent.accent}
+      />
+      <CardNewsStudio />
     </div>
   );
 }
@@ -170,6 +186,20 @@ export function AddyCampaignsTab({ agentId }: { agentId: DeskAgentId }) {
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <SectionHeader title="활성 캠페인 + ROAS" sub="채널별 성과 + 예산 슬라이더로 즉시 재분배" accent={a.accent} />
       <AddyROAS />
+    </div>
+  );
+}
+
+// 5-A) 광고 소재 제작 (애디 SPECIAL)
+export function AddyAdCreativeTab({ agentId }: { agentId: DeskAgentId }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <SectionHeader
+        title="🎯 광고 소재 제작"
+        sub="주제 + 광고 목적 → 애디가 1:1 / 4:5 / 9:16 세 비율 변형을 동시에 작성. 각 변형은 메타 글자수 정책 자동 준수, PNG 즉시 다운로드."
+        accent={DESKS[agentId].agent.accent}
+      />
+      <AdCreativeStudio />
     </div>
   );
 }

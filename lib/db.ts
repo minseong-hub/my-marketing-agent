@@ -213,8 +213,50 @@ function getDb(): Database.Database {
       do_not_use TEXT NOT NULL DEFAULT '',
       hashtag_library TEXT NOT NULL DEFAULT '[]',
       competitor_urls TEXT NOT NULL DEFAULT '[]',
+      reference_samples TEXT NOT NULL DEFAULT '[]',
+      style_guide TEXT NOT NULL DEFAULT '{}',
+      structure_templates TEXT NOT NULL DEFAULT '[]',
+      visual_refs TEXT NOT NULL DEFAULT '[]',
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    -- 자동 발행 큐 (스케줄링된 컨텐츠 발행 작업)
+    CREATE TABLE IF NOT EXISTS content_queue (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      agent_type TEXT NOT NULL,
+      channel TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      title TEXT NOT NULL DEFAULT '',
+      payload TEXT NOT NULL DEFAULT '{}',
+      status TEXT NOT NULL DEFAULT 'pending',
+      scheduled_at TEXT NOT NULL,
+      published_at TEXT,
+      external_ref TEXT,
+      retry_count INTEGER NOT NULL DEFAULT 0,
+      last_error TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_queue_user ON content_queue(user_id, status, scheduled_at);
+    CREATE INDEX IF NOT EXISTS idx_queue_status ON content_queue(status, scheduled_at);
+
+    -- 레퍼런스 수집 기록 (플랫폼별 URL → 본문 추출 결과)
+    CREATE TABLE IF NOT EXISTS reference_pulls (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      platform TEXT NOT NULL,
+      url TEXT NOT NULL,
+      title TEXT NOT NULL DEFAULT '',
+      content TEXT NOT NULL DEFAULT '',
+      author TEXT,
+      images TEXT NOT NULL DEFAULT '[]',
+      hashtags TEXT NOT NULL DEFAULT '[]',
+      label TEXT,
+      raw_meta TEXT NOT NULL DEFAULT '{}',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_refpulls_user ON reference_pulls(user_id, created_at);
 
     -- 상품 카탈로그
     CREATE TABLE IF NOT EXISTS products (
@@ -319,6 +361,16 @@ function getDb(): Database.Database {
     if (!names.includes("trial_days")) _db.exec("ALTER TABLE plans ADD COLUMN trial_days INTEGER NOT NULL DEFAULT 7");
     if (!names.includes("first_payment_amount")) _db.exec("ALTER TABLE plans ADD COLUMN first_payment_amount INTEGER");
     if (!names.includes("tools")) _db.exec("ALTER TABLE plans ADD COLUMN tools TEXT NOT NULL DEFAULT '[]'");
+  } catch {}
+
+  // brand_profiles 컬럼 마이그레이션 (기존 사용자 보존)
+  try {
+    const cols = _db.prepare("PRAGMA table_info(brand_profiles)").all() as { name: string }[];
+    const names = cols.map((c) => c.name);
+    if (!names.includes("reference_samples")) _db.exec("ALTER TABLE brand_profiles ADD COLUMN reference_samples TEXT NOT NULL DEFAULT '[]'");
+    if (!names.includes("style_guide")) _db.exec("ALTER TABLE brand_profiles ADD COLUMN style_guide TEXT NOT NULL DEFAULT '{}'");
+    if (!names.includes("structure_templates")) _db.exec("ALTER TABLE brand_profiles ADD COLUMN structure_templates TEXT NOT NULL DEFAULT '[]'");
+    if (!names.includes("visual_refs")) _db.exec("ALTER TABLE brand_profiles ADD COLUMN visual_refs TEXT NOT NULL DEFAULT '[]'");
   } catch {}
 
   seedDefaults(_db);
@@ -483,7 +535,79 @@ export interface BrandProfileRow {
   do_not_use: string;
   hashtag_library: string;
   competitor_urls: string;
+  reference_samples: string;     // JSON: ReferenceSample[]
+  style_guide: string;           // JSON: StyleGuide
+  structure_templates: string;   // JSON: StructureTemplate[]
+  visual_refs: string;           // JSON: VisualRef[]
   updated_at: string;
+}
+
+export interface ReferenceSample {
+  id: string;
+  label?: string;             // "내가 좋아하는 카피 / 베스트 게시물 등"
+  source?: string;            // "manual" | "naver_blog" | "instagram" | "threads" | "tistory" | "url"
+  source_url?: string;
+  text: string;
+  hashtags?: string[];
+  added_at: string;
+}
+
+export interface StyleGuide {
+  sentence_length?: "short" | "medium" | "long" | "mixed";
+  emoji_policy?: "none" | "minimal" | "moderate" | "rich";
+  tone_keywords?: string[];   // ["친근", "전문가", "위트"]
+  formality?: "casual" | "polite" | "formal";
+  paragraph_pattern?: string; // "후킹 → 문제 → 해결 → CTA"
+  signature_phrases?: string[]; // 자주 쓰는 마무리 멘트
+}
+
+export interface StructureTemplate {
+  id: string;
+  name: string;          // "인스타 캡션 7줄 템플릿"
+  agent_type?: string;   // marketing | detail_page | ads | finance
+  body: string;          // 템플릿 본문 (변수 {{product}} 등 가능)
+  added_at: string;
+}
+
+export interface VisualRef {
+  id: string;
+  url?: string;          // 이미지 URL
+  description: string;   // "미니멀 + 따뜻한 베이지 톤"
+  keywords?: string[];
+  added_at: string;
+}
+
+export interface ContentQueueRow {
+  id: string;
+  user_id: string;
+  agent_type: string;
+  channel: string;          // "library" | "naver_blog" | "instagram" | "threads" | "kakao_open" | "cafe24" | ...
+  kind: string;             // "caption" | "blog_post" | "card_news" | "ad_creative" | ...
+  title: string;
+  payload: string;          // JSON
+  status: string;           // pending | publishing | published | failed | canceled
+  scheduled_at: string;
+  published_at: string | null;
+  external_ref: string | null;  // 발행 후 외부 ID/URL
+  retry_count: number;
+  last_error: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReferencePullRow {
+  id: string;
+  user_id: string;
+  platform: string;         // naver_blog | smartstore | instagram | threads | tistory | url
+  url: string;
+  title: string;
+  content: string;
+  author: string | null;
+  images: string;           // JSON array
+  hashtags: string;         // JSON array
+  label: string | null;
+  raw_meta: string;         // JSON
+  created_at: string;
 }
 
 export interface ProductRow {
@@ -1012,8 +1136,17 @@ export const db = {
     const now = new Date().toISOString();
     if (!existing) {
       getDb().prepare(
-        `INSERT INTO brand_profiles (user_id, brand_voice, target_audience, unique_value, brand_story, do_not_use, hashtag_library, competitor_urls, updated_at)
-         VALUES (@user_id, @brand_voice, @target_audience, @unique_value, @brand_story, @do_not_use, @hashtag_library, @competitor_urls, @updated_at)`
+        `INSERT INTO brand_profiles (
+           user_id, brand_voice, target_audience, unique_value, brand_story, do_not_use,
+           hashtag_library, competitor_urls,
+           reference_samples, style_guide, structure_templates, visual_refs,
+           updated_at
+         ) VALUES (
+           @user_id, @brand_voice, @target_audience, @unique_value, @brand_story, @do_not_use,
+           @hashtag_library, @competitor_urls,
+           @reference_samples, @style_guide, @structure_templates, @visual_refs,
+           @updated_at
+         )`
       ).run({
         user_id: userId,
         brand_voice: patch.brand_voice ?? "",
@@ -1023,10 +1156,18 @@ export const db = {
         do_not_use: patch.do_not_use ?? "",
         hashtag_library: patch.hashtag_library ?? "[]",
         competitor_urls: patch.competitor_urls ?? "[]",
+        reference_samples: patch.reference_samples ?? "[]",
+        style_guide: patch.style_guide ?? "{}",
+        structure_templates: patch.structure_templates ?? "[]",
+        visual_refs: patch.visual_refs ?? "[]",
         updated_at: now,
       });
     } else {
-      const fields = ["brand_voice","target_audience","unique_value","brand_story","do_not_use","hashtag_library","competitor_urls"] as const;
+      const fields = [
+        "brand_voice","target_audience","unique_value","brand_story","do_not_use",
+        "hashtag_library","competitor_urls",
+        "reference_samples","style_guide","structure_templates","visual_refs",
+      ] as const;
       const sets: string[] = [];
       const params: Record<string, unknown> = { user_id: userId, updated_at: now };
       for (const f of fields) {
@@ -1037,6 +1178,95 @@ export const db = {
         getDb().prepare(`UPDATE brand_profiles SET ${sets.join(", ")} WHERE user_id = @user_id`).run(params);
       }
     }
+  },
+
+  // ===== content queue (자동 발행 큐) =====
+  createQueueItem(item: {
+    user_id: string;
+    agent_type: string;
+    channel: string;
+    kind: string;
+    title?: string;
+    payload?: Record<string, unknown>;
+    scheduled_at: string;
+  }): ContentQueueRow {
+    const id = uid("cq");
+    getDb().prepare(
+      `INSERT INTO content_queue (id, user_id, agent_type, channel, kind, title, payload, status, scheduled_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?)`
+    ).run(
+      id, item.user_id, item.agent_type, item.channel, item.kind,
+      item.title ?? "", JSON.stringify(item.payload ?? {}),
+      item.scheduled_at
+    );
+    return getDb().prepare("SELECT * FROM content_queue WHERE id = ?").get(id) as ContentQueueRow;
+  },
+  listQueueItems(userId: string, filters: { status?: string; channel?: string; limit?: number } = {}): ContentQueueRow[] {
+    const where: string[] = ["user_id = ?"];
+    const params: any[] = [userId];
+    if (filters.status) { where.push("status = ?"); params.push(filters.status); }
+    if (filters.channel) { where.push("channel = ?"); params.push(filters.channel); }
+    params.push(filters.limit ?? 200);
+    return getDb().prepare(
+      `SELECT * FROM content_queue WHERE ${where.join(" AND ")} ORDER BY scheduled_at ASC LIMIT ?`
+    ).all(...params) as ContentQueueRow[];
+  },
+  getQueueItem(id: string): ContentQueueRow | undefined {
+    return getDb().prepare("SELECT * FROM content_queue WHERE id = ?").get(id) as ContentQueueRow | undefined;
+  },
+  updateQueueItem(id: string, patch: Partial<Pick<ContentQueueRow, "status" | "published_at" | "external_ref" | "retry_count" | "last_error" | "scheduled_at" | "title" | "payload">>) {
+    const allowed = ["status","published_at","external_ref","retry_count","last_error","scheduled_at","title","payload"];
+    const sets: string[] = [];
+    const params: Record<string, unknown> = { id };
+    for (const [k, v] of Object.entries(patch)) {
+      if (allowed.includes(k) && v !== undefined) { sets.push(`${k} = @${k}`); params[k] = v; }
+    }
+    if (sets.length === 0) return;
+    sets.push("updated_at = datetime('now')");
+    getDb().prepare(`UPDATE content_queue SET ${sets.join(", ")} WHERE id = @id`).run(params);
+  },
+  deleteQueueItem(userId: string, id: string) {
+    getDb().prepare("DELETE FROM content_queue WHERE id = ? AND user_id = ?").run(id, userId);
+  },
+  // 워커가 가져갈 due 항목들 (status=pending && scheduled_at <= now)
+  fetchDueQueueItems(limit = 20): ContentQueueRow[] {
+    return getDb().prepare(
+      "SELECT * FROM content_queue WHERE status = 'pending' AND scheduled_at <= datetime('now') ORDER BY scheduled_at ASC LIMIT ?"
+    ).all(limit) as ContentQueueRow[];
+  },
+
+  // ===== reference pulls (URL → 본문 추출 기록) =====
+  createReferencePull(r: {
+    user_id: string;
+    platform: string;
+    url: string;
+    title?: string;
+    content?: string;
+    author?: string;
+    images?: string[];
+    hashtags?: string[];
+    label?: string;
+    raw_meta?: Record<string, unknown>;
+  }): ReferencePullRow {
+    const id = uid("rp");
+    getDb().prepare(
+      `INSERT INTO reference_pulls (id, user_id, platform, url, title, content, author, images, hashtags, label, raw_meta)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(
+      id, r.user_id, r.platform, r.url,
+      r.title ?? "", r.content ?? "", r.author ?? null,
+      JSON.stringify(r.images ?? []), JSON.stringify(r.hashtags ?? []),
+      r.label ?? null, JSON.stringify(r.raw_meta ?? {})
+    );
+    return getDb().prepare("SELECT * FROM reference_pulls WHERE id = ?").get(id) as ReferencePullRow;
+  },
+  listReferencePulls(userId: string, limit = 100): ReferencePullRow[] {
+    return getDb().prepare(
+      "SELECT * FROM reference_pulls WHERE user_id = ? ORDER BY created_at DESC LIMIT ?"
+    ).all(userId, limit) as ReferencePullRow[];
+  },
+  deleteReferencePull(userId: string, id: string) {
+    getDb().prepare("DELETE FROM reference_pulls WHERE id = ? AND user_id = ?").run(id, userId);
   },
 
   // ===== products =====

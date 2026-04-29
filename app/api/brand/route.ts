@@ -5,6 +5,41 @@ import { db } from "@/lib/db";
 import { verifySameOrigin } from "@/lib/security/csrf";
 import { consume, RATE_LIMITS, rateLimitResponseInit } from "@/lib/security/rate-limit";
 
+const ReferenceSampleSchema = z.object({
+  id: z.string().min(1).max(40),
+  label: z.string().max(80).optional(),
+  source: z.string().max(40).optional(),
+  source_url: z.string().max(2000).optional(),
+  text: z.string().min(10).max(8000),
+  hashtags: z.array(z.string().max(60)).max(40).optional(),
+  added_at: z.string(),
+});
+
+const StyleGuideSchema = z.object({
+  sentence_length: z.enum(["short","medium","long","mixed"]).optional(),
+  emoji_policy: z.enum(["none","minimal","moderate","rich"]).optional(),
+  tone_keywords: z.array(z.string().max(30)).max(10).optional(),
+  formality: z.enum(["casual","polite","formal"]).optional(),
+  paragraph_pattern: z.string().max(300).optional(),
+  signature_phrases: z.array(z.string().max(120)).max(10).optional(),
+});
+
+const StructureTemplateSchema = z.object({
+  id: z.string().min(1).max(40),
+  name: z.string().min(1).max(80),
+  agent_type: z.string().max(40).optional(),
+  body: z.string().min(10).max(4000),
+  added_at: z.string(),
+});
+
+const VisualRefSchema = z.object({
+  id: z.string().min(1).max(40),
+  url: z.string().max(2000).optional(),
+  description: z.string().min(1).max(400),
+  keywords: z.array(z.string().max(40)).max(15).optional(),
+  added_at: z.string(),
+});
+
 const BrandSchema = z.object({
   brand_voice: z.string().max(500).optional(),
   target_audience: z.string().max(500).optional(),
@@ -13,7 +48,16 @@ const BrandSchema = z.object({
   do_not_use: z.string().max(500).optional(),
   hashtag_library: z.array(z.string().max(60)).max(50).optional(),
   competitor_urls: z.array(z.string().max(300)).max(20).optional(),
+  reference_samples: z.array(ReferenceSampleSchema).max(20).optional(),
+  style_guide: StyleGuideSchema.optional(),
+  structure_templates: z.array(StructureTemplateSchema).max(15).optional(),
+  visual_refs: z.array(VisualRefSchema).max(20).optional(),
 });
+
+function parseJsonField<T>(s: string | undefined, fallback: T): T {
+  if (!s) return fallback;
+  try { return JSON.parse(s) as T; } catch { return fallback; }
+}
 
 export async function GET() {
   const session = await getSession();
@@ -28,20 +72,24 @@ export async function GET() {
       do_not_use: "",
       hashtag_library: [],
       competitor_urls: [],
+      reference_samples: [],
+      style_guide: {},
+      structure_templates: [],
+      visual_refs: [],
     });
   }
-  let hashtagLibrary: string[] = [];
-  let competitorUrls: string[] = [];
-  try { hashtagLibrary = JSON.parse(profile.hashtag_library || "[]"); } catch {}
-  try { competitorUrls = JSON.parse(profile.competitor_urls || "[]"); } catch {}
   return NextResponse.json({
     brand_voice: profile.brand_voice,
     target_audience: profile.target_audience,
     unique_value: profile.unique_value,
     brand_story: profile.brand_story,
     do_not_use: profile.do_not_use,
-    hashtag_library: hashtagLibrary,
-    competitor_urls: competitorUrls,
+    hashtag_library: parseJsonField<string[]>(profile.hashtag_library, []),
+    competitor_urls: parseJsonField<string[]>(profile.competitor_urls, []),
+    reference_samples: parseJsonField<unknown[]>(profile.reference_samples, []),
+    style_guide: parseJsonField<Record<string, unknown>>(profile.style_guide, {}),
+    structure_templates: parseJsonField<unknown[]>(profile.structure_templates, []),
+    visual_refs: parseJsonField<unknown[]>(profile.visual_refs, []),
     updated_at: profile.updated_at,
   });
 }
@@ -70,6 +118,10 @@ export async function PUT(request: NextRequest) {
     do_not_use: data.do_not_use,
     hashtag_library: data.hashtag_library ? JSON.stringify(data.hashtag_library) : undefined,
     competitor_urls: data.competitor_urls ? JSON.stringify(data.competitor_urls) : undefined,
+    reference_samples: data.reference_samples ? JSON.stringify(data.reference_samples) : undefined,
+    style_guide: data.style_guide ? JSON.stringify(data.style_guide) : undefined,
+    structure_templates: data.structure_templates ? JSON.stringify(data.structure_templates) : undefined,
+    visual_refs: data.visual_refs ? JSON.stringify(data.visual_refs) : undefined,
   });
   return NextResponse.json({ ok: true });
 }

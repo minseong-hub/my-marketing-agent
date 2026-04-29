@@ -94,6 +94,20 @@ export function DeskTopBar({ activeId }: { activeId: DeskAgentId }) {
 
       <span style={{ width: 1, height: 24, background: "#1f2a6b" }} />
 
+      {/* 시스템 메뉴 */}
+      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <Link href="/app/brand" title="브랜드 프로필 + 레퍼런스 팩" style={{
+          background: "none", border: "1px solid #1f2a6b", color: "#7e94c8",
+          padding: "5px 10px", fontFamily: FONT_KR, fontSize: 12, fontWeight: 500,
+          textDecoration: "none",
+        }}>브랜드</Link>
+        <Link href="/app/api-status" title="API 상태 + 사용량" style={{
+          background: "none", border: "1px solid #1f2a6b", color: "#7e94c8",
+          padding: "5px 10px", fontFamily: FONT_KR, fontSize: 12, fontWeight: 500,
+          textDecoration: "none",
+        }}>시스템</Link>
+      </div>
+
       <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: "#7e94c8", display: "flex", alignItems: "center", gap: 8 }}>
         <span style={{ color: "#5ce5ff" }}>{time}</span>
         <span style={{ color: "#1f2a6b" }}>·</span>

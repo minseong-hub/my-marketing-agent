@@ -8,7 +8,7 @@ import { checkQuotaForRun } from "@/lib/security/quota";
 import { recordAuthEvent, extractRequestMeta } from "@/lib/security/audit";
 import { getClaudeClient, MODEL } from "@/lib/claude/client";
 import { SYSTEM_PROMPTS } from "@/lib/claude/prompts";
-import { buildUserContextBlock } from "@/lib/agents/context";
+import { buildUserContextBlock, buildReferencePackBlock } from "@/lib/agents/context";
 import { buildAdCreativePrompt, extractJson } from "@/lib/studio/prompts";
 import type { AdCreativeSpec } from "@/lib/studio/templates";
 import type Anthropic from "@anthropic-ai/sdk";
@@ -53,9 +53,11 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues.map(i => i.message).join(" / ") }, { status: 400 });
 
   const claude = getClaudeClient();
-  const userContext = buildUserContextBlock(session.userId);
+  const userContext = buildUserContextBlock(session.userId, { agentType: "ads" });
+  const referencePack = buildReferencePackBlock(session.userId, { agentType: "ads" });
   const systemBlocks: Anthropic.TextBlockParam[] = [
     { type: "text", text: SYSTEM_PROMPTS.ads, cache_control: { type: "ephemeral" } },
+    ...(referencePack ? [{ type: "text" as const, text: referencePack, cache_control: { type: "ephemeral" as const } }] : []),
     ...(userContext ? [{ type: "text" as const, text: userContext }] : []),
   ];
 

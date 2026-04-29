@@ -3,7 +3,7 @@ import { COMMON_TOOLS } from "@/lib/claude/tools";
 import { SYSTEM_PROMPTS, AGENT_NAMES } from "@/lib/claude/prompts";
 import { db } from "@/lib/db";
 import { sseBus } from "@/lib/sse/bus";
-import { buildUserContextBlock } from "./context";
+import { buildUserContextBlock, buildReferencePackBlock } from "./context";
 import type { AgentType, AgentRunInput } from "./types";
 import type Anthropic from "@anthropic-ai/sdk";
 
@@ -98,14 +98,16 @@ async function executeAgentLoop(
   ];
 
   // 사용자/브랜드/상품 컨텍스트를 시스템 프롬프트 뒤에 동적으로 주입
-  const userContext = buildUserContextBlock(userId);
+  const userContext = buildUserContextBlock(userId, { agentType });
+  const referencePack = buildReferencePackBlock(userId, { agentType });
   const baseSystem = SYSTEM_PROMPTS[agentType] || "";
 
-  // Prompt caching: 정적 시스템 프롬프트 + 도구 정의는 캐시 — 5분 TTL
-  // 사용자 컨텍스트는 사용자별로 다르므로 별도 블록 (캐시 키 분리)
+  // Prompt caching: 정적 시스템 프롬프트 + 도구 정의 + 레퍼런스 팩(자주 안 변함)을 캐시 — 5분 TTL
+  // 사용자 컨텍스트(상품/세션)는 사용자별·시점별로 변하므로 별도 블록.
   const systemBlocks: Anthropic.TextBlockParam[] = [
     { type: "text", text: baseSystem, cache_control: { type: "ephemeral" } },
-    ...(userContext ? [{ type: "text" as const, text: userContext, cache_control: { type: "ephemeral" as const } }] : []),
+    ...(referencePack ? [{ type: "text" as const, text: referencePack, cache_control: { type: "ephemeral" as const } }] : []),
+    ...(userContext ? [{ type: "text" as const, text: userContext }] : []),
   ];
 
   // 누적 토큰 사용량 추적

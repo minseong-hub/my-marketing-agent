@@ -12,8 +12,8 @@ export function PageHeader({
   return (
     <div className="flex items-start justify-between mb-6 gap-4">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">{title}</h1>
-        {description && <p className="text-sm text-slate-500 mt-1">{description}</p>}
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{title}</h1>
+        {description && <p className="text-base text-slate-500 mt-1">{description}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </div>
@@ -49,12 +49,12 @@ export function Stat({
   };
   return (
     <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
-      <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-2">
+      <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 mb-2">
         <span className={`w-1.5 h-1.5 rounded-full ${bar[tone]}`} />
         {label}
       </div>
-      <div className="text-2xl font-extrabold text-slate-900 tracking-tight">{value}</div>
-      {sub && <div className="text-xs text-slate-400 mt-1">{sub}</div>}
+      <div className="text-3xl font-extrabold text-slate-900 tracking-tight">{value}</div>
+      {sub && <div className="text-sm text-slate-400 mt-1">{sub}</div>}
     </div>
   );
 }
@@ -76,7 +76,7 @@ export function Badge({
   };
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-md border ${tones[tone]}`}
+      className={`inline-flex items-center px-2 py-0.5 text-[15px] font-semibold rounded-md border ${tones[tone]}`}
     >
       {children}
     </span>
@@ -86,7 +86,7 @@ export function Badge({
 export function Table({ children }: { children: ReactNode }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">{children}</table>
+      <table className="w-full text-base">{children}</table>
     </div>
   );
 }
@@ -94,7 +94,7 @@ export function Table({ children }: { children: ReactNode }) {
 export function Th({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <th
-      className={`text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500 px-4 py-3 border-b border-slate-200 ${className}`}
+      className={`text-left text-[15px] font-semibold uppercase tracking-wider text-slate-500 px-4 py-3 border-b border-slate-200 ${className}`}
     >
       {children}
     </th>

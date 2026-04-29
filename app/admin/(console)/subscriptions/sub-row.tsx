@@ -27,7 +27,7 @@ export function SubRow({ id, status }: { id: string; status: string }) {
         <button
           disabled={busy}
           onClick={() => update("active")}
-          className="h-7 px-2.5 text-[11px] font-semibold rounded-md border border-emerald-200 text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+          className="h-7 px-2.5 text-[15px] font-semibold rounded-md border border-emerald-200 text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
         >
           활성화
         </button>
@@ -36,7 +36,7 @@ export function SubRow({ id, status }: { id: string; status: string }) {
         <button
           disabled={busy}
           onClick={() => update("paused")}
-          className="h-7 px-2.5 text-[11px] font-semibold rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+          className="h-7 px-2.5 text-[15px] font-semibold rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-50"
         >
           일시정지
         </button>
@@ -45,7 +45,7 @@ export function SubRow({ id, status }: { id: string; status: string }) {
         <button
           disabled={busy}
           onClick={() => update("canceled")}
-          className="h-7 px-2.5 text-[11px] font-semibold rounded-md border border-rose-200 text-rose-700 hover:bg-rose-50 disabled:opacity-50"
+          className="h-7 px-2.5 text-[15px] font-semibold rounded-md border border-rose-200 text-rose-700 hover:bg-rose-50 disabled:opacity-50"
         >
           해지
         </button>

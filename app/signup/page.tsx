@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Starfield } from "@/components/primitives/Starfield";
@@ -30,7 +30,7 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #1f2a6b",
   padding: "10px 12px",
   fontFamily: '"JetBrains Mono", monospace',
-  fontSize: 11,
+  fontSize: 15,
   color: "#cfe9ff",
   outline: "none",
   boxSizing: "border-box",
@@ -41,7 +41,7 @@ function CField({
 }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-      <label style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: "#7e94c8", letterSpacing: "0.08em" }}>
+      <label style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 13, color: "#7e94c8", letterSpacing: "0.08em" }}>
         {label}{required && <span style={{ color: "#ff4ec9", marginLeft: 4 }}>*</span>}
       </label>
       {children}
@@ -60,9 +60,9 @@ function PixelCheckbox({ checked, onChange, children }: { checked: boolean; onCh
           display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
         }}
       >
-        {checked && <span style={{ color: "#060920", fontSize: 9, fontWeight: 900, lineHeight: 1 }}>✓</span>}
+        {checked && <span style={{ color: "#060920", fontSize: 13, fontWeight: 900, lineHeight: 1 }}>✓</span>}
       </div>
-      <span style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 11, color: "#7e94c8", lineHeight: 1.6 }}>
+      <span style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 15, color: "#7e94c8", lineHeight: 1.6 }}>
         {children}
       </span>
     </label>
@@ -80,6 +80,9 @@ export default function SignupPage() {
   const [consent, setConsent] = useState({ terms: false, privacy: false, marketing: false });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [hpCompany, setHpCompany] = useState(""); // honeypot — 정상 사용자에겐 보이지 않음
+  const renderedAtRef = useRef<number>(0);
+  useEffect(() => { renderedAtRef.current = Date.now(); }, []);
 
   function toggleChannel(ch: string) {
     setSalesChannels((prev) => prev.includes(ch) ? prev.filter((c) => c !== ch) : [...prev, ch]);
@@ -105,14 +108,16 @@ export default function SignupPage() {
           productCategories: form.productCategories ? [form.productCategories] : [],
           termsAgreed: consent.terms, privacyAgreed: consent.privacy,
           marketingConsent: consent.marketing,
+          hp_company: hpCompany,
+          rendered_at: renderedAtRef.current,
         }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error || "통신 장애 — 재교신 시도 중"); return; }
-      router.push("/app/assistants");
+      if (!res.ok) { setError(data.error || "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."); return; }
+      router.push("/desk/marky");
       router.refresh();
     } catch {
-      setError("통신 장애 — 재교신 시도 중");
+      setError("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
       setLoading(false);
     }
@@ -130,12 +135,12 @@ export default function SignupPage() {
       {/* Nav */}
       <nav style={{ padding: "12px 20px", borderBottom: "1px solid #1f2a6b", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
         <Link href="/" style={{ textDecoration: "none" }}>
-          <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 10, color: "#ff4ec9", textShadow: "2px 2px 0 #8a2877" }}>
+          <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 14, color: "#ff4ec9", textShadow: "2px 2px 0 #8a2877" }}>
             CREWMATE AI
           </span>
         </Link>
-        <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#4a5a8a", letterSpacing: "0.1em" }}>
-          SECTOR-7G · AIRLOCK
+        <span style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 13, color: "#7e94c8" }}>
+          회원가입 화면
         </span>
       </nav>
 
@@ -146,11 +151,11 @@ export default function SignupPage() {
         <div className="relative z-10 w-full" style={{ maxWidth: 440 }}>
           {/* Header */}
           <div style={{ textAlign: "center", marginBottom: 20 }}>
-            <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#5ce5ff", letterSpacing: "0.1em", marginBottom: 8 }}>
-              ▸ AIRLOCK — 신규 탑승 등록
+            <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, fontWeight: 600, color: "#5ce5ff", marginBottom: 8 }}>
+              ▸ 신규 회원가입
             </p>
-            <h1 style={{ fontFamily: '"Press Start 2P", monospace', fontSize: "clamp(12px, 2vw, 16px)", color: "#cfe9ff", textShadow: "3px 3px 0 #ff4ec9", lineHeight: 1.8 }}>
-              크루와 함께<br />탑승하세요
+            <h1 style={{ fontFamily: '"Press Start 2P", monospace', fontSize: "clamp(16px, 2vw, 20px)", color: "#cfe9ff", textShadow: "3px 3px 0 #ff4ec9", lineHeight: 1.8 }}>
+              크루와 함께<br />시작해 보세요
             </h1>
           </div>
 
@@ -159,22 +164,22 @@ export default function SignupPage() {
             <a
               href="/api/auth/google"
               className="pixel-frame"
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 12px", border: "1px solid #1f2a6b", background: "#0f1640", textDecoration: "none", fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: "#cfe9ff", letterSpacing: "0.05em" }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 12px", border: "1px solid #1f2a6b", background: "#0f1640", textDecoration: "none", fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 15, fontWeight: 500, color: "#cfe9ff" }}
             >
-              Google로 탑승
+              Google로 가입
             </a>
             <a
               href="/api/auth/kakao"
               className="pixel-frame"
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 12px", background: "#FEE500", border: "1px solid #FEE500", textDecoration: "none", fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: "#3A1D1D", letterSpacing: "0.05em" }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 12px", background: "#FEE500", border: "1px solid #FEE500", textDecoration: "none", fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 15, fontWeight: 600, color: "#3A1D1D" }}
             >
-              카카오로 탑승
+              카카오로 가입
             </a>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
             <div style={{ flex: 1, height: 1, background: "#1f2a6b" }} />
-            <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#4a5a8a" }}>또는 이메일로</span>
+            <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: "#7e94c8" }}>또는 이메일로</span>
             <div style={{ flex: 1, height: 1, background: "#1f2a6b" }} />
           </div>
 
@@ -182,17 +187,31 @@ export default function SignupPage() {
           <div className="pixel-frame" style={{ border: "2px solid #5ce5ff", background: "#0a0e27", overflow: "hidden" }}>
             {/* Title bar */}
             <div style={{ padding: "8px 16px", borderBottom: "1px solid #5ce5ff33", background: "#060920", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: "#5ce5ff", letterSpacing: "0.1em" }}>
+              <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 13, color: "#5ce5ff", letterSpacing: "0.1em" }}>
                 ● 신규 승무원 등록
               </span>
-              <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#66ff9d", animation: "blink 1s steps(2) infinite" }}>
+              <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: "#66ff9d", animation: "blink 1s steps(2) infinite" }}>
                 ● SECURE
               </span>
             </div>
 
             <form onSubmit={handleSubmit} style={{ padding: "20px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
+              {/* Honeypot — 사람에겐 보이지 않음, 봇만 채움 */}
+              <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", top: "-9999px", width: 1, height: 1, overflow: "hidden", opacity: 0, pointerEvents: "none" }}>
+                <label htmlFor="hp_company">회사 (작성하지 마세요)</label>
+                <input
+                  id="hp_company"
+                  name="hp_company"
+                  type="text"
+                  autoComplete="off"
+                  tabIndex={-1}
+                  value={hpCompany}
+                  onChange={(e) => setHpCompany(e.target.value)}
+                />
+              </div>
+
               {/* 기본 정보 */}
-              <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#4a5a8a", letterSpacing: "0.1em" }}>
+              <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: "#7e94c8", letterSpacing: "0.1em" }}>
                 ▸ 기본 정보
               </p>
 
@@ -222,7 +241,7 @@ export default function SignupPage() {
 
               {/* 브랜드 정보 */}
               <div style={{ borderTop: "1px solid #1f2a6b", paddingTop: 12 }}>
-                <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#4a5a8a", letterSpacing: "0.1em", marginBottom: 12 }}>
+                <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: "#7e94c8", letterSpacing: "0.1em", marginBottom: 12 }}>
                   ▸ 브랜드 정보
                 </p>
 
@@ -269,7 +288,7 @@ export default function SignupPage() {
                         <button
                           key={ch} type="button" onClick={() => toggleChannel(ch)}
                           style={{
-                            fontFamily: '"JetBrains Mono", monospace', fontSize: 8,
+                            fontFamily: '"JetBrains Mono", monospace', fontSize: 12,
                             padding: "4px 10px", cursor: "pointer",
                             border: `1px solid ${salesChannels.includes(ch) ? "#5ce5ff" : "#1f2a6b"}`,
                             background: salesChannels.includes(ch) ? "#5ce5ff22" : "transparent",
@@ -293,31 +312,31 @@ export default function SignupPage() {
               {/* 약관 */}
               <div style={{ borderTop: "1px solid #1f2a6b", paddingTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
                 <PixelCheckbox checked={consent.terms} onChange={v => setConsent(c => ({ ...c, terms: v }))}>
-                  <Link href="/terms" target="_blank" style={{ color: "#5ce5ff" }}>이용약관</Link>에 동의합니다. <span style={{ color: "#4a5a8a" }}>(필수)</span>
+                  <Link href="/terms" target="_blank" style={{ color: "#5ce5ff" }}>이용약관</Link>에 동의합니다. <span style={{ color: "#7e94c8" }}>(필수)</span>
                 </PixelCheckbox>
                 <PixelCheckbox checked={consent.privacy} onChange={v => setConsent(c => ({ ...c, privacy: v }))}>
-                  <Link href="/privacy" target="_blank" style={{ color: "#5ce5ff" }}>개인정보처리방침</Link>에 동의합니다. <span style={{ color: "#4a5a8a" }}>(필수)</span>
+                  <Link href="/privacy" target="_blank" style={{ color: "#5ce5ff" }}>개인정보처리방침</Link>에 동의합니다. <span style={{ color: "#7e94c8" }}>(필수)</span>
                 </PixelCheckbox>
                 <PixelCheckbox checked={consent.marketing} onChange={v => setConsent(c => ({ ...c, marketing: v }))}>
-                  마케팅 정보 수신에 동의합니다. <span style={{ color: "#4a5a8a" }}>(선택)</span>
+                  마케팅 정보 수신에 동의합니다. <span style={{ color: "#7e94c8" }}>(선택)</span>
                 </PixelCheckbox>
               </div>
 
               {error && (
                 <div style={{ border: "1px solid #ff4ec944", background: "#ff4ec911", padding: "8px 12px" }}>
-                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: "#ff4ec9" }}>✗ {error}</p>
+                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 13, color: "#ff4ec9" }}>✗ {error}</p>
                 </div>
               )}
 
               <PixelButton type="submit" variant="primary" size="md" full disabled={loading || !consent.terms || !consent.privacy}>
-                {loading ? "교신 중..." : "▶ 탑승 등록"}
+                {loading ? "전송 중..." : "▶ 회원가입 완료"}
               </PixelButton>
             </form>
           </div>
 
-          <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: "#4a5a8a", textAlign: "center", marginTop: 16 }}>
-            이미 계정 있음?{" "}
-            <Link href="/login" style={{ color: "#5ce5ff", textDecoration: "none" }}>입항 →</Link>
+          <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, color: "#cfe9ff", textAlign: "center", marginTop: 16 }}>
+            이미 계정이 있으신가요?{" "}
+            <Link href="/login" style={{ color: "#5ce5ff", textDecoration: "none", fontWeight: 600 }}>로그인 →</Link>
           </p>
         </div>
       </div>

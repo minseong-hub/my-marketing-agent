@@ -49,7 +49,7 @@ export function NoticesManager({ initial }: { initial: Notice[] }) {
     router.refresh();
   }
 
-  const cls = "h-9 px-3 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30";
+  const cls = "h-9 px-3 rounded-lg border border-slate-200 text-base bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30";
 
   return (
     <div>
@@ -72,7 +72,7 @@ export function NoticesManager({ initial }: { initial: Notice[] }) {
           </select>
         </div>
         <textarea
-          className="w-full min-h-[72px] p-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-blue-500"
+          className="w-full min-h-[72px] p-3 rounded-lg border border-slate-200 text-base focus:outline-none focus:border-blue-500"
           placeholder="본문"
           value={draft.body}
           onChange={(e) => setDraft({ ...draft, body: e.target.value })}
@@ -80,7 +80,7 @@ export function NoticesManager({ initial }: { initial: Notice[] }) {
         <div className="flex justify-end mt-2">
           <button
             onClick={create}
-            className="h-9 px-4 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold"
+            className="h-9 px-4 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold"
           >
             <Plus className="w-3.5 h-3.5" /> 공지 추가
           </button>
@@ -89,7 +89,7 @@ export function NoticesManager({ initial }: { initial: Notice[] }) {
 
       <div className="space-y-3">
         {list.length === 0 && (
-          <div className="text-sm text-slate-400 text-center py-10">등록된 공지가 없습니다.</div>
+          <div className="text-base text-slate-400 text-center py-10">등록된 공지가 없습니다.</div>
         )}
         {list.map((n, idx) => (
           <div key={n.id} className="border border-slate-200 rounded-xl p-4 bg-white">
@@ -116,7 +116,7 @@ export function NoticesManager({ initial }: { initial: Notice[] }) {
                 <option value="banner">상단 배너</option>
                 <option value="maintenance">점검 안내</option>
               </select>
-              <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600">
+              <label className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600">
                 <input
                   type="checkbox"
                   checked={n.active === 1}
@@ -130,7 +130,7 @@ export function NoticesManager({ initial }: { initial: Notice[] }) {
               </label>
             </div>
             <textarea
-              className="w-full min-h-[64px] p-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-blue-500"
+              className="w-full min-h-[64px] p-3 rounded-lg border border-slate-200 text-base focus:outline-none focus:border-blue-500"
               value={n.body}
               onChange={(e) => {
                 const next = [...list];
@@ -139,17 +139,17 @@ export function NoticesManager({ initial }: { initial: Notice[] }) {
               }}
             />
             <div className="flex justify-between items-center mt-2">
-              <div className="text-[11px] text-slate-400">등록 {n.created_at}</div>
+              <div className="text-[15px] text-slate-400">등록 {n.created_at}</div>
               <div className="flex gap-2">
                 <button
                   onClick={() => del(n.id)}
-                  className="h-8 px-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 text-xs text-rose-600 hover:bg-rose-50"
+                  className="h-8 px-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 text-sm text-rose-600 hover:bg-rose-50"
                 >
                   <Trash2 className="w-3.5 h-3.5" /> 삭제
                 </button>
                 <button
                   onClick={() => save(n)}
-                  className="h-8 px-3 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold"
+                  className="h-8 px-3 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold"
                 >
                   <Save className="w-3.5 h-3.5" /> 저장
                 </button>

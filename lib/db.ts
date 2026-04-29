@@ -202,6 +202,73 @@ function getDb(): Database.Database {
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    -- 사용자별 브랜드 프로필 (모든 비서가 공유하는 정체성)
+    CREATE TABLE IF NOT EXISTS brand_profiles (
+      user_id TEXT PRIMARY KEY,
+      brand_voice TEXT NOT NULL DEFAULT '',
+      target_audience TEXT NOT NULL DEFAULT '',
+      unique_value TEXT NOT NULL DEFAULT '',
+      brand_story TEXT NOT NULL DEFAULT '',
+      do_not_use TEXT NOT NULL DEFAULT '',
+      hashtag_library TEXT NOT NULL DEFAULT '[]',
+      competitor_urls TEXT NOT NULL DEFAULT '[]',
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- 상품 카탈로그
+    CREATE TABLE IF NOT EXISTS products (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      category TEXT NOT NULL DEFAULT '',
+      price INTEGER,
+      cost INTEGER,
+      features TEXT NOT NULL DEFAULT '[]',
+      selling_points TEXT NOT NULL DEFAULT '[]',
+      target_keywords TEXT NOT NULL DEFAULT '[]',
+      image_urls TEXT NOT NULL DEFAULT '[]',
+      external_url TEXT,
+      notes TEXT,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_products_user ON products(user_id, is_active, updated_at);
+
+    -- 결과물 보관함 (AI 결과 + 사용자 직접 작성)
+    CREATE TABLE IF NOT EXISTS library_items (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      agent_type TEXT NOT NULL DEFAULT 'user',
+      kind TEXT NOT NULL,
+      title TEXT NOT NULL,
+      content TEXT NOT NULL DEFAULT '',
+      metadata TEXT NOT NULL DEFAULT '{}',
+      product_id TEXT,
+      source_session_id TEXT,
+      tags TEXT NOT NULL DEFAULT '[]',
+      is_favorite INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_library_user ON library_items(user_id, kind, updated_at);
+    CREATE INDEX IF NOT EXISTS idx_library_favorite ON library_items(user_id, is_favorite, updated_at);
+
+    -- 보안 감사: 인증 관련 사건 로그 (로그인 시도/성공/실패 등)
+    CREATE TABLE IF NOT EXISTS auth_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      kind TEXT NOT NULL,
+      user_id TEXT,
+      email TEXT,
+      ip TEXT,
+      user_agent TEXT,
+      detail TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_auth_events_user ON auth_events(user_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_auth_events_email ON auth_events(email, created_at);
+    CREATE INDEX IF NOT EXISTS idx_auth_events_kind ON auth_events(kind, created_at);
   `);
 
   // Column migrations for existing DBs
@@ -244,9 +311,9 @@ function getDb(): Database.Database {
 }
 
 function seedDefaults(d: Database.Database) {
-  // Seed canonical Starter/Growth/Pro plans (archive legacy ones without slug)
-  const slugCount = (d.prepare("SELECT COUNT(*) as c FROM plans WHERE slug IN ('starter','growth','pro')").get() as { c: number }).c;
-  if (slugCount < 3) {
+  // Seed canonical Free/Starter/Growth/Pro plans (archive legacy ones without slug)
+  const slugCount = (d.prepare("SELECT COUNT(*) as c FROM plans WHERE slug IN ('free','starter','growth','pro')").get() as { c: number }).c;
+  if (slugCount < 4) {
     d.prepare("UPDATE plans SET archived = 1 WHERE slug IS NULL OR slug = ''").run();
     const insert = d.prepare(
       `INSERT OR REPLACE INTO plans (id, name, price_monthly, features, archived, slug, trial_days, first_payment_amount, tools)
@@ -389,6 +456,52 @@ export interface AgentSessionRow {
   error_message: string | null;
   metadata: string;
   conversation_history: string;
+}
+
+export interface BrandProfileRow {
+  user_id: string;
+  brand_voice: string;
+  target_audience: string;
+  unique_value: string;
+  brand_story: string;
+  do_not_use: string;
+  hashtag_library: string;
+  competitor_urls: string;
+  updated_at: string;
+}
+
+export interface ProductRow {
+  id: string;
+  user_id: string;
+  name: string;
+  category: string;
+  price: number | null;
+  cost: number | null;
+  features: string;
+  selling_points: string;
+  target_keywords: string;
+  image_urls: string;
+  external_url: string | null;
+  notes: string | null;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LibraryItemRow {
+  id: string;
+  user_id: string;
+  agent_type: string;
+  kind: string;
+  title: string;
+  content: string;
+  metadata: string;
+  product_id: string | null;
+  source_session_id: string | null;
+  tags: string;
+  is_favorite: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface AgentLogRow {
@@ -811,6 +924,175 @@ export const db = {
         entry.detail ?? null
       );
   },
+  // ===== auth events (보안 감사 로그) =====
+  createAuthEvent(entry: {
+    kind: string;
+    user_id: string | null;
+    email: string | null;
+    ip: string | null;
+    user_agent: string | null;
+    detail: string | null;
+  }) {
+    getDb()
+      .prepare(
+        "INSERT INTO auth_events (kind, user_id, email, ip, user_agent, detail) VALUES (?, ?, ?, ?, ?, ?)"
+      )
+      .run(entry.kind, entry.user_id, entry.email, entry.ip, entry.user_agent, entry.detail);
+  },
+  listAuthEvents(filters: { user_id?: string; email?: string; kind?: string; limit?: number } = {}) {
+    const where: string[] = [];
+    const params: any[] = [];
+    if (filters.user_id) { where.push("user_id = ?"); params.push(filters.user_id); }
+    if (filters.email) { where.push("email = ?"); params.push(filters.email); }
+    if (filters.kind) { where.push("kind = ?"); params.push(filters.kind); }
+    const sql = `SELECT * FROM auth_events ${where.length ? "WHERE " + where.join(" AND ") : ""} ORDER BY created_at DESC LIMIT ?`;
+    params.push(filters.limit ?? 200);
+    return getDb().prepare(sql).all(...params);
+  },
+
+  // ===== brand profile =====
+  getBrandProfile(userId: string): BrandProfileRow | undefined {
+    return getDb().prepare("SELECT * FROM brand_profiles WHERE user_id = ?").get(userId) as BrandProfileRow | undefined;
+  },
+  upsertBrandProfile(userId: string, patch: Partial<Omit<BrandProfileRow, "user_id" | "updated_at">>) {
+    const existing = this.getBrandProfile(userId);
+    const now = new Date().toISOString();
+    if (!existing) {
+      getDb().prepare(
+        `INSERT INTO brand_profiles (user_id, brand_voice, target_audience, unique_value, brand_story, do_not_use, hashtag_library, competitor_urls, updated_at)
+         VALUES (@user_id, @brand_voice, @target_audience, @unique_value, @brand_story, @do_not_use, @hashtag_library, @competitor_urls, @updated_at)`
+      ).run({
+        user_id: userId,
+        brand_voice: patch.brand_voice ?? "",
+        target_audience: patch.target_audience ?? "",
+        unique_value: patch.unique_value ?? "",
+        brand_story: patch.brand_story ?? "",
+        do_not_use: patch.do_not_use ?? "",
+        hashtag_library: patch.hashtag_library ?? "[]",
+        competitor_urls: patch.competitor_urls ?? "[]",
+        updated_at: now,
+      });
+    } else {
+      const fields = ["brand_voice","target_audience","unique_value","brand_story","do_not_use","hashtag_library","competitor_urls"] as const;
+      const sets: string[] = [];
+      const params: Record<string, unknown> = { user_id: userId, updated_at: now };
+      for (const f of fields) {
+        if (patch[f] !== undefined) { sets.push(`${f} = @${f}`); params[f] = patch[f]; }
+      }
+      sets.push("updated_at = @updated_at");
+      if (sets.length > 1) {
+        getDb().prepare(`UPDATE brand_profiles SET ${sets.join(", ")} WHERE user_id = @user_id`).run(params);
+      }
+    }
+  },
+
+  // ===== products =====
+  listProducts(userId: string, includeInactive = false): ProductRow[] {
+    const sql = includeInactive
+      ? "SELECT * FROM products WHERE user_id = ? ORDER BY updated_at DESC"
+      : "SELECT * FROM products WHERE user_id = ? AND is_active = 1 ORDER BY updated_at DESC";
+    return getDb().prepare(sql).all(userId) as ProductRow[];
+  },
+  getProduct(userId: string, id: string): ProductRow | undefined {
+    return getDb().prepare("SELECT * FROM products WHERE user_id = ? AND id = ?").get(userId, id) as ProductRow | undefined;
+  },
+  createProduct(userId: string, p: Partial<Omit<ProductRow, "id" | "user_id" | "created_at" | "updated_at">>): ProductRow {
+    const id = uid("prd");
+    getDb().prepare(
+      `INSERT INTO products (id, user_id, name, category, price, cost, features, selling_points, target_keywords, image_urls, external_url, notes, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(
+      id, userId,
+      p.name ?? "",
+      p.category ?? "",
+      p.price ?? null,
+      p.cost ?? null,
+      p.features ?? "[]",
+      p.selling_points ?? "[]",
+      p.target_keywords ?? "[]",
+      p.image_urls ?? "[]",
+      p.external_url ?? null,
+      p.notes ?? null,
+      p.is_active ?? 1,
+    );
+    return this.getProduct(userId, id)!;
+  },
+  updateProduct(userId: string, id: string, patch: Partial<ProductRow>) {
+    const allowed = ["name","category","price","cost","features","selling_points","target_keywords","image_urls","external_url","notes","is_active"];
+    const sets: string[] = [];
+    const params: Record<string, unknown> = { id, user_id: userId };
+    for (const [k, v] of Object.entries(patch)) {
+      if (allowed.includes(k) && v !== undefined) { sets.push(`${k} = @${k}`); params[k] = v; }
+    }
+    if (sets.length === 0) return;
+    sets.push("updated_at = datetime('now')");
+    getDb().prepare(`UPDATE products SET ${sets.join(", ")} WHERE id = @id AND user_id = @user_id`).run(params);
+  },
+  deleteProduct(userId: string, id: string) {
+    getDb().prepare("DELETE FROM products WHERE id = ? AND user_id = ?").run(id, userId);
+  },
+
+  // ===== library items =====
+  listLibraryItems(userId: string, filters: { kind?: string; agent_type?: string; favorite?: boolean; q?: string; limit?: number } = {}): LibraryItemRow[] {
+    const where: string[] = ["user_id = ?"];
+    const params: any[] = [userId];
+    if (filters.kind) { where.push("kind = ?"); params.push(filters.kind); }
+    if (filters.agent_type) { where.push("agent_type = ?"); params.push(filters.agent_type); }
+    if (filters.favorite) { where.push("is_favorite = 1"); }
+    if (filters.q) {
+      where.push("(title LIKE ? OR content LIKE ?)");
+      params.push(`%${filters.q}%`, `%${filters.q}%`);
+    }
+    params.push(filters.limit ?? 200);
+    return getDb().prepare(
+      `SELECT * FROM library_items WHERE ${where.join(" AND ")} ORDER BY is_favorite DESC, updated_at DESC LIMIT ?`
+    ).all(...params) as LibraryItemRow[];
+  },
+  getLibraryItem(userId: string, id: string): LibraryItemRow | undefined {
+    return getDb().prepare("SELECT * FROM library_items WHERE id = ? AND user_id = ?").get(id, userId) as LibraryItemRow | undefined;
+  },
+  createLibraryItem(userId: string, item: Partial<Omit<LibraryItemRow, "id" | "user_id" | "created_at" | "updated_at">>): LibraryItemRow {
+    const id = uid("lib");
+    getDb().prepare(
+      `INSERT INTO library_items (id, user_id, agent_type, kind, title, content, metadata, product_id, source_session_id, tags, is_favorite)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(
+      id, userId,
+      item.agent_type ?? "user",
+      item.kind ?? "note",
+      item.title ?? "(제목 없음)",
+      item.content ?? "",
+      item.metadata ?? "{}",
+      item.product_id ?? null,
+      item.source_session_id ?? null,
+      item.tags ?? "[]",
+      item.is_favorite ?? 0,
+    );
+    return this.getLibraryItem(userId, id)!;
+  },
+  updateLibraryItem(userId: string, id: string, patch: Partial<LibraryItemRow>) {
+    const allowed = ["title","content","metadata","tags","is_favorite","product_id","kind"];
+    const sets: string[] = [];
+    const params: Record<string, unknown> = { id, user_id: userId };
+    for (const [k, v] of Object.entries(patch)) {
+      if (allowed.includes(k) && v !== undefined) { sets.push(`${k} = @${k}`); params[k] = v; }
+    }
+    if (sets.length === 0) return;
+    sets.push("updated_at = datetime('now')");
+    getDb().prepare(`UPDATE library_items SET ${sets.join(", ")} WHERE id = @id AND user_id = @user_id`).run(params);
+  },
+  deleteLibraryItem(userId: string, id: string) {
+    getDb().prepare("DELETE FROM library_items WHERE id = ? AND user_id = ?").run(id, userId);
+  },
+  countLibraryItems(userId: string): { total: number; favorites: number; byKind: Record<string, number> } {
+    const total = (getDb().prepare("SELECT COUNT(*) as c FROM library_items WHERE user_id = ?").get(userId) as { c: number }).c;
+    const favorites = (getDb().prepare("SELECT COUNT(*) as c FROM library_items WHERE user_id = ? AND is_favorite = 1").get(userId) as { c: number }).c;
+    const byKindRows = getDb().prepare("SELECT kind, COUNT(*) as c FROM library_items WHERE user_id = ? GROUP BY kind").all(userId) as { kind: string; c: number }[];
+    const byKind: Record<string, number> = {};
+    for (const r of byKindRows) byKind[r.kind] = r.c;
+    return { total, favorites, byKind };
+  },
+
   listAdminLogs(limit = 100): AdminLogRow[] {
     return getDb()
       .prepare("SELECT * FROM admin_logs ORDER BY created_at DESC LIMIT ?")
@@ -850,6 +1132,23 @@ export const db = {
     return getDb().prepare(
       "SELECT * FROM agent_sessions WHERE user_id = ? ORDER BY started_at DESC LIMIT 4"
     ).all(userId) as AgentSessionRow[];
+  },
+  countAgentSessionsForUser(userId: string, agentType: string, daysWindow?: number): number {
+    if (daysWindow && daysWindow > 0) {
+      const row = getDb().prepare(
+        "SELECT COUNT(*) as c FROM agent_sessions WHERE user_id = ? AND agent_type = ? AND started_at >= datetime('now', ?)"
+      ).get(userId, agentType, `-${daysWindow} days`) as { c: number };
+      return row.c;
+    }
+    const row = getDb().prepare(
+      "SELECT COUNT(*) as c FROM agent_sessions WHERE user_id = ? AND agent_type = ?"
+    ).get(userId, agentType) as { c: number };
+    return row.c;
+  },
+  listRecentAgentSessions(userId: string, limit = 20): AgentSessionRow[] {
+    return getDb().prepare(
+      "SELECT * FROM agent_sessions WHERE user_id = ? ORDER BY started_at DESC LIMIT ?"
+    ).all(userId, limit) as AgentSessionRow[];
   },
 
   // ===== agent logs =====

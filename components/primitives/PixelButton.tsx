@@ -33,9 +33,9 @@ const variantStyles = {
 };
 
 const sizeStyles = {
-  sm: { padding: "6px 14px", fontSize: 9 },
-  md: { padding: "10px 20px", fontSize: 10 },
-  lg: { padding: "14px 28px", fontSize: 11 },
+  sm: { padding: "6px 14px", fontSize: 13 },
+  md: { padding: "10px 20px", fontSize: 14 },
+  lg: { padding: "14px 28px", fontSize: 15 },
 };
 
 export function PixelButton({

@@ -89,7 +89,7 @@ export default function DocsPage() {
             className="w-full text-left cursor-pointer"
             style={{
               fontFamily: '"JetBrains Mono", monospace',
-              fontSize: 9,
+              fontSize: 13,
               color: active === item.id ? "#5ce5ff" : "#7e94c8",
               background: "none",
               border: "none",
@@ -100,7 +100,7 @@ export default function DocsPage() {
             {active === item.id ? "▶ " : "› "}{item.label}
           </button>
           {active === item.id && item.sub.map(s => (
-            <p key={s} style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#4a5a8a", paddingLeft: 12, marginTop: 2, animation: "blink 1s steps(2) infinite" }}>
+            <p key={s} style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: "#7e94c8", paddingLeft: 12, marginTop: 2, animation: "blink 1s steps(2) infinite" }}>
               · {s}
             </p>
           ))}
@@ -113,15 +113,15 @@ export default function DocsPage() {
 
   return (
     <CockpitShell
-      sector="SECTOR-7G · MISSION MANUAL"
+      sector="도움말 · 사용 안내서"
       leftConsole={TocPanel}
-      bootMessage="MANUAL LOADED · MISSION BRIEFING AVAILABLE · CLEARANCE: STANDARD"
+      bootMessage="안내서 로드 완료 · 시작 가이드 / 자주 묻는 질문 / 문제 해결"
     >
       <div style={{ padding: "32px 28px", maxWidth: 720 }}>
         <h1
           style={{
             fontFamily: '"Press Start 2P", monospace',
-            fontSize: "clamp(13px, 1.8vw, 18px)",
+            fontSize: "clamp(17px, 1.8vw, 22px)",
             color: "#cfe9ff",
             textShadow: "4px 4px 0 #8a2877",
             marginBottom: 28,
@@ -132,7 +132,7 @@ export default function DocsPage() {
         <div
           style={{
             fontFamily: '"IBM Plex Sans KR", sans-serif',
-            fontSize: 14,
+            fontSize: 18,
             color: "#cfe9ff",
             lineHeight: 1.9,
             whiteSpace: "pre-line",
@@ -146,7 +146,7 @@ export default function DocsPage() {
                 <h2
                   style={{
                     fontFamily: '"Press Start 2P", monospace',
-                    fontSize: 11,
+                    fontSize: 15,
                     color: "#5ce5ff",
                     marginBottom: 12,
                     textShadow: "2px 2px 0 #2a86a8",

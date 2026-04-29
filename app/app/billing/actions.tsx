@@ -10,12 +10,10 @@ type Status = "none" | "trialing" | "active" | "past_due" | "canceled";
 export function BillingActions({
   currentSlug,
   currentStatus,
-  trialUsed,
   selected: initialSelected,
 }: {
   currentSlug: PlanSlug | null;
   currentStatus: Status;
-  trialUsed: boolean;
   selected: PlanSlug;
 }) {
   const router = useRouter();
@@ -45,11 +43,6 @@ export function BillingActions({
     } finally {
       setLoading(null);
     }
-  }
-
-  async function startTrial() {
-    const ok = await post("/api/billing/start-trial", { plan: selected });
-    if (ok) setMessage({ type: "ok", text: "7일 무료 체험이 시작되었습니다." });
   }
 
   async function subscribe() {
@@ -85,30 +78,30 @@ export function BillingActions({
               }
             >
               <div className="flex items-start justify-between mb-2">
-                <div className="text-sm font-extrabold text-slate-900">{def.name}</div>
+                <div className="text-base font-extrabold text-slate-900">{def.name}</div>
                 {current && (
-                  <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
+                  <span className="text-[14px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
                     현재
                   </span>
                 )}
               </div>
-              <div className="text-2xl font-extrabold text-slate-900">
+              <div className="text-3xl font-extrabold text-slate-900">
                 {formatKRW(def.price_monthly)}
-                <span className="text-xs font-semibold text-slate-500 ml-1">/월</span>
+                <span className="text-sm font-semibold text-slate-500 ml-1">/월</span>
               </div>
               {def.first_payment_amount != null && (
-                <div className="text-[11px] font-semibold text-blue-700 mt-1">
+                <div className="text-[15px] font-semibold text-blue-700 mt-1">
                   첫 결제 {formatKRW(def.first_payment_amount)}
                 </div>
               )}
-              <div className="text-xs text-slate-500 mt-3">
+              <div className="text-sm text-slate-500 mt-3">
                 {def.tools.length}개 도구 ·{" "}
                 {def.monthly_generation_limit === null
                   ? "무제한 생성"
                   : `월 ${def.monthly_generation_limit.toLocaleString()}회`}
               </div>
               {chosen && (
-                <div className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-blue-700">
+                <div className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-blue-700">
                   <Check className="w-3.5 h-3.5" strokeWidth={3} />
                   선택됨
                 </div>
@@ -121,7 +114,7 @@ export function BillingActions({
       {message && (
         <div
           className={
-            "mt-5 rounded-lg px-4 py-3 text-sm border " +
+            "mt-5 rounded-lg px-4 py-3 text-base border " +
             (message.type === "ok"
               ? "bg-emerald-50 border-emerald-200 text-emerald-800"
               : "bg-rose-50 border-rose-200 text-rose-700")
@@ -132,44 +125,33 @@ export function BillingActions({
       )}
 
       <div className="flex flex-wrap gap-3 mt-6">
-        {(currentStatus === "none" || currentStatus === "canceled") && !trialUsed && (
-          <button
-            onClick={startTrial}
-            disabled={loading != null}
-            className="h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm disabled:opacity-60 inline-flex items-center gap-2"
-          >
-            {loading === "/api/billing/start-trial" && <Loader2 className="w-4 h-4 animate-spin" />}
-            7일 무료 체험 시작
-          </button>
-        )}
-
         <button
           onClick={subscribe}
-          disabled={loading != null}
+          disabled={loading != null || selected === "free"}
           className={
-            "h-11 px-6 rounded-xl font-bold text-sm disabled:opacity-60 inline-flex items-center gap-2 " +
-            (currentStatus === "active" && isCurrent(selected)
+            "h-11 px-6 rounded-xl font-bold text-base disabled:opacity-60 inline-flex items-center gap-2 " +
+            ((currentStatus === "active" && isCurrent(selected)) || selected === "free"
               ? "bg-slate-100 text-slate-400 cursor-not-allowed"
               : "bg-blue-600 hover:bg-blue-500 text-white")
           }
         >
           {loading === "/api/billing/subscribe" && <Loader2 className="w-4 h-4 animate-spin" />}
-          {currentStatus === "active" && isCurrent(selected)
+          {selected === "free"
+            ? "무료 플랜 (가입과 동시 활성)"
+            : currentStatus === "active" && isCurrent(selected)
             ? "현재 결제중"
-            : currentStatus === "trialing"
-            ? "지금 정기 결제로 전환"
             : currentStatus === "active"
             ? "플랜 변경 / 결제"
-            : "바로 정기 결제 (체험 건너뛰기)"}
+            : "정기 결제 시작"}
         </button>
 
-        {(currentStatus === "active" || currentStatus === "trialing") && (
+        {currentStatus === "active" && (
           <button
             onClick={cancel}
             disabled={loading != null}
-            className="h-11 px-6 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold text-sm disabled:opacity-60"
+            className="h-11 px-6 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold text-base disabled:opacity-60"
           >
-            {currentStatus === "trialing" ? "체험 해지" : "구독 해지"}
+            구독 해지
           </button>
         )}
       </div>

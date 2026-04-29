@@ -31,35 +31,35 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="lg:col-span-2 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold text-slate-900">최근 관리자 활동</h2>
+            <h2 className="text-base font-bold text-slate-900">최근 관리자 활동</h2>
             <Link
               href="/admin/settings"
-              className="text-xs font-semibold text-blue-600 hover:text-blue-500 inline-flex items-center gap-1"
+              className="text-sm font-semibold text-blue-600 hover:text-blue-500 inline-flex items-center gap-1"
             >
               전체 보기 <ArrowUpRight className="w-3 h-3" />
             </Link>
           </div>
           <ul className="divide-y divide-slate-100">
             {logs.length === 0 && (
-              <li className="py-8 text-center text-sm text-slate-400">기록된 활동이 없습니다.</li>
+              <li className="py-8 text-center text-base text-slate-400">기록된 활동이 없습니다.</li>
             )}
             {logs.map((l) => (
               <li key={l.id} className="py-3 flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="text-sm font-medium text-slate-800 truncate">{l.action}</div>
-                  <div className="text-xs text-slate-500 truncate">
+                  <div className="text-base font-medium text-slate-800 truncate">{l.action}</div>
+                  <div className="text-sm text-slate-500 truncate">
                     {l.admin_email}
                     {l.target_type && ` · ${l.target_type}:${l.target_id ?? ""}`}
                   </div>
                 </div>
-                <div className="text-xs text-slate-400 shrink-0">{l.created_at}</div>
+                <div className="text-sm text-slate-400 shrink-0">{l.created_at}</div>
               </li>
             ))}
           </ul>
         </Card>
 
         <Card className="p-6">
-          <h2 className="text-sm font-bold text-slate-900 mb-4">빠른 이동</h2>
+          <h2 className="text-base font-bold text-slate-900 mb-4">빠른 이동</h2>
           <div className="space-y-2">
             {[
               { href: "/admin/users", label: "사용자 관리" },
@@ -71,7 +71,7 @@ export default async function AdminDashboard() {
               <Link
                 key={q.href}
                 href={q.href}
-                className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-slate-100"
+                className="flex items-center justify-between px-3 py-2.5 rounded-lg text-base text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-slate-100"
               >
                 <span className="font-medium">{q.label}</span>
                 <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
@@ -79,7 +79,7 @@ export default async function AdminDashboard() {
             ))}
           </div>
           <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
-            <span className="text-xs text-slate-500">시스템 상태</span>
+            <span className="text-sm text-slate-500">시스템 상태</span>
             <Badge tone="emerald">정상</Badge>
           </div>
         </Card>

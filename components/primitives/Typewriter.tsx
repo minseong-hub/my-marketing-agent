@@ -68,7 +68,7 @@ export function Typewriter({ lines, loop = false }: TypewriterProps) {
   }, [currentLine, currentChar, done, lines, loop]);
 
   return (
-    <div className="font-mono text-xs leading-relaxed" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+    <div className="font-mono text-sm leading-relaxed" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
       {displayed.map((entry, i) => (
         <div key={i} className="flex gap-1">
           <span style={{ color: entry.line.promptColor ?? "#7e94c8" }}>{entry.line.prompt}</span>

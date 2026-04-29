@@ -12,12 +12,12 @@ const POSTS = [
 
 export default function BlogPage() {
   const ArchivePanel = (
-    <CockpitPanel title="ARCHIVE LOG" status="UPDATED" accent="#7e94c8" className="flex-1">
+    <CockpitPanel title="발행 일지 모음" status="업데이트됨" accent="#7e94c8" className="flex-1">
       <div className="space-y-3">
         {POSTS.map(p => (
           <div key={p.id} style={{ borderBottom: "1px solid #1f2a6b", paddingBottom: 8 }}>
-            <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#4a5a8a" }}>{p.date}</p>
-            <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 11, color: "#cfe9ff", marginTop: 2, lineHeight: 1.5 }}>{p.title}</p>
+            <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: "#7e94c8" }}>{p.date}</p>
+            <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 15, color: "#cfe9ff", marginTop: 2, lineHeight: 1.5 }}>{p.title}</p>
           </div>
         ))}
       </div>
@@ -26,18 +26,18 @@ export default function BlogPage() {
 
   return (
     <CockpitShell
-      sector="SECTOR-7G · COMMS LOG"
+      sector="운영 일지 · 발행 콘텐츠"
       leftConsole={ArchivePanel}
-      bootMessage="COMMS LOG ONLINE · 5 TRANSMISSIONS RECEIVED · SIGNAL: STRONG"
+      bootMessage="운영 일지 5편 게시됨 · 새 글 알림 받기 신청 가능"
     >
       <div style={{ padding: "32px 24px" }}>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: "#5ce5ff", letterSpacing: "0.12em", marginBottom: 12 }}>
-          › COMMS_LOG
+        <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, fontWeight: 600, color: "#5ce5ff", letterSpacing: "0.04em", marginBottom: 12 }}>
+          운영 일지 · 셀러를 위한 인사이트
         </p>
         <h1
           style={{
             fontFamily: '"Press Start 2P", monospace',
-            fontSize: "clamp(13px, 1.8vw, 18px)",
+            fontSize: "clamp(17px, 1.8vw, 22px)",
             color: "#cfe9ff",
             textShadow: "4px 4px 0 #8a2877",
             marginBottom: 28,
@@ -64,7 +64,7 @@ export default function BlogPage() {
                 <span
                   style={{
                     fontFamily: '"JetBrains Mono", monospace',
-                    fontSize: 8,
+                    fontSize: 12,
                     color: post.color,
                     border: `1px solid ${post.color}`,
                     padding: "2px 6px",
@@ -75,8 +75,8 @@ export default function BlogPage() {
                 <span
                   style={{
                     fontFamily: '"JetBrains Mono", monospace',
-                    fontSize: 8,
-                    color: "#4a5a8a",
+                    fontSize: 12,
+                    color: "#7e94c8",
                   }}
                 >
                   {post.date}
@@ -85,7 +85,7 @@ export default function BlogPage() {
               <p
                 style={{
                   fontFamily: '"IBM Plex Sans KR", sans-serif',
-                  fontSize: 14,
+                  fontSize: 18,
                   color: "#cfe9ff",
                   fontWeight: 600,
                   lineHeight: 1.6,
@@ -95,13 +95,14 @@ export default function BlogPage() {
               </p>
               <p
                 style={{
-                  fontFamily: '"JetBrains Mono", monospace',
-                  fontSize: 9,
+                  fontFamily: '"IBM Plex Sans KR", sans-serif',
+                  fontSize: 14,
                   color: post.color,
                   marginTop: 10,
+                  fontWeight: 500,
                 }}
               >
-                도시에 열기 →
+                자세히 읽기 →
               </p>
             </div>
           ))}

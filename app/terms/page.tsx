@@ -10,7 +10,7 @@ function TocPanel() {
     <CockpitPanel title="목차" status="INDEXED" accent="#7e94c8" className="flex-1">
       <div className="space-y-2">
         {TOC_ITEMS.map(item => (
-          <p key={item} style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#7e94c8" }}>
+          <p key={item} style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: "#7e94c8" }}>
             › {item}
           </p>
         ))}
@@ -22,18 +22,18 @@ function TocPanel() {
 export default function TermsPage() {
   return (
     <CockpitShell
-      sector="SECTOR-7G · ARCHIVES"
+      sector="기록보관소 · 이용약관"
       leftConsole={<TocPanel />}
-      bootMessage="LEGAL ARCHIVE LOADED · TERMS v2026.04 · JURISDICTION: KOREA"
+      bootMessage="이용약관 2026.04 로드 완료 · 적용 국가: 대한민국"
     >
       <div style={{ padding: "32px 28px", maxWidth: 720 }}>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#4a5a8a", marginBottom: 8 }}>
+        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: "#7e94c8", marginBottom: 8 }}>
           최종 업데이트: 2026년 4월
         </p>
         <h1
           style={{
             fontFamily: '"Press Start 2P", monospace',
-            fontSize: "clamp(12px, 1.6vw, 16px)",
+            fontSize: "clamp(16px, 1.6vw, 20px)",
             color: "#cfe9ff",
             textShadow: "3px 3px 0 #8a2877",
             marginBottom: 28,
@@ -44,7 +44,7 @@ export default function TermsPage() {
         <div
           style={{
             fontFamily: '"IBM Plex Sans KR", sans-serif',
-            fontSize: 14,
+            fontSize: 18,
             color: "#7e94c8",
             lineHeight: 1.9,
             display: "flex",
@@ -55,7 +55,7 @@ export default function TermsPage() {
           <p>Crewmate AI 서비스를 이용해 주셔서 감사합니다. 본 약관은 서비스 이용에 관한 기본 사항을 규정합니다.</p>
           <p>서비스를 이용하시면 본 약관에 동의하신 것으로 간주됩니다.</p>
           <p>서비스 이용 중 문제가 발생하면 관제 센터(help@crewmate.ai)로 연락해 주세요.</p>
-          <p style={{ fontSize: 12, color: "#4a5a8a" }}>※ 본 약관은 한국 법률을 준거법으로 합니다.</p>
+          <p style={{ fontSize: 16, color: "#7e94c8" }}>※ 본 약관은 한국 법률을 준거법으로 합니다.</p>
         </div>
       </div>
     </CockpitShell>

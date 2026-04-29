@@ -24,7 +24,7 @@ export default async function AnalyticsPage() {
   const max = Math.max(...dau.map((d) => d.value));
   const totalUse = dau.reduce((s, d) => s + d.value, 0);
 
-  const planDist: Record<PlanSlug, number> = { starter: 0, growth: 0, pro: 0 };
+  const planDist: Record<PlanSlug, number> = { free: 0, starter: 0, growth: 0, pro: 0 };
   for (const row of summary.planDist) {
     if (row.slug in planDist) planDist[row.slug as PlanSlug] = row.c;
   }
@@ -62,11 +62,11 @@ export default async function AnalyticsPage() {
           return (
             <Card key={slug} className="p-5">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-sm font-bold text-slate-900">{def.name}</div>
-                <span className="text-xs font-semibold text-slate-500">{pct.toFixed(0)}%</span>
+                <div className="text-base font-bold text-slate-900">{def.name}</div>
+                <span className="text-sm font-semibold text-slate-500">{pct.toFixed(0)}%</span>
               </div>
-              <div className="text-2xl font-extrabold text-slate-900">{count}명</div>
-              <div className="text-xs text-slate-500 mt-1">
+              <div className="text-3xl font-extrabold text-slate-900">{count}명</div>
+              <div className="text-sm text-slate-500 mt-1">
                 {formatKRW(def.price_monthly)}/월 · 추정 MRR {formatKRW(def.price_monthly * count)}
               </div>
               <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
@@ -79,7 +79,7 @@ export default async function AnalyticsPage() {
 
       <Card className="p-6 mb-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-bold text-slate-900">DAU (지난 14일)</h2>
+          <h2 className="text-base font-bold text-slate-900">DAU (지난 14일)</h2>
           <Badge tone="blue">dummy</Badge>
         </div>
         <div className="flex items-end gap-1.5 h-40">
@@ -89,20 +89,20 @@ export default async function AnalyticsPage() {
                 className="w-full rounded-t-md bg-gradient-to-t from-blue-600 to-blue-400"
                 style={{ height: `${(d.value / max) * 100}%` }}
               />
-              <div className="text-[10px] text-slate-400">{d.date}</div>
+              <div className="text-[14px] text-slate-400">{d.date}</div>
             </div>
           ))}
         </div>
-        <div className="mt-3 text-xs text-slate-500">합계 {totalUse.toLocaleString()} 세션</div>
+        <div className="mt-3 text-sm text-slate-500">합계 {totalUse.toLocaleString()} 세션</div>
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="p-6">
-          <h2 className="text-sm font-bold text-slate-900 mb-4">툴별 사용 비중 (%)</h2>
+          <h2 className="text-base font-bold text-slate-900 mb-4">툴별 사용 비중 (%)</h2>
           <div className="space-y-3">
             {toolUsage.map((t) => (
               <div key={t.name}>
-                <div className="flex items-center justify-between text-xs mb-1">
+                <div className="flex items-center justify-between text-sm mb-1">
                   <span className="text-slate-700 font-medium">{t.name}</span>
                   <span className="text-slate-500">{t.value}%</span>
                 </div>
@@ -115,8 +115,8 @@ export default async function AnalyticsPage() {
         </Card>
 
         <Card className="p-6">
-          <h2 className="text-sm font-bold text-slate-900 mb-4">결제 요약</h2>
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+          <h2 className="text-base font-bold text-slate-900 mb-4">결제 요약</h2>
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-base">
             <dt className="text-slate-500">활성 구독</dt>
             <dd className="font-bold text-slate-900 text-right">{summary.activeCount}</dd>
             <dt className="text-slate-500">체험중</dt>

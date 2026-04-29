@@ -1,24 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
-import { startTrial } from "@/lib/billing";
-import { db } from "@/lib/db";
-import { PLAN_DEFINITIONS, PlanSlug } from "@/lib/plans";
+import { NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
-
-  const { plan } = (await request.json()) as { plan?: string };
-  if (!plan || !PLAN_DEFINITIONS[plan as PlanSlug]) {
-    return NextResponse.json({ error: "유효한 플랜을 선택하세요." }, { status: 400 });
-  }
-
-  const user = db.getUserById(session.userId);
-  if (!user) return NextResponse.json({ error: "사용자 없음" }, { status: 404 });
-  if (user.trial_started_at) {
-    return NextResponse.json({ error: "이미 체험을 사용하셨습니다." }, { status: 409 });
-  }
-
-  startTrial(session.userId, plan as PlanSlug);
-  return NextResponse.json({ ok: true });
+/**
+ * 체험판 흐름은 더 이상 사용자에게 노출되지 않습니다.
+ * 라우트는 보안상 폐기 상태로 두되, 의도치 않은 호출을 차단하기 위해 410(Gone)으로 응답합니다.
+ */
+export async function POST() {
+  return NextResponse.json(
+    { error: "체험판 기능은 종료되었습니다. 무료 플랜으로 가입 후 사용해 주세요." },
+    { status: 410 }
+  );
 }

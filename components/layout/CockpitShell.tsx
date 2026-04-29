@@ -23,11 +23,11 @@ export function CockpitShell({
   children,
   leftConsole,
   rightConsole,
-  sector = "SECTOR-7G · SHIP CREWMATE-04",
+  sector = "크루메이트호 · 7번 구역",
   accent = "#5ce5ff",
   viewport = false,
   minHeight = 600,
-  bootMessage = "BOOT SEQ COMPLETE · ALL SYSTEMS ONLINE · STORE LINK: SECURE",
+  bootMessage = "부팅 완료 · 전 시스템 정상 · 스토어 연결 안전",
 }: CockpitShellProps) {
   const [activeAgent, setActiveAgent] = useState<Agent | null>(null);
   const [mobileTab, setMobileTab] = useState<"main" | "left" | "right">("main");
@@ -59,7 +59,7 @@ export function CockpitShell({
             <span
               style={{
                 fontFamily: '"JetBrains Mono", monospace',
-                fontSize: 8, color: "#5ce5ff", letterSpacing: "0.08em",
+                fontSize: 12, color: "#5ce5ff", letterSpacing: "0.08em",
                 flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               }}
             >
@@ -68,7 +68,7 @@ export function CockpitShell({
             <span
               style={{
                 fontFamily: '"JetBrains Mono", monospace',
-                fontSize: 8, color: "#4a5a8a", letterSpacing: "0.08em", flexShrink: 0,
+                fontSize: 12, color: "#7e94c8", letterSpacing: "0.08em", flexShrink: 0,
               }}
               className="hidden sm:inline"
             >
@@ -103,10 +103,10 @@ export function CockpitShell({
             >
               {viewport && (
                 <>
-                  <CornerLabel pos="tl">VIEW_PORT 01</CornerLabel>
+                  <CornerLabel pos="tl">관측창 01</CornerLabel>
                   <CornerLabel pos="tr">42.7°N · 126.8°E</CornerLabel>
-                  <CornerLabel pos="bl">ZOOM ×1.0</CornerLabel>
-                  <CornerLabel pos="br" color="#ff4ec9">REC ●</CornerLabel>
+                  <CornerLabel pos="bl">배율 ×1.0</CornerLabel>
+                  <CornerLabel pos="br" color="#ff4ec9">녹화 중 ●</CornerLabel>
                 </>
               )}
               {children}
@@ -123,23 +123,23 @@ export function CockpitShell({
             style={{ borderBottom: `1px solid ${accent}22`, background: "#060920" }}
           >
             {(leftConsole ? [
-              { id: "main" as const,  label: "메인" },
-              { id: "left" as const,  label: "콘솔" },
-              { id: "right" as const, label: "크루" },
+              { id: "main" as const,  label: "본문" },
+              { id: "left" as const,  label: "좌측 패널" },
+              { id: "right" as const, label: "크루 명단" },
             ] : [
-              { id: "main" as const,  label: "메인" },
-              { id: "right" as const, label: "크루" },
+              { id: "main" as const,  label: "본문" },
+              { id: "right" as const, label: "크루 명단" },
             ]).map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setMobileTab(tab.id)}
                 style={{
                   flex: 1,
-                  padding: "8px 4px",
-                  fontFamily: '"JetBrains Mono", monospace',
-                  fontSize: 8,
-                  letterSpacing: "0.08em",
-                  color: mobileTab === tab.id ? accent : "#4a5a8a",
+                  padding: "10px 4px",
+                  fontFamily: '"IBM Plex Sans KR", sans-serif',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: mobileTab === tab.id ? accent : "#cfe9ff",
                   background: "none", border: "none", cursor: "pointer",
                   borderBottom: mobileTab === tab.id ? `2px solid ${accent}` : "2px solid transparent",
                   transition: "all 0.15s",
@@ -156,8 +156,8 @@ export function CockpitShell({
               <div className={`relative ${viewport ? "scanlines" : ""}`}>
                 {viewport && (
                   <>
-                    <CornerLabel pos="tl">VIEW_PORT 01</CornerLabel>
-                    <CornerLabel pos="br" color="#ff4ec9">REC ●</CornerLabel>
+                    <CornerLabel pos="tl">관측창 01</CornerLabel>
+                    <CornerLabel pos="br" color="#ff4ec9">녹화 중 ●</CornerLabel>
                   </>
                 )}
                 {children}

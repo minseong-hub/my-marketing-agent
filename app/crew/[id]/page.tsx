@@ -71,23 +71,23 @@ function LeftConsole({ agent }: { agent: Agent }) {
   return (
     <>
       <CockpitPanel
-        title={`${agent.name.toUpperCase()} · 프로필`}
+        title={`${agent.name} · 비서 정보`}
         accent={agent.accent}
         statusColor={agent.accent}
-        status="ACTIVE"
+        status="대기 중"
         className="flex-1"
       >
         <div className="flex flex-col items-center gap-4">
           <div style={{ filter: `drop-shadow(0 0 24px ${agent.accent}88)` }}>
             <AstronautAvatar agent={agent} scale={8} idle={true} />
           </div>
-          <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: agent.accent, textAlign: "center" }}>
+          <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 13, color: agent.accent, textAlign: "center" }}>
             {agent.englishName.toUpperCase()}
           </p>
-          <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#7e94c8", textAlign: "center" }}>
+          <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, color: "#cfe9ff", textAlign: "center", fontWeight: 500 }}>
             {agent.role}
           </p>
-          <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: agent.accent, textAlign: "center", lineHeight: 1.6 }}>
+          <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, color: agent.accent, textAlign: "center", lineHeight: 1.6 }}>
             {agent.tagline}
           </p>
 
@@ -101,18 +101,18 @@ function LeftConsole({ agent }: { agent: Agent }) {
       </CockpitPanel>
 
       <CockpitPanel
-        title="SAMPLE TRANSMISSION"
+        title="비서 멘트 미리보기"
         accent={agent.accent}
         statusColor="#66ff9d"
-        status="LIVE"
+        status="실시간"
         height={200}
       >
         <Typewriter key={typeKey} lines={agent.sample} loop={true} />
         <button
           onClick={() => setTypeKey(k => k + 1)}
-          style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 7, color: "#4a5a8a", background: "none", border: "none", cursor: "pointer", marginTop: 6 }}
+          style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 13, color: "#5ce5ff", background: "none", border: "none", cursor: "pointer", marginTop: 6, fontWeight: 500 }}
         >
-          ↻ 재생
+          ↻ 처음부터 다시 재생
         </button>
       </CockpitPanel>
     </>
@@ -127,30 +127,30 @@ export default function CrewDetailPage({ params }: { params: { id: string } }) {
 
   return (
     <CockpitShell
-      sector="SECTOR-7G · CREW DOSSIER"
+      sector="크루 명부 · 비서 상세"
       leftConsole={<LeftConsole agent={agent} />}
-      bootMessage={`DOSSIER LOADED · ${agent.englishName.toUpperCase()} · STATUS: ACTIVE · CLEARANCE: STANDARD`}
+      bootMessage={`${agent.name} 비서 프로필 로드 완료 · 상태: 대기 중`}
     >
       <div style={{ padding: "32px 28px", maxWidth: 680 }}>
         {/* Breadcrumb */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-          <Link href="/crew" style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#4a5a8a", textDecoration: "none" }}>
-            CREW
+          <Link href="/crew" style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, color: "#cfe9ff", textDecoration: "none", fontWeight: 500 }}>
+            크루 전체
           </Link>
           <span style={{ color: "#1f2a6b" }}>›</span>
-          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: agent.accent }}>
-            {agent.englishName.toUpperCase()}
+          <span style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, color: agent.accent, fontWeight: 600 }}>
+            {agent.name}
           </span>
         </div>
 
         {/* Header */}
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: agent.accent, letterSpacing: "0.1em", marginBottom: 8 }}>
+        <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, fontWeight: 600, color: agent.accent, letterSpacing: "0.02em", marginBottom: 8 }}>
           {agent.title}
         </p>
         <h1
           style={{
             fontFamily: '"Press Start 2P", monospace',
-            fontSize: "clamp(16px, 2.5vw, 24px)",
+            fontSize: "clamp(20px, 2.5vw, 24px)",
             color: "#cfe9ff",
             textShadow: `4px 4px 0 ${agent.accentDark}`,
             lineHeight: 1.6,
@@ -159,26 +159,26 @@ export default function CrewDetailPage({ params }: { params: { id: string } }) {
         >
           {agent.name}
         </h1>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: agent.accent, marginBottom: 20 }}>
+        <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 16, color: agent.accent, marginBottom: 20, fontWeight: 500 }}>
           » {agent.tagline}
         </p>
 
         {/* Description */}
-        <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, color: "#cfe9ff", lineHeight: 1.9, marginBottom: 28 }}>
+        <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 18, color: "#cfe9ff", lineHeight: 1.9, marginBottom: 28 }}>
           {agent.desc}
         </p>
 
         {/* Equipment */}
         <div className="pixel-frame" style={{ border: `1px solid ${agent.accent}44`, background: "#0f1640", padding: "16px 14px", marginBottom: 20 }}>
-          <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#7e94c8", letterSpacing: "0.1em", marginBottom: 10 }}>
-            ▸ EQUIPMENT
+          <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, fontWeight: 600, color: "#cfe9ff", marginBottom: 10 }}>
+            ▸ 잘하는 일
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {agent.skills.map(skill => (
               <span
                 key={skill}
                 style={{
-                  fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: agent.accent,
+                  fontFamily: '"JetBrains Mono", monospace', fontSize: 13, color: agent.accent,
                   border: `1px solid ${agent.accentDark}`, padding: "4px 10px",
                   background: `${agent.accentDark}22`,
                 }}
@@ -191,14 +191,14 @@ export default function CrewDetailPage({ params }: { params: { id: string } }) {
 
         {/* Use Cases */}
         <div className="pixel-frame" style={{ border: `1px solid ${agent.accent}44`, background: "#0f1640", padding: "16px 14px", marginBottom: 24 }}>
-          <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#7e94c8", letterSpacing: "0.1em", marginBottom: 12 }}>
-            ▸ 실전 사례
+          <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, fontWeight: 600, color: "#cfe9ff", marginBottom: 12 }}>
+            ▸ 실전 활용 사례
           </p>
           <ul style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {USE_CASES[agent.id]?.map((uc, i) => (
               <li key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                <span style={{ color: agent.accent, fontFamily: '"JetBrains Mono", monospace', fontSize: 9, flexShrink: 0 }}>›</span>
-                <span style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 13, color: "#cfe9ff", lineHeight: 1.7 }}>{uc}</span>
+                <span style={{ color: agent.accent, fontFamily: '"JetBrains Mono", monospace', fontSize: 13, flexShrink: 0 }}>›</span>
+                <span style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 17, color: "#cfe9ff", lineHeight: 1.7 }}>{uc}</span>
               </li>
             ))}
           </ul>
@@ -206,8 +206,8 @@ export default function CrewDetailPage({ params }: { params: { id: string } }) {
 
         {/* Other crew */}
         <div style={{ marginBottom: 24 }}>
-          <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#7e94c8", letterSpacing: "0.1em", marginBottom: 10 }}>
-            ▸ 다른 크루원
+          <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, fontWeight: 600, color: "#cfe9ff", marginBottom: 10 }}>
+            ▸ 다른 비서 보기
           </p>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {AGENTS.filter(a => a.id !== agent.id).map(other => (
@@ -216,13 +216,13 @@ export default function CrewDetailPage({ params }: { params: { id: string } }) {
                   className="pixel-frame"
                   style={{
                     border: `1px solid ${other.accent}44`, background: "#0f1640",
-                    padding: "6px 12px", transition: "all 0.15s",
+                    padding: "8px 14px", transition: "all 0.15s",
                   }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.border = `1px solid ${other.accent}`; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.border = `1px solid ${other.accent}44`; }}
                 >
-                  <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 7, color: other.accent }}>{other.englishName}</p>
-                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 7, color: "#7e94c8", marginTop: 2 }}>{other.role}</p>
+                  <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, fontWeight: 700, color: other.accent }}>{other.name}</p>
+                  <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 12, color: "#7e94c8", marginTop: 2 }}>{other.role}</p>
                 </div>
               </Link>
             ))}
@@ -232,7 +232,7 @@ export default function CrewDetailPage({ params }: { params: { id: string } }) {
         {/* CTA */}
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           <Link href="/signup" style={{ textDecoration: "none" }}>
-            <PixelButton variant="primary" size="md">▶ {agent.name} 고용하기</PixelButton>
+            <PixelButton variant="primary" size="md">▶ {agent.name}와 함께하기</PixelButton>
           </Link>
           <Link href="/crew" style={{ textDecoration: "none" }}>
             <PixelButton variant="secondary" size="md">← 크루 목록</PixelButton>

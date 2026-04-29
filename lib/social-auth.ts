@@ -1,13 +1,11 @@
 import { SignJWT, jwtVerify } from "jose";
+import { getJwtSecretBytes } from "./env";
 
 export const PENDING_COOKIE = "social-pending";
 export const STATE_COOKIE = "oauth-state";
 
 function getSecret() {
-  return new TextEncoder().encode(
-    process.env.JWT_SECRET ||
-      "saas-marketing-agent-secret-key-2024-change-in-production"
-  );
+  return getJwtSecretBytes();
 }
 
 export interface SocialPendingPayload {

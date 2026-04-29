@@ -2,41 +2,72 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { signAdminToken, ADMIN_COOKIE_NAME } from "@/lib/auth";
+import { LoginSchema, formatZodError } from "@/lib/validation/schemas";
+import { consume, RATE_LIMITS, getClientIp, rateLimitResponseInit } from "@/lib/security/rate-limit";
+import { verifySameOrigin } from "@/lib/security/csrf";
+import { recordAuthEvent, extractRequestMeta } from "@/lib/security/audit";
 
 export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { email, password } = body as { email: string; password: string; otp?: string };
+  const csrf = verifySameOrigin(request);
+  if (!csrf.ok) {
+    recordAuthEvent({ kind: "csrf_blocked", ...extractRequestMeta(request), detail: `admin login: ${csrf.reason}` });
+    return NextResponse.json({ error: "허용되지 않은 출처입니다." }, { status: 403 });
+  }
 
-    if (!email || !password) {
-      return NextResponse.json({ error: "이메일과 비밀번호를 입력해주세요." }, { status: 400 });
+  const meta = extractRequestMeta(request);
+  // 관리자 로그인은 더 엄격하게: IP 기준 5회/15분
+  const rl = consume(`admin-login:${meta.ip}`, RATE_LIMITS.LOGIN);
+  if (!rl.allowed) {
+    recordAuthEvent({ kind: "rate_limited", ...meta, detail: `admin login retry after ${rl.retryAfterSec}s` });
+    return NextResponse.json(
+      { error: `로그인 시도가 너무 많습니다. ${rl.retryAfterSec}초 후 다시 시도해 주세요.` },
+      rateLimitResponseInit(rl.retryAfterSec)
+    );
+  }
+
+  try {
+    let raw: unknown;
+    try { raw = await request.json(); } catch { return NextResponse.json({ error: "잘못된 요청 형식입니다." }, { status: 400 }); }
+
+    const parsed = LoginSchema.safeParse(raw);
+    if (!parsed.success) {
+      return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
     }
+    const { email, password } = parsed.data;
 
     // (선택) IP 화이트리스트 체크 — 설정에 값이 있을 때만 적용
     const settings = db.getSettings();
     const allowlist = (settings.admin_ip_allowlist || "").split(",").map((s) => s.trim()).filter(Boolean);
     if (allowlist.length > 0) {
-      const ip =
-        request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
-        request.headers.get("x-real-ip") ||
-        "";
+      const ip = getClientIp(request);
       if (!allowlist.includes(ip)) {
+        recordAuthEvent({ kind: "permission_denied", ip, user_agent: meta.user_agent, detail: "admin: IP not allowed" });
         return NextResponse.json({ error: "허용되지 않은 네트워크입니다." }, { status: 403 });
       }
     }
 
     const user = db.getUserByEmail(email);
-    if (!user || user.role !== "admin") {
-      // 일반 사용자 계정 노출 방지 — 동일한 메시지 반환
+    const adminRoles = new Set(["admin", "owner", "support"]);
+    if (!user || !adminRoles.has(user.role)) {
+      // 사용자 없을 때도 bcrypt 시간 비슷하게
+      await bcrypt.compare(password, "$2b$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinv");
+      recordAuthEvent({ kind: "login_fail", ...meta, email, detail: "admin: not authorized" });
+      return NextResponse.json({ error: "이메일 또는 비밀번호가 올바르지 않습니다." }, { status: 401 });
+    }
+
+    if (!user.password_hash) {
+      recordAuthEvent({ kind: "login_fail", ...meta, user_id: user.id, email, detail: "admin: no password (social-only)" });
       return NextResponse.json({ error: "이메일 또는 비밀번호가 올바르지 않습니다." }, { status: 401 });
     }
 
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok) {
+      recordAuthEvent({ kind: "login_fail", ...meta, user_id: user.id, email, detail: "admin: wrong password" });
       return NextResponse.json({ error: "이메일 또는 비밀번호가 올바르지 않습니다." }, { status: 401 });
     }
 
     if (user.status && user.status !== "active") {
+      recordAuthEvent({ kind: "login_fail", ...meta, user_id: user.id, email, detail: `admin: status=${user.status}` });
       return NextResponse.json({ error: "사용할 수 없는 관리자 계정입니다." }, { status: 403 });
     }
 
@@ -52,15 +83,16 @@ export async function POST(request: NextRequest) {
       name: user.name,
       businessName: user.business_name,
       brandDisplayName: user.brand_display_name,
-      role: "admin",
+      role: (user.role as "user" | "admin") ?? "admin",
     });
 
     db.logAdmin({
       admin_id: user.id,
       admin_email: user.email,
       action: "admin.login",
-      detail: request.headers.get("user-agent") ?? undefined,
+      detail: `${meta.ip} ${meta.user_agent.slice(0, 200)}`,
     });
+    recordAuthEvent({ kind: "login_success", ...meta, user_id: user.id, email, detail: `admin role=${user.role}` });
 
     const response = NextResponse.json({ message: "ok" }, { status: 200 });
     response.cookies.set(ADMIN_COOKIE_NAME, token, {

@@ -10,7 +10,7 @@ export function Footer() {
         <span
           style={{
             fontFamily: '"Press Start 2P", monospace',
-            fontSize: 8,
+            fontSize: 12,
             color: "#ff4ec9",
             letterSpacing: "0.05em",
           }}
@@ -28,8 +28,8 @@ export function Footer() {
               href={href}
               style={{
                 fontFamily: '"JetBrains Mono", monospace',
-                fontSize: 8,
-                color: "#4a5a8a",
+                fontSize: 12,
+                color: "#7e94c8",
                 textDecoration: "none",
                 letterSpacing: "0.08em",
               }}
@@ -41,8 +41,8 @@ export function Footer() {
         <span
           style={{
             fontFamily: '"JetBrains Mono", monospace',
-            fontSize: 8,
-            color: "#4a5a8a",
+            fontSize: 12,
+            color: "#7e94c8",
             letterSpacing: "0.06em",
           }}
         >

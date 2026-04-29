@@ -23,7 +23,7 @@ export function CornerLabel({ pos, color = "#7e94c8", children }: CornerLabelPro
         position: "absolute",
         ...posStyle[pos],
         fontFamily: '"JetBrains Mono", monospace',
-        fontSize: 9,
+        fontSize: 13,
         color,
         letterSpacing: "0.08em",
         pointerEvents: "none",

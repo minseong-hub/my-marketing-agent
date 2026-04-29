@@ -33,8 +33,8 @@ export default async function BillingPage({
     <div className="min-h-screen bg-slate-50 px-6 py-10">
       <div className="max-w-5xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">결제 & 구독</h1>
-          <p className="text-sm text-slate-500 mt-1">현재 플랜, 결제 내역, 업그레이드/해지를 관리합니다.</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">결제 & 구독</h1>
+          <p className="text-base text-slate-500 mt-1">현재 플랜, 결제 내역, 업그레이드/해지를 관리합니다.</p>
         </div>
 
         {/* Current plan summary */}
@@ -42,12 +42,12 @@ export default async function BillingPage({
           <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="text-xs font-semibold text-slate-500 mb-1">현재 플랜</div>
-                <div className="text-2xl font-extrabold text-slate-900">
+                <div className="text-sm font-semibold text-slate-500 mb-1">현재 플랜</div>
+                <div className="text-3xl font-extrabold text-slate-900">
                   {currentDef ? currentDef.name : "선택된 플랜 없음"}
                 </div>
                 {currentDef && (
-                  <p className="text-sm text-slate-500 mt-1">{currentDef.tagline}</p>
+                  <p className="text-base text-slate-500 mt-1">{currentDef.tagline}</p>
                 )}
               </div>
               <StatusBadge status={state.planStatus} trialDaysLeft={state.trialDaysLeft} />
@@ -61,12 +61,8 @@ export default async function BillingPage({
               />
               <Info
                 icon={<Calendar className="w-4 h-4 text-blue-600" />}
-                label={state.planStatus === "trialing" ? "체험 종료" : "다음 결제일"}
-                value={
-                  state.planStatus === "trialing"
-                    ? state.trialEndsAt?.slice(0, 10) ?? "-"
-                    : state.nextBillingAt?.slice(0, 10) ?? "-"
-                }
+                label="다음 결제일"
+                value={state.nextBillingAt?.slice(0, 10) ?? "-"}
               />
               <Info
                 icon={<ShieldCheck className="w-4 h-4 text-blue-600" />}
@@ -81,17 +77,17 @@ export default async function BillingPage({
           </div>
 
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <div className="text-xs font-semibold text-slate-500 mb-3">이용 가능한 도구</div>
+            <div className="text-sm font-semibold text-slate-500 mb-3">이용 가능한 도구</div>
             <ul className="space-y-2">
               {currentDef
                 ? currentDef.tools.map((t) => (
-                    <li key={t} className="flex items-center gap-2 text-sm text-slate-700">
+                    <li key={t} className="flex items-center gap-2 text-base text-slate-700">
                       <Check className="w-4 h-4 text-blue-600" strokeWidth={3} />
                       {PLAN_TOOL_META[t].label}
                     </li>
                   ))
                 : (
-                    <li className="text-sm text-slate-400">
+                    <li className="text-base text-slate-400">
                       아래에서 플랜을 선택하면 도구가 활성화됩니다.
                     </li>
                   )}
@@ -103,12 +99,12 @@ export default async function BillingPage({
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mb-8">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-sm font-bold text-slate-900">플랜 선택</h2>
-              <p className="text-xs text-slate-500 mt-1">
-                7일 무료 체험 후 결제됩니다. 체험 중 해지하면 비용이 청구되지 않습니다.
+              <h2 className="text-base font-bold text-slate-900">플랜 선택</h2>
+              <p className="text-sm text-slate-500 mt-1">
+                무료 플랜은 가입과 동시에 활성화됩니다. 호출 한도가 부족할 때 단계별 업그레이드하세요.
               </p>
             </div>
-            <Link href="/pricing" className="text-xs font-semibold text-blue-600 hover:text-blue-500">
+            <Link href="/pricing" className="text-sm font-semibold text-blue-600 hover:text-blue-500">
               상세 비교 →
             </Link>
           </div>
@@ -116,7 +112,6 @@ export default async function BillingPage({
           <BillingActions
             currentSlug={state.planSlug}
             currentStatus={state.planStatus}
-            trialUsed={!!state.trialStartedAt}
             selected={selectedSlug as PlanSlug}
           />
         </div>
@@ -124,30 +119,30 @@ export default async function BillingPage({
         {/* Billing history */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-900">결제 내역</h2>
-            <span className="text-xs text-slate-400">최근 30건</span>
+            <h2 className="text-base font-bold text-slate-900">결제 내역</h2>
+            <span className="text-sm text-slate-400">최근 30건</span>
           </div>
           {events.length === 0 ? (
-            <div className="px-6 py-10 text-center text-sm text-slate-400">
+            <div className="px-6 py-10 text-center text-base text-slate-400">
               아직 결제 내역이 없습니다.
             </div>
           ) : (
-            <table className="w-full text-sm">
+            <table className="w-full text-base">
               <thead className="bg-slate-50/60">
                 <tr>
-                  <th className="text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 px-6 py-3">
+                  <th className="text-left text-[15px] font-bold uppercase tracking-wider text-slate-500 px-6 py-3">
                     날짜
                   </th>
-                  <th className="text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 px-6 py-3">
+                  <th className="text-left text-[15px] font-bold uppercase tracking-wider text-slate-500 px-6 py-3">
                     유형
                   </th>
-                  <th className="text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 px-6 py-3">
+                  <th className="text-left text-[15px] font-bold uppercase tracking-wider text-slate-500 px-6 py-3">
                     플랜
                   </th>
-                  <th className="text-right text-[11px] font-bold uppercase tracking-wider text-slate-500 px-6 py-3">
+                  <th className="text-right text-[15px] font-bold uppercase tracking-wider text-slate-500 px-6 py-3">
                     금액
                   </th>
-                  <th className="text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 px-6 py-3">
+                  <th className="text-left text-[15px] font-bold uppercase tracking-wider text-slate-500 px-6 py-3">
                     메모
                   </th>
                 </tr>
@@ -155,7 +150,7 @@ export default async function BillingPage({
               <tbody>
                 {events.map((e) => (
                   <tr key={e.id} className="border-t border-slate-100">
-                    <td className="px-6 py-3 text-xs text-slate-500">{e.created_at.slice(0, 16)}</td>
+                    <td className="px-6 py-3 text-sm text-slate-500">{e.created_at.slice(0, 16)}</td>
                     <td className="px-6 py-3">
                       <EventBadge kind={e.kind} />
                     </td>
@@ -165,7 +160,7 @@ export default async function BillingPage({
                     <td className="px-6 py-3 text-right font-semibold text-slate-900">
                       {e.amount > 0 ? formatKRW(e.amount) : "-"}
                     </td>
-                    <td className="px-6 py-3 text-xs text-slate-500">{e.note ?? ""}</td>
+                    <td className="px-6 py-3 text-sm text-slate-500">{e.note ?? ""}</td>
                   </tr>
                 ))}
               </tbody>
@@ -173,7 +168,7 @@ export default async function BillingPage({
           )}
         </div>
 
-        <p className="text-[11px] text-slate-400 mt-6 text-center">
+        <p className="text-[15px] text-slate-400 mt-6 text-center">
           ※ 현재 모의 결제 모드입니다. 실제 PG 연동 전까지 버튼은 내부 상태만 변경합니다.
         </p>
       </div>
@@ -184,11 +179,11 @@ export default async function BillingPage({
 function Info({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div>
-      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 mb-1">
+      <div className="flex items-center gap-1.5 text-[15px] font-semibold text-slate-500 mb-1">
         {icon}
         {label}
       </div>
-      <div className="text-sm font-bold text-slate-900">{value}</div>
+      <div className="text-base font-bold text-slate-900">{value}</div>
     </div>
   );
 }
@@ -209,7 +204,7 @@ function StatusBadge({
   };
   const s = map[status] ?? map.none;
   return (
-    <span className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-full ${s.bg} ${s.text}`}>
+    <span className={`inline-flex items-center px-3 py-1 text-sm font-bold rounded-full ${s.bg} ${s.text}`}>
       {s.label}
     </span>
   );
@@ -224,7 +219,7 @@ function EventBadge({ kind }: { kind: string }) {
   };
   const s = map[kind] ?? { bg: "bg-slate-100", text: "text-slate-700", label: kind };
   return (
-    <span className={`inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-md ${s.bg} ${s.text}`}>
+    <span className={`inline-flex px-2 py-0.5 text-[15px] font-semibold rounded-md ${s.bg} ${s.text}`}>
       {s.label}
     </span>
   );

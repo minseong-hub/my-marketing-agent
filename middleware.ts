@@ -6,10 +6,11 @@ const USER_COOKIE = "auth-token";
 const ADMIN_COOKIE = "admin-token";
 
 function getSecret() {
-  return new TextEncoder().encode(
-    process.env.JWT_SECRET ||
-      "saas-marketing-agent-secret-key-2024-change-in-production"
-  );
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32 || secret.includes("change-in-production")) {
+    throw new Error("JWT_SECRET 환경변수가 설정되지 않았거나 안전하지 않습니다.");
+  }
+  return new TextEncoder().encode(secret);
 }
 
 async function verify(token: string | undefined): Promise<{ role?: string } | null> {
@@ -50,11 +51,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ===== /login, /signup, /social-complete, /account-conflict — 이미 로그인이면 /app =====
+  // ===== /desk/* — 일반 사용자 =====
+  if (pathname.startsWith("/desk")) {
+    const payload = await verify(request.cookies.get(USER_COOKIE)?.value);
+    if (!payload) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // ===== /login, /signup, /social-complete, /account-conflict — 이미 로그인이면 /desk =====
   if (pathname === "/login" || pathname === "/signup" || pathname === "/social-complete" || pathname === "/account-conflict") {
     const payload = await verify(request.cookies.get(USER_COOKIE)?.value);
     if (payload) {
-      return NextResponse.redirect(new URL("/app", request.url));
+      return NextResponse.redirect(new URL("/desk/marky", request.url));
     }
   }
 
@@ -62,5 +72,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/app/:path*", "/login", "/signup", "/social-complete", "/account-conflict"],
+  matcher: ["/admin/:path*", "/app/:path*", "/desk/:path*", "/login", "/signup", "/social-complete", "/account-conflict"],
 };

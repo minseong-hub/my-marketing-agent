@@ -7,21 +7,33 @@ import {
   signSocialPending,
   setCookieOptions,
 } from "@/lib/social-auth";
+import { consume, RATE_LIMITS, getClientIp, rateLimitResponseInit } from "@/lib/security/rate-limit";
+import { recordAuthEvent, extractRequestMeta } from "@/lib/security/audit";
 
 export async function GET(request: NextRequest) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const ip = getClientIp(request);
+  const rl = consume(`oauth:google:cb:${ip}`, RATE_LIMITS.OAUTH);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: `요청이 너무 많습니다. ${rl.retryAfterSec}초 후 다시 시도해 주세요.` },
+      rateLimitResponseInit(rl.retryAfterSec)
+    );
+  }
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const { searchParams } = request.nextUrl;
   const code = searchParams.get("code");
   const state = searchParams.get("state");
   const error = searchParams.get("error");
 
   if (error || !code) {
+    recordAuthEvent({ kind: "social_login_fail", ...extractRequestMeta(request), detail: `google: ${error || "no code"}` });
     return NextResponse.redirect(`${baseUrl}/login?error=google_cancelled`);
   }
 
   // Verify state (CSRF protection)
   const savedState = request.cookies.get(STATE_COOKIE)?.value;
   if (!savedState || savedState !== state) {
+    recordAuthEvent({ kind: "csrf_blocked", ...extractRequestMeta(request), detail: "google: state mismatch" });
     return NextResponse.redirect(`${baseUrl}/login?error=invalid_state`);
   }
 
@@ -71,6 +83,7 @@ export async function GET(request: NextRequest) {
   const existingByProvider = db.getUserByProvider("google", googleUser.sub);
   if (existingByProvider) {
     if (existingByProvider.status !== "active") {
+      recordAuthEvent({ kind: "social_login_fail", ...extractRequestMeta(request), user_id: existingByProvider.id, email: existingByProvider.email, detail: "google: status=suspended" });
       return clearState(NextResponse.redirect(`${baseUrl}/login?error=account_suspended`));
     }
     const token = await signToken({
@@ -81,7 +94,8 @@ export async function GET(request: NextRequest) {
       brandDisplayName: existingByProvider.brand_display_name,
       role: (existingByProvider.role as "user" | "admin") ?? "user",
     });
-    const res = NextResponse.redirect(`${baseUrl}/app/assistants`);
+    recordAuthEvent({ kind: "social_login_success", ...extractRequestMeta(request), user_id: existingByProvider.id, email: existingByProvider.email, detail: "google" });
+    const res = NextResponse.redirect(`${baseUrl}/desk/marky`);
     res.cookies.set(COOKIE_NAME, token, setCookieOptions(60 * 60 * 24 * 7));
     return clearState(res);
   }

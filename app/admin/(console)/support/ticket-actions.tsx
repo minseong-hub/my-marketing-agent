@@ -23,7 +23,7 @@ export function TicketActions({
   }
 
   const cls =
-    "h-8 px-2 rounded-md border border-slate-200 bg-white text-[11px] font-semibold text-slate-600";
+    "h-8 px-2 rounded-md border border-slate-200 bg-white text-[15px] font-semibold text-slate-600";
 
   return (
     <div className="inline-flex items-center gap-1.5">

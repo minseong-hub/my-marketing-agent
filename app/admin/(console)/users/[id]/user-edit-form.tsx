@@ -41,24 +41,24 @@ export function UserEditForm({ user, plans }: { user: UserRow; plans: PlanRow[] 
     }
   }
 
-  const cls = "w-full h-10 px-3 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30";
+  const cls = "w-full h-10 px-3 rounded-lg border border-slate-200 text-base bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30";
 
   return (
     <div className="space-y-4">
       <div>
-        <label className="text-xs font-semibold text-slate-700 mb-1 block">이름</label>
+        <label className="text-sm font-semibold text-slate-700 mb-1 block">이름</label>
         <input className={cls} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-xs font-semibold text-slate-700 mb-1 block">역할</label>
+          <label className="text-sm font-semibold text-slate-700 mb-1 block">역할</label>
           <select className={cls} value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
             <option value="user">user</option>
             <option value="admin">admin</option>
           </select>
         </div>
         <div>
-          <label className="text-xs font-semibold text-slate-700 mb-1 block">상태</label>
+          <label className="text-sm font-semibold text-slate-700 mb-1 block">상태</label>
           <select className={cls} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
             <option value="active">active</option>
             <option value="suspended">suspended</option>
@@ -66,7 +66,7 @@ export function UserEditForm({ user, plans }: { user: UserRow; plans: PlanRow[] 
         </div>
       </div>
       <div>
-        <label className="text-xs font-semibold text-slate-700 mb-1 block">요금제</label>
+        <label className="text-sm font-semibold text-slate-700 mb-1 block">요금제</label>
         <select className={cls} value={form.plan_id} onChange={(e) => setForm({ ...form, plan_id: e.target.value })}>
           <option value="">(없음)</option>
           {plans.map((p) => (
@@ -80,7 +80,7 @@ export function UserEditForm({ user, plans }: { user: UserRow; plans: PlanRow[] 
       {msg && (
         <div
           className={
-            "rounded-lg px-3 py-2 text-xs " +
+            "rounded-lg px-3 py-2 text-sm " +
             (msg.type === "ok"
               ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
               : "bg-rose-50 text-rose-700 border border-rose-200")
@@ -94,7 +94,7 @@ export function UserEditForm({ user, plans }: { user: UserRow; plans: PlanRow[] 
         <button
           onClick={save}
           disabled={saving}
-          className="h-10 px-5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold disabled:opacity-60"
+          className="h-10 px-5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-base font-semibold disabled:opacity-60"
         >
           {saving ? "저장 중..." : "변경 저장"}
         </button>

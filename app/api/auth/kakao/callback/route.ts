@@ -7,21 +7,33 @@ import {
   signSocialPending,
   setCookieOptions,
 } from "@/lib/social-auth";
+import { consume, RATE_LIMITS, getClientIp, rateLimitResponseInit } from "@/lib/security/rate-limit";
+import { recordAuthEvent, extractRequestMeta } from "@/lib/security/audit";
 
 export async function GET(request: NextRequest) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const ip = getClientIp(request);
+  const rl = consume(`oauth:kakao:cb:${ip}`, RATE_LIMITS.OAUTH);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: `요청이 너무 많습니다. ${rl.retryAfterSec}초 후 다시 시도해 주세요.` },
+      rateLimitResponseInit(rl.retryAfterSec)
+    );
+  }
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const { searchParams } = request.nextUrl;
   const code = searchParams.get("code");
   const state = searchParams.get("state");
   const error = searchParams.get("error");
 
   if (error || !code) {
+    recordAuthEvent({ kind: "social_login_fail", ...extractRequestMeta(request), detail: `kakao: ${error || "no code"}` });
     return NextResponse.redirect(`${baseUrl}/login?error=kakao_cancelled`);
   }
 
   // Verify state
   const savedState = request.cookies.get(STATE_COOKIE)?.value;
   if (!savedState || savedState !== state) {
+    recordAuthEvent({ kind: "csrf_blocked", ...extractRequestMeta(request), detail: "kakao: state mismatch" });
     return NextResponse.redirect(`${baseUrl}/login?error=invalid_state`);
   }
 
@@ -88,7 +100,7 @@ export async function GET(request: NextRequest) {
       brandDisplayName: existingByProvider.brand_display_name,
       role: (existingByProvider.role as "user" | "admin") ?? "user",
     });
-    const res = NextResponse.redirect(`${baseUrl}/app/assistants`);
+    const res = NextResponse.redirect(`${baseUrl}/desk/marky`);
     res.cookies.set(COOKIE_NAME, token, setCookieOptions(60 * 60 * 24 * 7));
     return clearState(res);
   }

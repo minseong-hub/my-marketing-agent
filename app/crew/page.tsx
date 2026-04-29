@@ -19,13 +19,13 @@ export default function CrewPage() {
         <div style={{ filter: `drop-shadow(0 0 20px ${featured.accent}88)` }}>
           <AstronautAvatar agent={featured} scale={7} idle={true} />
         </div>
-        <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 9, color: featured.accent, textAlign: "center" }}>
+        <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 13, color: featured.accent, textAlign: "center" }}>
           {featured.name}
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#7e94c8", textAlign: "center" }}>
+        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: "#7e94c8", textAlign: "center" }}>
           {featured.role}
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: featured.accent, textAlign: "center" }}>
+        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: featured.accent, textAlign: "center" }}>
           » {featured.tagline}
         </p>
         <div style={{ width: "100%", background: "#060920", border: `1px solid ${featured.accent}44`, padding: 8, marginTop: 4 }}>
@@ -38,18 +38,18 @@ export default function CrewPage() {
   return (
     <>
       <CockpitShell
-        sector="SECTOR-7G · CREW DOSSIER"
+        sector="크루 명부 · 비서 4명"
         leftConsole={leftConsole}
-        bootMessage="CREW MANIFEST LOADED · 4 AGENTS READY · DOSSIER ACCESS: GRANTED"
+        bootMessage="크루 명단 로드 완료 · 비서 4명 대기 · 프로필 열람 가능"
       >
         <div style={{ padding: "32px 24px" }}>
-          <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: "#5ce5ff", letterSpacing: "0.12em", marginBottom: 12 }}>
-            › CREW_MANIFEST
+          <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, fontWeight: 600, color: "#5ce5ff", letterSpacing: "0.04em", marginBottom: 12 }}>
+            크루 명단 · 함께 일할 4명의 AI 비서
           </p>
           <h1
             style={{
               fontFamily: '"Press Start 2P", monospace',
-              fontSize: "clamp(14px, 2vw, 20px)",
+              fontSize: "clamp(18px, 2vw, 20px)",
               color: "#cfe9ff",
               textShadow: "4px 4px 0 #8a2877",
               marginBottom: 32,
@@ -73,18 +73,18 @@ export default function CrewPage() {
               >
                 <AstronautAvatar agent={agent} scale={4} idle={true} />
                 <div className="flex-1">
-                  <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 10, color: agent.accent, marginBottom: 6 }}>
+                  <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: 14, color: agent.accent, marginBottom: 6 }}>
                     {agent.englishName.toUpperCase()}
                   </p>
-                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: "#7e94c8", marginBottom: 8 }}>
+                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 13, color: "#7e94c8", marginBottom: 8 }}>
                     {agent.role}
                   </p>
-                  <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 12, color: "#cfe9ff", lineHeight: 1.7 }}>
+                  <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 16, color: "#cfe9ff", lineHeight: 1.7 }}>
                     {agent.desc}
                   </p>
                   <div className="flex flex-wrap gap-1 mt-3">
                     {agent.skills.slice(0, 3).map(s => (
-                      <span key={s} style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: agent.accent, border: `1px solid ${agent.accentDark}`, padding: "2px 6px", background: `${agent.accentDark}22` }}>
+                      <span key={s} style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: agent.accent, border: `1px solid ${agent.accentDark}`, padding: "2px 6px", background: `${agent.accentDark}22` }}>
                         {s}
                       </span>
                     ))}

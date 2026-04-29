@@ -41,15 +41,15 @@ export function SettingsForm({ initial }: { initial: Record<string, string> }) {
   }
 
   const cls =
-    "w-full h-10 px-3 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30";
+    "w-full h-10 px-3 rounded-lg border border-slate-200 text-base bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30";
 
   return (
     <div className="space-y-4">
       {FIELDS.map((f) => (
         <div key={f.key}>
-          <label className="text-xs font-semibold text-slate-700 mb-1 block">
+          <label className="text-sm font-semibold text-slate-700 mb-1 block">
             {f.label}
-            {f.hint && <span className="ml-2 text-[11px] text-slate-400 font-normal">{f.hint}</span>}
+            {f.hint && <span className="ml-2 text-[15px] text-slate-400 font-normal">{f.hint}</span>}
           </label>
           {f.type === "bool" ? (
             <select
@@ -71,7 +71,7 @@ export function SettingsForm({ initial }: { initial: Record<string, string> }) {
       ))}
 
       {msg && (
-        <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-xs text-emerald-700">
+        <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-sm text-emerald-700">
           {msg}
         </div>
       )}
@@ -80,7 +80,7 @@ export function SettingsForm({ initial }: { initial: Record<string, string> }) {
         <button
           onClick={save}
           disabled={saving}
-          className="h-10 px-5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold disabled:opacity-60"
+          className="h-10 px-5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-base font-semibold disabled:opacity-60"
         >
           {saving ? "저장 중..." : "설정 저장"}
         </button>

@@ -13,6 +13,7 @@ import { CrewRoster } from "@/components/crew/CrewRoster";
 import { AGENTS } from "@/data/agents";
 import type { Agent } from "@/data/agents";
 import Link from "next/link";
+import { useAuth } from "@/lib/useAuth";
 
 const VITALS = [
   { label: "매출 성장", v: 78, c: "#66ff9d" },
@@ -23,6 +24,9 @@ const VITALS = [
 
 export function HeroCockpit() {
   const [activeAgent, setActiveAgent] = useState<Agent | null>(null);
+  const { loggedIn } = useAuth();
+  const primaryHref = loggedIn ? "/desk/marky" : "/signup";
+  const primaryLabel = loggedIn ? "▶ 데스크 진입" : "▶ 무료로 시작";
 
   return (
     <>
@@ -47,25 +51,24 @@ export function HeroCockpit() {
           ))}
           <span
             style={{
-              fontFamily: '"JetBrains Mono", monospace',
-              fontSize: 8,
+              fontFamily: '"IBM Plex Sans KR", sans-serif',
+              fontSize: 14,
               color: "#5ce5ff",
-              letterSpacing: "0.08em",
               flex: 1,
+              fontWeight: 500,
             }}
           >
-            ▸ BOOT SEQ COMPLETE · 4 CREW MEMBERS ACTIVE · STORE LINK: SECURE
+            ▸ 부팅 완료 · 크루 4명 대기 중 · 스토어 연결 안전
           </span>
           <span
             style={{
-              fontFamily: '"JetBrains Mono", monospace',
-              fontSize: 8,
-              color: "#4a5a8a",
-              letterSpacing: "0.08em",
+              fontFamily: '"IBM Plex Sans KR", sans-serif',
+              fontSize: 13,
+              color: "#7e94c8",
               flexShrink: 0,
             }}
           >
-            SECTOR-7G · SHIP CREWMATE-04
+            크루메이트호 · 7번 구역
           </span>
         </div>
 
@@ -89,16 +92,16 @@ export function HeroCockpit() {
               overflowY: "auto",
             }}
           >
-            <CockpitPanel title="COMMS · MARKY" status="LIVE" statusColor="#ff4ec9" accent="#ff4ec9" height={220}>
+            <CockpitPanel title="마키와의 교신" status="실시간" statusColor="#ff4ec9" accent="#ff4ec9" height={220}>
               <Typewriter lines={AGENTS[0].sample} loop={true} />
             </CockpitPanel>
-            <CockpitPanel title="VITALS" status="MOM · 2026.04" statusColor="#66ff9d" accent="#66ff9d" height={260}>
+            <CockpitPanel title="스토어 핵심 지표" status="이번 달" statusColor="#66ff9d" accent="#66ff9d" height={260}>
               <div className="space-y-3 mt-1">
                 {VITALS.map(v => (
                   <Bar key={v.label} {...v} segments={16} />
                 ))}
-                <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#4a5a8a", marginTop: 10 }}>
-                  ▸ MOM · 2026.04
+                <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 13, color: "#7e94c8", marginTop: 10 }}>
+                  ▸ 전월 대비 · 2026년 4월 누적
                 </p>
               </div>
             </CockpitPanel>
@@ -118,20 +121,21 @@ export function HeroCockpit() {
             >
               <p
                 style={{
-                  fontFamily: '"JetBrains Mono", monospace',
-                  fontSize: 9,
+                  fontFamily: '"IBM Plex Sans KR", sans-serif',
+                  fontSize: 15,
+                  fontWeight: 600,
                   color: "#5ce5ff",
-                  letterSpacing: "0.1em",
+                  letterSpacing: "0.04em",
                   marginBottom: 16,
                 }}
               >
-                ▸ MISSION_001: SCALE_YOUR_STORE
+                ▸ 1번 임무 · 당신의 스토어를 키웁니다
               </p>
 
               <h1
                 style={{
                   fontFamily: '"Press Start 2P", monospace',
-                  fontSize: "clamp(16px, 2vw, 24px)",
+                  fontSize: "clamp(20px, 2vw, 24px)",
                   color: "#cfe9ff",
                   lineHeight: 1.8,
                   textShadow: "4px 4px 0 #ff4ec9, 8px 8px 0 #060920",
@@ -147,7 +151,7 @@ export function HeroCockpit() {
               <p
                 style={{
                   fontFamily: '"IBM Plex Sans KR", sans-serif',
-                  fontSize: 14,
+                  fontSize: 18,
                   color: "#7e94c8",
                   lineHeight: 1.8,
                   marginBottom: 24,
@@ -159,22 +163,22 @@ export function HeroCockpit() {
 
               <p
                 style={{
-                  fontFamily: '"JetBrains Mono", monospace',
-                  fontSize: 8,
+                  fontFamily: '"IBM Plex Sans KR", sans-serif',
+                  fontSize: 14,
                   color: "#ff4ec9",
-                  letterSpacing: "0.08em",
                   marginBottom: 20,
+                  fontWeight: 500,
                 }}
               >
-                ▸ TIP — 떠다니는 우주복을 클릭해서 도크를 여세요
+                ▸ TIP — 떠다니는 우주복을 클릭하면 비서 소개가 열립니다
               </p>
 
               <div className="flex gap-3 flex-wrap">
-                <Link href="/signup" style={{ textDecoration: "none" }}>
-                  <PixelButton variant="primary" size="md">▶ 14일 무료 탑승</PixelButton>
+                <Link href={primaryHref} style={{ textDecoration: "none" }}>
+                  <PixelButton variant="primary" size="md">{primaryLabel}</PixelButton>
                 </Link>
                 <Link href="/pricing" style={{ textDecoration: "none" }}>
-                  <PixelButton variant="ghost" size="md">데모 보기</PixelButton>
+                  <PixelButton variant="ghost" size="md">플랜 보기</PixelButton>
                 </Link>
               </div>
             </div>
@@ -199,13 +203,13 @@ export function HeroCockpit() {
         <div className="lg:hidden relative" style={{ minHeight: 480 }}>
           <Starfield density={1} />
           <div className="relative z-10 p-6">
-            <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#5ce5ff", letterSpacing: "0.1em", marginBottom: 12 }}>
-              ▸ MISSION_001: SCALE_YOUR_STORE
+            <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, fontWeight: 600, color: "#5ce5ff", letterSpacing: "0.04em", marginBottom: 12 }}>
+              ▸ 1번 임무 · 당신의 스토어를 키웁니다
             </p>
             <h1
               style={{
                 fontFamily: '"Press Start 2P", monospace',
-                fontSize: 14,
+                fontSize: 18,
                 color: "#cfe9ff",
                 lineHeight: 1.8,
                 textShadow: "3px 3px 0 #ff4ec9",
@@ -217,7 +221,7 @@ export function HeroCockpit() {
               <span style={{ color: "#5ce5ff" }}>{"4명의 크루"}</span>
               {"가\n운영합니다."}
             </h1>
-            <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 13, color: "#7e94c8", lineHeight: 1.8, marginBottom: 20 }}>
+            <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 17, color: "#7e94c8", lineHeight: 1.8, marginBottom: 20 }}>
               마키, 데일리, 애디, 페니 — AI 크루 4명이 함께 운영합니다.
             </p>
 
@@ -251,11 +255,11 @@ export function HeroCockpit() {
             </div>
 
             <div className="flex gap-3 flex-wrap">
-              <Link href="/signup" style={{ textDecoration: "none" }}>
-                <PixelButton variant="primary" size="sm">▶ 14일 무료 탑승</PixelButton>
+              <Link href={primaryHref} style={{ textDecoration: "none" }}>
+                <PixelButton variant="primary" size="sm">{primaryLabel}</PixelButton>
               </Link>
               <Link href="/pricing" style={{ textDecoration: "none" }}>
-                <PixelButton variant="ghost" size="sm">데모 보기</PixelButton>
+                <PixelButton variant="ghost" size="sm">플랜 보기</PixelButton>
               </Link>
             </div>
           </div>

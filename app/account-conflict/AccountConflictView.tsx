@@ -38,7 +38,7 @@ export default function AccountConflictView({
         setError(data.error || "연결에 실패했습니다.");
         return;
       }
-      router.push("/app/assistants");
+      router.push("/desk/marky");
       router.refresh();
     } catch {
       setError("서버 오류가 발생했습니다.");
@@ -65,8 +65,8 @@ export default function AccountConflictView({
             <text x="24" y="31" textAnchor="middle" fill="white" fontFamily="-apple-system,sans-serif" fontSize="16" fontWeight="800">UpF</text>
           </svg>
           <div>
-            <span className="text-sm font-bold text-white block leading-none">업플로</span>
-            <span className="text-[10px] text-white/50">UpFlow</span>
+            <span className="text-base font-bold text-white block leading-none">업플로</span>
+            <span className="text-[14px] text-white/50">UpFlow</span>
           </div>
         </Link>
       </header>
@@ -78,8 +78,8 @@ export default function AccountConflictView({
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-400/20 border border-amber-400/30 mb-4">
               <AlertTriangle className="w-6 h-6 text-amber-300" />
             </div>
-            <h1 className="text-xl font-extrabold text-white mb-2">이미 가입된 이메일입니다</h1>
-            <p className="text-sm text-blue-100/70">
+            <h1 className="text-2xl font-extrabold text-white mb-2">이미 가입된 이메일입니다</h1>
+            <p className="text-base text-blue-100/70">
               <span className="font-medium text-white">{email}</span>은<br />
               이미 이메일로 가입된 계정입니다.
             </p>
@@ -90,13 +90,13 @@ export default function AccountConflictView({
             <div className="flex rounded-xl overflow-hidden border border-white/20">
               <button
                 onClick={() => setTab("info")}
-                className={`flex-1 py-2 text-sm font-semibold transition-colors ${tab === "info" ? "bg-white text-blue-700" : "text-white/60 hover:text-white"}`}
+                className={`flex-1 py-2 text-base font-semibold transition-colors ${tab === "info" ? "bg-white text-blue-700" : "text-white/60 hover:text-white"}`}
               >
                 이메일로 로그인
               </button>
               <button
                 onClick={() => setTab("link")}
-                className={`flex-1 py-2 text-sm font-semibold transition-colors ${tab === "link" ? "bg-white text-blue-700" : "text-white/60 hover:text-white"}`}
+                className={`flex-1 py-2 text-base font-semibold transition-colors ${tab === "link" ? "bg-white text-blue-700" : "text-white/60 hover:text-white"}`}
               >
                 계정 연결
               </button>
@@ -104,13 +104,13 @@ export default function AccountConflictView({
 
             {tab === "info" && (
               <div className="space-y-3">
-                <p className="text-sm text-white/70 leading-relaxed">
+                <p className="text-base text-white/70 leading-relaxed">
                   기존 이메일 계정으로 로그인한 후,
                   설정에서 <span className={`font-semibold ${PROVIDER_COLOR[provider]}`}>{PROVIDER_LABEL[provider]}</span> 계정을 연결할 수 있습니다.
                 </p>
                 <Link
                   href={`/login?email=${encodeURIComponent(email)}`}
-                  className="block w-full h-11 bg-white text-blue-700 hover:bg-blue-50 font-semibold rounded-xl transition-colors text-sm text-center leading-[44px]"
+                  className="block w-full h-11 bg-white text-blue-700 hover:bg-blue-50 font-semibold rounded-xl transition-colors text-base text-center leading-[44px]"
                 >
                   이메일로 로그인하기
                 </Link>
@@ -119,12 +119,12 @@ export default function AccountConflictView({
 
             {tab === "link" && (
               <form onSubmit={handleLink} className="space-y-4">
-                <p className="text-sm text-white/70 leading-relaxed">
+                <p className="text-base text-white/70 leading-relaxed">
                   기존 계정의 비밀번호를 입력하면
                   <span className={`font-semibold ${PROVIDER_COLOR[provider]}`}> {PROVIDER_LABEL[provider]}</span> 계정이 자동으로 연결됩니다.
                 </p>
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-medium text-white/80">비밀번호</Label>
+                  <Label className="text-base font-medium text-white/80">비밀번호</Label>
                   <div className="relative">
                     <Input
                       type={showPassword ? "text" : "password"}
@@ -145,13 +145,13 @@ export default function AccountConflictView({
                 </div>
                 {error && (
                   <div className="rounded-lg bg-red-500/20 border border-red-400/30 px-4 py-2.5">
-                    <p className="text-sm text-red-200">{error}</p>
+                    <p className="text-base text-red-200">{error}</p>
                   </div>
                 )}
                 <button
                   type="submit"
                   disabled={loading || !password}
-                  className="w-full h-11 bg-white text-blue-700 hover:bg-blue-50 font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  className="w-full h-11 bg-white text-blue-700 hover:bg-blue-50 font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
                 >
                   {loading ? "연결 중..." : "비밀번호 확인 및 연결"}
                 </button>
@@ -159,7 +159,7 @@ export default function AccountConflictView({
             )}
           </div>
 
-          <p className="text-center text-sm text-white/50 mt-5">
+          <p className="text-center text-base text-white/50 mt-5">
             <Link href="/login" className="font-semibold text-blue-200 hover:text-white transition-colors">
               돌아가기
             </Link>

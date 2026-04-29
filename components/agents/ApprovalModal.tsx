@@ -79,18 +79,18 @@ export function ApprovalModal({ approvals, onApprove, onReject }: ApprovalModalP
               <div className={cn("w-2 h-2 rounded-full mt-2 flex-shrink-0 animate-pulse", colors.dot)} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className={cn("text-xs font-bold px-2 py-0.5 rounded-full", URGENCY_COLORS[approval.urgency_level])}>
+                  <span className={cn("text-sm font-bold px-2 py-0.5 rounded-full", URGENCY_COLORS[approval.urgency_level])}>
                     {URGENCY_LABELS[approval.urgency_level] || "보통"}
                   </span>
-                  <span className={cn("text-xs font-semibold", colors.text)}>
+                  <span className={cn("text-sm font-semibold", colors.text)}>
                     {AGENT_NAMES[approval.agent_type] || approval.agent_type}
                   </span>
-                  <span className="flex items-center gap-1 text-xs text-slate-400 ml-auto">
+                  <span className="flex items-center gap-1 text-sm text-slate-400 ml-auto">
                     <Clock className="w-3 h-3" />
                     {minutesLeft}분 후 만료
                   </span>
                 </div>
-                <p className="text-sm font-bold text-slate-800">{approval.title}</p>
+                <p className="text-base font-bold text-slate-800">{approval.title}</p>
               </div>
               {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400 flex-shrink-0 mt-1" /> : <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0 mt-1" />}
             </button>
@@ -108,15 +108,15 @@ export function ApprovalModal({ approvals, onApprove, onReject }: ApprovalModalP
                   <div className="p-4 bg-white border-t border-slate-100 space-y-4">
                     {/* 설명 */}
                     <div>
-                      <p className="text-xs font-semibold text-slate-400 mb-1">요청 내용</p>
-                      <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{approval.description}</p>
+                      <p className="text-sm font-semibold text-slate-400 mb-1">요청 내용</p>
+                      <p className="text-base text-slate-700 leading-relaxed whitespace-pre-line">{approval.description}</p>
                     </div>
 
                     {/* 미리보기 */}
                     {Object.keys(approval.preview_data).length > 0 && (
                       <div>
-                        <p className="text-xs font-semibold text-slate-400 mb-2">미리보기</p>
-                        <div className="bg-slate-50 rounded-xl p-3 text-xs text-slate-600 space-y-1">
+                        <p className="text-sm font-semibold text-slate-400 mb-2">미리보기</p>
+                        <div className="bg-slate-50 rounded-xl p-3 text-sm text-slate-600 space-y-1">
                           {Object.entries(approval.preview_data).map(([k, v]) => (
                             <div key={k} className="flex gap-2">
                               <span className="font-semibold text-slate-500 flex-shrink-0">{k}:</span>
@@ -130,13 +130,13 @@ export function ApprovalModal({ approvals, onApprove, onReject }: ApprovalModalP
                     {/* 거절 이유 입력 */}
                     {rejectingId === approval.id && (
                       <div>
-                        <p className="text-xs font-semibold text-slate-400 mb-1">거절 사유 (선택)</p>
+                        <p className="text-sm font-semibold text-slate-400 mb-1">거절 사유 (선택)</p>
                         <input
                           type="text"
                           value={rejectReason}
                           onChange={(e) => setRejectReason(e.target.value)}
                           placeholder="거절 사유를 입력하세요..."
-                          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300"
+                          className="w-full px-3 py-2 text-base border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300"
                         />
                       </div>
                     )}

@@ -17,7 +17,7 @@ export default async function UserDetailPage({
   return (
     <>
       <div className="mb-2">
-        <Link href="/admin/users" className="text-xs text-slate-500 hover:text-blue-600">
+        <Link href="/admin/users" className="text-sm text-slate-500 hover:text-blue-600">
           ← 사용자 목록
         </Link>
       </div>
@@ -25,13 +25,13 @@ export default async function UserDetailPage({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="p-6 lg:col-span-2">
-          <h2 className="text-sm font-bold text-slate-900 mb-4">계정 편집</h2>
+          <h2 className="text-base font-bold text-slate-900 mb-4">계정 편집</h2>
           <UserEditForm user={user} plans={plans} />
         </Card>
 
         <Card className="p-6">
-          <h2 className="text-sm font-bold text-slate-900 mb-4">요약</h2>
-          <dl className="space-y-3 text-sm">
+          <h2 className="text-base font-bold text-slate-900 mb-4">요약</h2>
+          <dl className="space-y-3 text-base">
             <div className="flex justify-between">
               <dt className="text-slate-500">이름</dt>
               <dd className="font-medium text-slate-900">{user.name}</dd>

@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { runAgent } from "@/lib/agents/runner";
 import { pickScheduledTask } from "@/lib/scheduler/auto-tasks";
 import type { AutoAgentType } from "@/lib/scheduler/auto-tasks";
+import { checkQuotaForRun } from "@/lib/security/quota";
 
 /**
  * POST /api/scheduler/auto-run
@@ -48,9 +49,17 @@ export async function POST(request: NextRequest) {
 
   const results: Array<{ userId: string; agentType: string; sessionId: string }> = [];
 
+  const skipped: Array<{ userId: string; agentType: string; reason: string }> = [];
+
   for (const user of users) {
     if (!user) continue;
     for (const agentType of agentTypes) {
+      // 플랜 한도/무료 자동 차단 검증
+      const quota = checkQuotaForRun(user.id, { trigger: "auto_scheduler" });
+      if (!quota.ok) {
+        skipped.push({ userId: user.id, agentType, reason: quota.reason });
+        continue;
+      }
       try {
         const task = pickScheduledTask(agentType);
         const sessionId = await runAgent({
@@ -70,7 +79,9 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     message: "자율 에이전트 실행 완료",
     launched: results.length,
+    skipped: skipped.length,
     results,
+    skippedDetails: skipped,
   });
 }
 

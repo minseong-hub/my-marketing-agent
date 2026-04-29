@@ -35,7 +35,7 @@ export function HowItWorks() {
         <p
           style={{
             fontFamily: '"JetBrains Mono", monospace',
-            fontSize: 9,
+            fontSize: 13,
             color: "#5ce5ff",
             letterSpacing: "0.12em",
             marginBottom: 12,
@@ -46,7 +46,7 @@ export function HowItWorks() {
         <h2
           style={{
             fontFamily: '"Press Start 2P", monospace',
-            fontSize: "clamp(14px, 2vw, 20px)",
+            fontSize: "clamp(18px, 2vw, 20px)",
             color: "#cfe9ff",
             textShadow: "4px 4px 0 #8a2877",
             marginBottom: 40,
@@ -71,7 +71,7 @@ export function HowItWorks() {
               <p
                 style={{
                   fontFamily: '"Press Start 2P", monospace',
-                  fontSize: 18,
+                  fontSize: 22,
                   color: step.color,
                   opacity: 0.3,
                   position: "absolute",
@@ -84,7 +84,7 @@ export function HowItWorks() {
               <h3
                 style={{
                   fontFamily: '"Press Start 2P", monospace',
-                  fontSize: 10,
+                  fontSize: 14,
                   color: step.color,
                   marginBottom: 12,
                   lineHeight: 1.6,
@@ -95,7 +95,7 @@ export function HowItWorks() {
               <p
                 style={{
                   fontFamily: '"IBM Plex Sans KR", sans-serif',
-                  fontSize: 13,
+                  fontSize: 17,
                   color: "#7e94c8",
                   lineHeight: 1.8,
                 }}

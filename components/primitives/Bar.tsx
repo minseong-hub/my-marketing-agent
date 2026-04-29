@@ -13,8 +13,8 @@ export function Bar({ v, c, segments = 20, label }: BarProps) {
     <div className="space-y-1">
       {label && (
         <div className="flex justify-between" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
-          <span className="text-xs" style={{ color: "#7e94c8" }}>{label}</span>
-          <span className="text-xs" style={{ color: c }}>{v}%</span>
+          <span className="text-sm" style={{ color: "#7e94c8" }}>{label}</span>
+          <span className="text-sm" style={{ color: c }}>{v}%</span>
         </div>
       )}
       <div className="flex gap-px">

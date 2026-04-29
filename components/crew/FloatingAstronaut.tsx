@@ -96,7 +96,7 @@ export function FloatingAstronaut({ agent, path, onOpen }: FloatingAstronautProp
             border: `1px solid ${agent.accent}`,
             padding: "4px 8px",
             fontFamily: '"JetBrains Mono", monospace',
-            fontSize: 8,
+            fontSize: 12,
             color: agent.accent,
             whiteSpace: "nowrap",
             pointerEvents: "none",

@@ -17,7 +17,7 @@ export function CrewRoster({ onOpen }: CrewRosterProps) {
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
-    <CockpitPanel title="CREW ROSTER" status="4 ACTIVE" statusColor="#66ff9d" accent="#5ce5ff" className="h-full">
+    <CockpitPanel title="크루 명단" status="4명 대기" statusColor="#66ff9d" accent="#5ce5ff" className="h-full">
       <div className="space-y-1">
         {AGENTS.map(agent => (
           <button
@@ -45,9 +45,9 @@ export function CrewRoster({ onOpen }: CrewRosterProps) {
               </p>
               <p
                 style={{
-                  fontFamily: '"JetBrains Mono", monospace',
-                  fontSize: 8,
-                  color: "#7e94c8",
+                  fontFamily: '"IBM Plex Sans KR", sans-serif',
+                  fontSize: 13,
+                  color: "#cfe9ff",
                   marginTop: 2,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -60,7 +60,7 @@ export function CrewRoster({ onOpen }: CrewRosterProps) {
             <span
               style={{
                 fontFamily: '"JetBrains Mono", monospace',
-                fontSize: 8,
+                fontSize: 12,
                 color: "#66ff9d",
               }}
             >
@@ -76,13 +76,13 @@ export function CrewRoster({ onOpen }: CrewRosterProps) {
           marginTop: 12,
           borderTop: "1px dashed #1f2a6b",
           paddingTop: 8,
-          fontFamily: '"JetBrains Mono", monospace',
-          fontSize: 8,
-          color: "#4a5a8a",
+          fontFamily: '"IBM Plex Sans KR", sans-serif',
+          fontSize: 13,
+          color: "#7e94c8",
           textAlign: "center",
         }}
       >
-        ▸ DOSSIER 열람 · 행을 클릭
+        ▸ 비서 행을 클릭하면 상세 정보가 열려요
       </div>
     </CockpitPanel>
   );

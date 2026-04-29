@@ -7,7 +7,7 @@ export default async function AdminBillingPage() {
   const events = db.listBillingEvents(undefined, 100);
   const subs = db.listSubscriptions();
 
-  const dist: Record<PlanSlug, number> = { starter: 0, growth: 0, pro: 0 };
+  const dist: Record<PlanSlug, number> = { free: 0, starter: 0, growth: 0, pro: 0 };
   for (const row of summary.planDist) {
     if (row.slug in dist) dist[row.slug as PlanSlug] = row.c;
   }
@@ -32,11 +32,11 @@ export default async function AdminBillingPage() {
           return (
             <Card key={slug} className="p-5">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-sm font-bold text-slate-900">{def.name}</div>
+                <div className="text-base font-bold text-slate-900">{def.name}</div>
                 <Badge tone="blue">{formatKRW(def.price_monthly)}</Badge>
               </div>
-              <div className="text-3xl font-extrabold text-slate-900">{dist[slug]}</div>
-              <div className="text-xs text-slate-500 mt-1">활성 + 체험 사용자 수</div>
+              <div className="text-4xl font-extrabold text-slate-900">{dist[slug]}</div>
+              <div className="text-sm text-slate-500 mt-1">활성 + 체험 사용자 수</div>
               <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
                 <div
                   className="h-full bg-blue-600"
@@ -55,8 +55,8 @@ export default async function AdminBillingPage() {
 
       <Card className="mb-6">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-slate-900">활성 구독</h2>
-          <span className="text-xs text-slate-400">{subs.length}건</span>
+          <h2 className="text-base font-bold text-slate-900">활성 구독</h2>
+          <span className="text-sm text-slate-400">{subs.length}건</span>
         </div>
         <Table>
           <thead>
@@ -86,8 +86,8 @@ export default async function AdminBillingPage() {
                   {s.status === "trialing" && <Badge tone="blue">trialing</Badge>}
                 </Td>
                 <Td>{formatKRW(s.amount)}</Td>
-                <Td className="text-xs text-slate-500">{s.started_at?.slice(0, 10)}</Td>
-                <Td className="text-xs text-slate-500">{s.next_billing_at?.slice(0, 10) ?? "-"}</Td>
+                <Td className="text-sm text-slate-500">{s.started_at?.slice(0, 10)}</Td>
+                <Td className="text-sm text-slate-500">{s.next_billing_at?.slice(0, 10) ?? "-"}</Td>
               </tr>
             ))}
           </tbody>
@@ -96,8 +96,8 @@ export default async function AdminBillingPage() {
 
       <Card>
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-slate-900">결제 이벤트 로그</h2>
-          <span className="text-xs text-slate-400">최근 100건 · mock</span>
+          <h2 className="text-base font-bold text-slate-900">결제 이벤트 로그</h2>
+          <span className="text-sm text-slate-400">최근 100건 · mock</span>
         </div>
         <Table>
           <thead>
@@ -118,14 +118,14 @@ export default async function AdminBillingPage() {
             )}
             {events.map((e) => (
               <tr key={e.id} className="hover:bg-slate-50">
-                <Td className="text-xs text-slate-500">{e.created_at.slice(0, 16)}</Td>
+                <Td className="text-sm text-slate-500">{e.created_at.slice(0, 16)}</Td>
                 <Td className="font-medium text-slate-900">{e.user_email ?? e.user_id}</Td>
                 <Td>
                   <EventBadge kind={e.kind} />
                 </Td>
                 <Td>{e.plan_slug ? PLAN_DEFINITIONS[e.plan_slug as PlanSlug]?.name ?? e.plan_slug : "-"}</Td>
                 <Td className="text-right font-semibold">{e.amount > 0 ? formatKRW(e.amount) : "-"}</Td>
-                <Td className="text-xs text-slate-500">{e.note ?? ""}</Td>
+                <Td className="text-sm text-slate-500">{e.note ?? ""}</Td>
               </tr>
             ))}
           </tbody>

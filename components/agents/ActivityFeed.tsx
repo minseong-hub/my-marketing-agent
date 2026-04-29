@@ -28,9 +28,9 @@ export function ActivityFeed({ logs }: ActivityFeedProps) {
   if (logs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="text-4xl mb-3">🤖</div>
-        <p className="text-sm font-medium text-slate-400">아직 활동 내역이 없습니다.</p>
-        <p className="text-xs text-slate-300 mt-1">에이전트를 시작하면 여기에 실시간으로 보고됩니다.</p>
+        <div className="text-5xl mb-3">🤖</div>
+        <p className="text-base font-medium text-slate-400">아직 활동 내역이 없습니다.</p>
+        <p className="text-sm text-slate-300 mt-1">에이전트를 시작하면 여기에 실시간으로 보고됩니다.</p>
       </div>
     );
   }
@@ -56,12 +56,12 @@ export function ActivityFeed({ logs }: ActivityFeedProps) {
               <div className={cn("w-2 h-2 rounded-full flex-shrink-0 mt-1.5", levelConfig.dot)} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className={cn("text-[10px] font-bold", colors.text)}>
+                  <span className={cn("text-[14px] font-bold", colors.text)}>
                     {AGENT_ICONS[log.agent_type]} {AGENT_NAMES[log.agent_type] || log.agent_type}
                   </span>
-                  <span className="text-[10px] text-slate-300 ml-auto flex-shrink-0">{time}</span>
+                  <span className="text-[14px] text-slate-300 ml-auto flex-shrink-0">{time}</span>
                 </div>
-                <p className="text-xs text-slate-700 leading-relaxed">{log.message}</p>
+                <p className="text-sm text-slate-700 leading-relaxed">{log.message}</p>
               </div>
             </motion.div>
           );

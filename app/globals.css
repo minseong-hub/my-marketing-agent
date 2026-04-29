@@ -38,6 +38,7 @@
     background: #060920;
     color: #cfe9ff;
     font-family: "IBM Plex Sans KR", "Pretendard Variable", Pretendard, system-ui, sans-serif;
+    font-size: 18px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -99,3 +100,14 @@
 ::-webkit-scrollbar-track { background: #060920; }
 ::-webkit-scrollbar-thumb { background: #1f2a6b; }
 ::-webkit-scrollbar-thumb:hover { background: #2a86a8; }
+
+/* ── Toast 슬라이드 인 ── */
+@keyframes toast-in {
+  0%   { transform: translate(-50%, 16px); opacity: 0; }
+  60%  { transform: translate(-50%, -2px); opacity: 1; }
+  100% { transform: translate(-50%, 0); opacity: 1; }
+}
+@keyframes toast-out {
+  0%   { transform: translate(-50%, 0); opacity: 1; }
+  100% { transform: translate(-50%, 8px); opacity: 0; }
+}

@@ -17,6 +17,10 @@ import {
   Target,
   DollarSign,
   LayoutDashboard,
+  Zap,
+  Sparkles,
+  Package,
+  Archive,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -48,7 +52,7 @@ function NavLink({
       href={href}
       title={collapsed ? label : undefined}
       className={cn(
-        "group relative flex items-center gap-2.5 rounded-xl text-sm transition-all duration-150 select-none",
+        "group relative flex items-center gap-2.5 rounded-xl text-base transition-all duration-150 select-none",
         collapsed ? "justify-center px-0 py-2.5 mx-1" : "px-3 py-[7px]",
         isActive
           ? "bg-blue-500/[0.09] text-blue-700 font-semibold"
@@ -73,6 +77,10 @@ function NavLink({
 
 const NAV_ITEMS = [
   { href: "/app/assistants", label: "어시스턴트 현황판", icon: LayoutDashboard, exact: true },
+  { href: "/app/automation", label: "⚡ 자동화 허브", icon: Zap },
+  { href: "/app/library", label: "📦 보관함", icon: Archive },
+  { href: "/app/brand", label: "✨ 브랜드 프로필", icon: Sparkles },
+  { href: "/app/products", label: "🏷️ 상품 카탈로그", icon: Package },
   { href: "/app/assistants/marketing", label: "📱 마케팅 어시스턴트", icon: Megaphone },
   { href: "/app/assistants/detail_page", label: "📄 상세페이지 어시스턴트", icon: FileText },
   { href: "/app/assistants/ads", label: "🎯 광고 전문가", icon: Target },
@@ -96,8 +104,8 @@ function SidebarContent({
           <SSymbol size={28} />
           {showFull && (
             <div className="min-w-0">
-              <p className="text-[13px] font-bold text-slate-800 leading-none truncate">{brandDisplayName}</p>
-              <p className="text-[10px] text-slate-400 leading-none mt-0.5 font-semibold tracking-widest">UpFlow</p>
+              <p className="text-[17px] font-bold text-slate-800 leading-none truncate">{brandDisplayName}</p>
+              <p className="text-[14px] text-slate-400 leading-none mt-0.5 font-semibold tracking-widest">UpFlow</p>
             </div>
           )}
         </Link>
@@ -118,7 +126,7 @@ function SidebarContent({
       {/* AI 비서 섹션 헤더 */}
       {showFull && (
         <div className="px-5 pt-4 pb-1">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+          <p className="text-[14px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
             <Bot className="w-3 h-3" /> AI 마케팅 비서
           </p>
         </div>
@@ -145,14 +153,14 @@ function SidebarContent({
           <div className="mt-2 mx-1 p-3 rounded-xl bg-slate-50/80 border border-slate-100/80">
             <div className="flex items-center gap-2.5 mb-2.5">
               <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 shadow-sm">
-                <span className="text-[10px] font-bold text-white">{userName.charAt(0).toUpperCase() || "U"}</span>
+                <span className="text-[14px] font-bold text-white">{userName.charAt(0).toUpperCase() || "U"}</span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-slate-700 truncate leading-none mb-0.5">{userName}</p>
-                <p className="text-[10px] text-slate-400 leading-none">로그인됨</p>
+                <p className="text-sm font-semibold text-slate-700 truncate leading-none mb-0.5">{userName}</p>
+                <p className="text-[14px] text-slate-400 leading-none">로그인됨</p>
               </div>
             </div>
-            <button onClick={onLogout} className="flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-red-500 transition-colors font-medium">
+            <button onClick={onLogout} className="flex items-center gap-1.5 text-[15px] text-slate-400 hover:text-red-500 transition-colors font-medium">
               <LogOut className="w-3 h-3" />로그아웃
             </button>
           </div>
@@ -214,7 +222,7 @@ export function AppSidebar({ brandDisplayName, userName }: AppSidebarProps) {
           <Menu className="w-4 h-4" />
         </button>
         <SSymbol size={22} />
-        <span className="text-sm font-bold text-slate-800">{brandDisplayName}</span>
+        <span className="text-base font-bold text-slate-800">{brandDisplayName}</span>
       </div>
 
       {/* 모바일 backdrop */}

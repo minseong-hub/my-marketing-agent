@@ -15,7 +15,7 @@ const LED_PHASES = [0, 400, 800, 1200];
 
 export function CockpitPanel({
   title,
-  status = "ONLINE",
+  status = "정상",
   statusColor = "#66ff9d",
   accent = "#5ce5ff",
   height,
@@ -44,20 +44,21 @@ export function CockpitPanel({
       >
         <span
           style={{
-            fontFamily: '"JetBrains Mono", monospace',
-            fontSize: 9,
+            fontFamily: '"IBM Plex Sans KR", sans-serif',
+            fontSize: 14,
+            fontWeight: 600,
             color: accent,
-            letterSpacing: "0.1em",
+            letterSpacing: "0.02em",
           }}
         >
           ● {title}
         </span>
         <span
           style={{
-            fontFamily: '"JetBrains Mono", monospace',
-            fontSize: 9,
+            fontFamily: '"IBM Plex Sans KR", sans-serif',
+            fontSize: 13,
+            fontWeight: 500,
             color: statusColor,
-            letterSpacing: "0.08em",
             animation: "blink 1s steps(2) infinite",
           }}
         >

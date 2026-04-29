@@ -24,25 +24,25 @@ export default async function UsersPage({
             name="q"
             defaultValue={sp.q ?? ""}
             placeholder="이메일 / 이름 / 사업자명"
-            className="flex-1 min-w-[220px] h-9 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+            className="flex-1 min-w-[220px] h-9 px-3 rounded-lg border border-slate-200 text-base focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           />
-          <select name="role" defaultValue={sp.role ?? ""} className="h-9 px-3 rounded-lg border border-slate-200 text-sm bg-white">
+          <select name="role" defaultValue={sp.role ?? ""} className="h-9 px-3 rounded-lg border border-slate-200 text-base bg-white">
             <option value="">역할 전체</option>
             <option value="user">user</option>
             <option value="admin">admin</option>
           </select>
-          <select name="status" defaultValue={sp.status ?? ""} className="h-9 px-3 rounded-lg border border-slate-200 text-sm bg-white">
+          <select name="status" defaultValue={sp.status ?? ""} className="h-9 px-3 rounded-lg border border-slate-200 text-base bg-white">
             <option value="">계정 상태 전체</option>
             <option value="active">active</option>
             <option value="suspended">suspended</option>
           </select>
-          <select name="plan" defaultValue={sp.plan ?? ""} className="h-9 px-3 rounded-lg border border-slate-200 text-sm bg-white">
+          <select name="plan" defaultValue={sp.plan ?? ""} className="h-9 px-3 rounded-lg border border-slate-200 text-base bg-white">
             <option value="">플랜 전체</option>
             <option value="starter">Starter</option>
             <option value="growth">Growth</option>
             <option value="pro">Pro</option>
           </select>
-          <button type="submit" className="h-9 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold">
+          <button type="submit" className="h-9 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-base font-semibold">
             검색
           </button>
         </form>
@@ -76,7 +76,7 @@ export default async function UsersPage({
                   <Td className="font-medium text-slate-900">{u.email}</Td>
                   <Td>
                     <div className="text-slate-900">{u.name}</div>
-                    <div className="text-xs text-slate-500">{u.brand_display_name}</div>
+                    <div className="text-sm text-slate-500">{u.brand_display_name}</div>
                   </Td>
                   <Td><AuthProviderBadge provider={u.auth_provider} /></Td>
                   <Td>
@@ -85,15 +85,15 @@ export default async function UsersPage({
                   <Td>
                     {def ? (
                       <div>
-                        <div className="text-sm font-semibold text-slate-900">{def.name}</div>
-                        <div className="text-[11px] text-slate-500">{formatKRW(def.price_monthly)}/월</div>
+                        <div className="text-base font-semibold text-slate-900">{def.name}</div>
+                        <div className="text-[15px] text-slate-500">{formatKRW(def.price_monthly)}/월</div>
                       </div>
                     ) : (
-                      <span className="text-xs text-slate-400">미가입</span>
+                      <span className="text-sm text-slate-400">미가입</span>
                     )}
                   </Td>
                   <Td><PlanStatusBadge status={u.plan_status} /></Td>
-                  <Td className="text-xs">
+                  <Td className="text-sm">
                     <div className="space-y-0.5">
                       {u.terms_agreed_at ? (
                         <div className="text-emerald-600">이용약관 {u.terms_agreed_at.slice(0, 10)}</div>
@@ -110,11 +110,11 @@ export default async function UsersPage({
                       ) : null}
                     </div>
                   </Td>
-                  <Td className="text-xs text-slate-500">{u.created_at?.slice(0, 10)}</Td>
+                  <Td className="text-sm text-slate-500">{u.created_at?.slice(0, 10)}</Td>
                   <Td className="text-right">
                     <Link
                       href={`/admin/users/${u.id}`}
-                      className="text-xs font-semibold text-blue-600 hover:text-blue-500"
+                      className="text-sm font-semibold text-blue-600 hover:text-blue-500"
                     >
                       상세
                     </Link>

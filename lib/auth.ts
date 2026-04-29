@@ -2,15 +2,13 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "./db";
+import { getJwtSecretBytes } from "./env";
 
 export const COOKIE_NAME = "auth-token";
 export const ADMIN_COOKIE_NAME = "admin-token";
 
 function getSecret() {
-  return new TextEncoder().encode(
-    process.env.JWT_SECRET ||
-      "saas-marketing-agent-secret-key-2024-change-in-production"
-  );
+  return getJwtSecretBytes();
 }
 
 export interface UserPayload {

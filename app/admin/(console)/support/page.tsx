@@ -28,7 +28,7 @@ export default async function SupportPage({
             key={f.v || "all"}
             href={`/admin/support${f.v ? `?status=${f.v}` : ""}`}
             className={
-              "h-8 px-3 inline-flex items-center rounded-lg text-xs font-semibold border transition-colors " +
+              "h-8 px-3 inline-flex items-center rounded-lg text-sm font-semibold border transition-colors " +
               ((sp.status ?? "") === f.v
                 ? "bg-blue-600 text-white border-blue-600"
                 : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")
@@ -62,7 +62,7 @@ export default async function SupportPage({
               <tr key={t.id} className="hover:bg-slate-50">
                 <Td className="font-medium text-slate-900 max-w-[360px]">
                   <div className="truncate">{t.subject}</div>
-                  <div className="text-xs text-slate-500 truncate">{t.body}</div>
+                  <div className="text-sm text-slate-500 truncate">{t.body}</div>
                 </Td>
                 <Td>{t.user_email}</Td>
                 <Td>
@@ -79,7 +79,7 @@ export default async function SupportPage({
                   {t.status === "pending" && <Badge tone="amber">pending</Badge>}
                   {t.status === "closed" && <Badge tone="emerald">closed</Badge>}
                 </Td>
-                <Td className="text-xs text-slate-500">{t.created_at?.slice(0, 16)}</Td>
+                <Td className="text-sm text-slate-500">{t.created_at?.slice(0, 16)}</Td>
                 <Td className="text-right">
                   <TicketActions id={t.id} status={t.status} priority={t.priority} />
                 </Td>

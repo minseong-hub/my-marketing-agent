@@ -83,14 +83,14 @@ export function AgentModal({ agent, onClose, onCTA }: AgentModalProps) {
               className="flex items-center justify-between px-4 py-2"
               style={{ borderBottom: `1px solid ${agent.accent}44`, background: "#060920" }}
             >
-              <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: agent.accent, letterSpacing: "0.1em" }}>
-                ● CREW DOSSIER · {agent.englishName.toUpperCase()}
+              <span style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 15, fontWeight: 600, color: agent.accent }}>
+                ● 비서 상세 · {agent.name}
               </span>
               <button
                 onClick={onClose}
-                style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: "#7e94c8", cursor: "pointer", background: "none", border: "none" }}
+                style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, color: "#cfe9ff", cursor: "pointer", background: "none", border: "none", fontWeight: 500 }}
               >
-                [ESC] CLOSE ✕
+                닫기 (ESC) ✕
               </button>
             </div>
 
@@ -114,7 +114,7 @@ export function AgentModal({ agent, onClose, onCTA }: AgentModalProps) {
               {/* Right: Info */}
               <div className="flex-1 p-6 space-y-4">
                 <div>
-                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: agent.accent, letterSpacing: "0.1em" }}>
+                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 13, color: agent.accent, letterSpacing: "0.1em" }}>
                     {agent.title}
                   </p>
                   <h2
@@ -129,19 +129,19 @@ export function AgentModal({ agent, onClose, onCTA }: AgentModalProps) {
                   >
                     {agent.name}
                   </h2>
-                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: agent.accent, marginTop: 6 }}>
+                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 14, color: agent.accent, marginTop: 6 }}>
                     » {agent.tagline}
                   </p>
                 </div>
 
-                <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 13, color: "#cfe9ff", lineHeight: 1.8 }}>
+                <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 17, color: "#cfe9ff", lineHeight: 1.8 }}>
                   {agent.desc}
                 </p>
 
                 {/* Skills */}
                 <div>
-                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: "#7e94c8", letterSpacing: "0.1em", marginBottom: 8 }}>
-                    ▸ EQUIPMENT
+                  <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, fontWeight: 600, color: "#cfe9ff", marginBottom: 8 }}>
+                    ▸ 잘하는 일
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {agent.skills.map(skill => (
@@ -149,7 +149,7 @@ export function AgentModal({ agent, onClose, onCTA }: AgentModalProps) {
                         key={skill}
                         style={{
                           fontFamily: '"JetBrains Mono", monospace',
-                          fontSize: 9,
+                          fontSize: 13,
                           color: agent.accent,
                           border: `1px solid ${agent.accentDark}`,
                           padding: "3px 8px",
@@ -164,8 +164,8 @@ export function AgentModal({ agent, onClose, onCTA }: AgentModalProps) {
 
                 {/* Sample Transmission */}
                 <div>
-                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 9, color: "#7e94c8", letterSpacing: "0.1em", marginBottom: 8 }}>
-                    ▸ SAMPLE TRANSMISSION
+                  <p style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, fontWeight: 600, color: "#cfe9ff", marginBottom: 8 }}>
+                    ▸ 비서가 어떻게 말하는지 미리보기
                   </p>
                   <div
                     style={{
@@ -182,10 +182,10 @@ export function AgentModal({ agent, onClose, onCTA }: AgentModalProps) {
                 {/* CTAs */}
                 <div className="flex gap-3 pt-2 flex-wrap">
                   <PixelButton variant="primary" size="md" onClick={onCTA ?? (() => onClose())}>
-                    ▶ {agent.name} 고용하기
+                    ▶ {agent.name} 함께하기
                   </PixelButton>
                   <PixelButton variant="secondary" size="md" onClick={onClose}>
-                    도크 닫기
+                    닫기
                   </PixelButton>
                 </div>
               </div>

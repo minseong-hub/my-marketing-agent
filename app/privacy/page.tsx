@@ -8,7 +8,7 @@ function TocPanel() {
     <CockpitPanel title="목차" status="INDEXED" accent="#7e94c8" className="flex-1">
       <div className="space-y-2">
         {["수집 정보", "이용 목적", "보존 기간", "제3자 제공", "이용자 권리", "문의"].map(item => (
-          <p key={item} style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#7e94c8" }}>
+          <p key={item} style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: "#7e94c8" }}>
             › {item}
           </p>
         ))}
@@ -20,18 +20,18 @@ function TocPanel() {
 export default function PrivacyPage() {
   return (
     <CockpitShell
-      sector="SECTOR-7G · ARCHIVES"
+      sector="기록보관소 · 개인정보처리방침"
       leftConsole={<TocPanel />}
-      bootMessage="PRIVACY PROTOCOL v2026.04 · ENCRYPTION: AES-256 · STATUS: COMPLIANT"
+      bootMessage="개인정보 보호 정책 2026.04 · 암호화 AES-256 · 컴플라이언스 정상"
     >
       <div style={{ padding: "32px 28px", maxWidth: 720 }}>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: "#4a5a8a", marginBottom: 8 }}>
+        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: "#7e94c8", marginBottom: 8 }}>
           최종 업데이트: 2026년 4월
         </p>
         <h1
           style={{
             fontFamily: '"Press Start 2P", monospace',
-            fontSize: "clamp(12px, 1.6vw, 16px)",
+            fontSize: "clamp(16px, 1.6vw, 20px)",
             color: "#cfe9ff",
             textShadow: "3px 3px 0 #8a2877",
             marginBottom: 28,
@@ -42,7 +42,7 @@ export default function PrivacyPage() {
         <div
           style={{
             fontFamily: '"IBM Plex Sans KR", sans-serif',
-            fontSize: 14,
+            fontSize: 18,
             color: "#7e94c8",
             lineHeight: 1.9,
             display: "flex",

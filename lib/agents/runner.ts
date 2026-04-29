@@ -3,6 +3,7 @@ import { COMMON_TOOLS } from "@/lib/claude/tools";
 import { SYSTEM_PROMPTS, AGENT_NAMES } from "@/lib/claude/prompts";
 import { db } from "@/lib/db";
 import { sseBus } from "@/lib/sse/bus";
+import { buildUserContextBlock } from "./context";
 import type { AgentType, AgentRunInput } from "./types";
 import type Anthropic from "@anthropic-ai/sdk";
 
@@ -96,13 +97,17 @@ async function executeAgentLoop(
     { role: "user", content: task },
   ];
 
+  // 사용자/브랜드/상품 컨텍스트를 시스템 프롬프트 뒤에 동적으로 주입
+  const userContext = buildUserContextBlock(userId);
+  const systemPrompt = (SYSTEM_PROMPTS[agentType] || "") + (userContext || "");
+
   for (let i = 0; i < MAX_ITERATIONS; i++) {
     let response: Anthropic.Message;
     try {
       response = await claude.messages.create({
         model: MODEL,
         max_tokens: 4096,
-        system: SYSTEM_PROMPTS[agentType],
+        system: systemPrompt,
         tools: COMMON_TOOLS,
         messages,
       });
@@ -222,14 +227,59 @@ async function executeAgentLoop(
       }
 
       else if (tool.name === "save_content_draft") {
-        // 콘텐츠 초안 저장 (향후 DB 연동)
-        emit("action", `📝 "${input.title}" 콘텐츠 초안을 저장했습니다. 플랫폼: ${input.platform}`);
-        toolResult = "콘텐츠 초안 저장 완료";
+        try {
+          const platform = (input.platform as string) || "unknown";
+          const title = (input.title as string) || "(제목 없음)";
+          const contentText = (input.content as string) || "";
+          const hashtags = Array.isArray(input.hashtags) ? input.hashtags as string[] : [];
+          const scheduled = (input.scheduled_date as string) || null;
+          db.createLibraryItem(userId, {
+            agent_type: agentType,
+            kind: agentType === "detail_page" ? "detail_section" : "content_draft",
+            title,
+            content: contentText + (hashtags.length ? "\n\n" + hashtags.map(h => h.startsWith("#") ? h : "#" + h).join(" ") : ""),
+            metadata: JSON.stringify({ platform, hashtags, scheduled_date: scheduled }),
+            tags: JSON.stringify(hashtags.slice(0, 10)),
+            source_session_id: sessionId,
+            is_favorite: 0,
+          });
+          emit("action", `📝 "${title}" 콘텐츠 초안을 보관함에 저장했습니다. (플랫폼: ${platform})`);
+          toolResult = "콘텐츠 초안 저장 완료 (보관함)";
+        } catch (e) {
+          toolResult = `저장 실패: ${e instanceof Error ? e.message : String(e)}`;
+        }
       }
 
       else if (tool.name === "save_ad_campaign") {
-        emit("action", `🎯 "${input.campaign_name}" 광고 캠페인 초안을 생성했습니다. 플랫폼: ${input.platform}`);
-        toolResult = "광고 캠페인 저장 완료";
+        try {
+          const platform = (input.platform as string) || "unknown";
+          const campaignName = (input.campaign_name as string) || "(이름 없음)";
+          const keywords = Array.isArray(input.keywords) ? input.keywords as string[] : [];
+          const headline = (input.headline as string) || "";
+          const description = (input.description as string) || "";
+          const budget = (input.budget as number) || 0;
+          const composedContent = [
+            `채널: ${platform}`,
+            `키워드: ${keywords.join(", ")}`,
+            headline ? `\n[헤드라인]\n${headline}` : "",
+            description ? `\n[설명문]\n${description}` : "",
+            budget ? `\n[예산] ${budget.toLocaleString()}원` : "",
+          ].filter(Boolean).join("\n");
+          db.createLibraryItem(userId, {
+            agent_type: agentType,
+            kind: "ad_campaign",
+            title: campaignName,
+            content: composedContent,
+            metadata: JSON.stringify({ platform, keywords, headline, description, budget }),
+            tags: JSON.stringify(keywords.slice(0, 10)),
+            source_session_id: sessionId,
+            is_favorite: 0,
+          });
+          emit("action", `🎯 "${campaignName}" 광고 캠페인을 보관함에 저장했습니다. (채널: ${platform})`);
+          toolResult = "광고 캠페인 저장 완료 (보관함)";
+        } catch (e) {
+          toolResult = `저장 실패: ${e instanceof Error ? e.message : String(e)}`;
+        }
       }
 
       toolResults.push({ type: "tool_result", tool_use_id: tool.id, content: toolResult });

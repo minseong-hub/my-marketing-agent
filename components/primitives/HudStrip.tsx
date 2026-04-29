@@ -20,31 +20,31 @@ export function HudStrip() {
 
   return (
     <div
-      className="flex items-center gap-6 px-4 py-2"
+      className="flex items-center gap-5 px-4 py-2 flex-wrap"
       style={{
         background: "#060920",
         borderTop: "1px solid #1f2a6b",
-        fontFamily: '"JetBrains Mono", monospace',
-        fontSize: 9,
-        color: "#7e94c8",
-        letterSpacing: "0.08em",
+        fontFamily: '"IBM Plex Sans KR", sans-serif',
+        fontSize: 13,
+        color: "#cfe9ff",
+        fontWeight: 500,
       }}
     >
-      <span style={{ color: "#5ce5ff" }}>⏱ {time} UTC+9</span>
-      <span>|</span>
+      <span style={{ color: "#5ce5ff" }}>⏱ {time} (KST)</span>
+      <span style={{ color: "#7e94c8" }}>|</span>
       <span>
-        FUEL{" "}
+        연료{" "}
         <span style={{ color: fuel > 50 ? "#66ff9d" : "#ffd84d" }}>{fuel}%</span>
       </span>
-      <span>|</span>
+      <span style={{ color: "#7e94c8" }}>|</span>
       <span>
-        O2{" "}
+        산소{" "}
         <span style={{ color: o2 > 70 ? "#66ff9d" : "#ff4ec9" }}>{o2}%</span>
       </span>
-      <span>|</span>
-      <span>SECTOR-7G · SHIP CREWMATE-04</span>
+      <span style={{ color: "#7e94c8" }}>|</span>
+      <span>크루메이트호 · 7번 구역</span>
       <span className="ml-auto" style={{ color: "#66ff9d", animation: "blink 1s steps(2) infinite" }}>
-        ● ALL SYSTEMS NOMINAL
+        ● 전 시스템 정상
       </span>
     </div>
   );

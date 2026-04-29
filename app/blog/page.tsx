@@ -1,14 +1,8 @@
 "use client";
+import Link from "next/link";
 import { CockpitShell } from "@/components/layout/CockpitShell";
 import { CockpitPanel } from "@/components/primitives/CockpitPanel";
-
-const POSTS = [
-  { id: 1, title: "ROAS 4배 달성한 셀러의 광고 전략", date: "2026.04.20", tag: "광고", color: "#ffd84d" },
-  { id: 2, title: "상세페이지 체류시간 42초 늘리는 법", date: "2026.04.15", tag: "상세페이지", color: "#5ce5ff" },
-  { id: 3, title: "스마트스토어 5월 트렌드 예측", date: "2026.04.10", tag: "마케팅", color: "#ff4ec9" },
-  { id: 4, title: "AI 재무 비서로 절세한 소규모 셀러 사례", date: "2026.04.05", tag: "재무", color: "#66ff9d" },
-  { id: 5, title: "카페24 연동 완전 가이드", date: "2026.03.28", tag: "가이드", color: "#7e94c8" },
-];
+import { POSTS } from "./posts";
 
 export default function BlogPage() {
   const ArchivePanel = (
@@ -48,14 +42,17 @@ export default function BlogPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {POSTS.map(post => (
-            <div
+            <Link
               key={post.id}
+              href={`/blog/${post.slug}`}
               className="pixel-frame cursor-pointer"
               style={{
                 border: `1px solid ${post.color}44`,
                 background: "#0f1640",
                 padding: "20px 16px",
                 transition: "all 0.15s",
+                textDecoration: "none",
+                display: "block",
               }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.border = `1px solid ${post.color}`; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.border = `1px solid ${post.color}44`; }}
@@ -97,6 +94,17 @@ export default function BlogPage() {
                 style={{
                   fontFamily: '"IBM Plex Sans KR", sans-serif',
                   fontSize: 14,
+                  color: "#7e94c8",
+                  marginTop: 8,
+                  lineHeight: 1.6,
+                }}
+              >
+                {post.excerpt}
+              </p>
+              <p
+                style={{
+                  fontFamily: '"IBM Plex Sans KR", sans-serif',
+                  fontSize: 14,
                   color: post.color,
                   marginTop: 10,
                   fontWeight: 500,
@@ -104,7 +112,7 @@ export default function BlogPage() {
               >
                 자세히 읽기 →
               </p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

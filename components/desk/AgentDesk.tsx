@@ -17,9 +17,14 @@ import { AddyROAS } from "./widgets/specialty/AddyROAS";
 import { PennyLedger } from "./widgets/specialty/PennyLedger";
 import { ChatBubble } from "./chat/ChatBubble";
 import { CommandPalette } from "@/components/system/CommandPalette";
-import { DESKS, type DeskAgentId } from "@/data/desks";
-
-const FONT_KR = '"IBM Plex Sans KR", sans-serif';
+import {
+  MarkyContentCalendarTab, MarkyAudienceTab,
+  DaliTemplatesTab, DaliABTab,
+  AddyCampaignsTab, AddySpendTab,
+  PennyLedgerTab, PennyTaxTab,
+  HistoryTab, PerformanceTab, KnowledgeTab, TeamTab, ReportsTab, SettingsTab,
+} from "./tabs/DeskTabs";
+import { type DeskAgentId } from "@/data/desks";
 
 function Specialty({ agentId }: { agentId: DeskAgentId }) {
   if (agentId === "marky") return <MarkyAudience />;
@@ -28,25 +33,32 @@ function Specialty({ agentId }: { agentId: DeskAgentId }) {
   return <PennyLedger />;
 }
 
-function StubTab({ tab }: { tab: string }) {
-  const a = DESKS.marky.agent;
-  return (
-    <div style={{
-      border: "1px dashed #1f2a6b",
-      padding: "60px 40px",
-      textAlign: "center",
-      fontFamily: FONT_KR,
-      color: "#7e94c8",
-    }}>
-      <p style={{ fontSize: 16, fontWeight: 600, color: "#cfe9ff", marginBottom: 8 }}>
-        「{tab}」 탭은 콘셉트 단계
-      </p>
-      <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>
-        오버뷰 탭에서 전체 흐름을 먼저 확인해 주세요.<br />
-        이 탭은 곧 실 데이터 + 위젯이 채워질 예정입니다.
-      </p>
-    </div>
-  );
+function TabContent({ agentId, tab }: { agentId: DeskAgentId; tab: string }) {
+  // Special tabs (비서별)
+  if (agentId === "marky") {
+    if (tab === "콘텐츠 캘린더") return <MarkyContentCalendarTab agentId={agentId} />;
+    if (tab === "오디언스") return <MarkyAudienceTab agentId={agentId} />;
+  }
+  if (agentId === "dali") {
+    if (tab === "템플릿 갤러리") return <DaliTemplatesTab agentId={agentId} />;
+    if (tab === "A/B 테스트") return <DaliABTab agentId={agentId} />;
+  }
+  if (agentId === "addy") {
+    if (tab === "캠페인") return <AddyCampaignsTab agentId={agentId} />;
+    if (tab === "지출 모니터") return <AddySpendTab agentId={agentId} />;
+  }
+  if (agentId === "penny") {
+    if (tab === "장부") return <PennyLedgerTab agentId={agentId} />;
+    if (tab === "세금·정산") return <PennyTaxTab agentId={agentId} />;
+  }
+  // BASE tabs (공통)
+  if (tab === "히스토리") return <HistoryTab agentId={agentId} />;
+  if (tab === "성과 분석") return <PerformanceTab agentId={agentId} />;
+  if (tab === "지식 베이스") return <KnowledgeTab agentId={agentId} />;
+  if (tab === "팀 협업") return <TeamTab agentId={agentId} />;
+  if (tab === "리포트") return <ReportsTab agentId={agentId} />;
+  if (tab === "설정") return <SettingsTab agentId={agentId} />;
+  return null;
 }
 
 export function AgentDesk({ agentId }: { agentId: DeskAgentId }) {
@@ -86,7 +98,7 @@ export function AgentDesk({ agentId }: { agentId: DeskAgentId }) {
                   <IncidentLog agentId={agentId} />
                 </div>
               ) : (
-                <StubTab tab={activeTab} />
+                <TabContent agentId={agentId} tab={activeTab} />
               )}
             </div>
 

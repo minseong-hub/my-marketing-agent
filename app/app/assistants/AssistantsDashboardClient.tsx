@@ -354,7 +354,7 @@ export default function AssistantsDashboardClient() {
                       key={agentType}
                       agentType={agentType}
                       state={agents[agentType]}
-                      onClick={() => router.push(`/app/assistants/${agentType}`)}
+                      onClick={() => router.push(`/desk/${CREW_MAP[agentType].crewId}`)}
                     />
                   ))}
                 </div>
@@ -383,7 +383,7 @@ export default function AssistantsDashboardClient() {
             )}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               {AGENT_TYPES.map(agentType => (
-                <CrewCard key={agentType} agentType={agentType} state={agents[agentType]} onClick={() => router.push(`/app/assistants/${agentType}`)} />
+                <CrewCard key={agentType} agentType={agentType} state={agents[agentType]} onClick={() => router.push(`/desk/${CREW_MAP[agentType].crewId}`)} />
               ))}
             </div>
             <div style={{ background: "#0f1640", border: "1px solid #1f2a6b", padding: 12 }}>

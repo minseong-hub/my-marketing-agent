@@ -9,10 +9,10 @@ import { HudStrip } from "@/components/primitives/HudStrip";
 import { AUTO_TASKS } from "@/lib/scheduler/auto-tasks";
 
 const CREW_MAP = {
-  marketing:   { name: "마키",   role: "마케팅 비서",   accent: "#ff4ec9", accentDark: "#8a2877", autoCapable: true  },
-  detail_page: { name: "데일리", role: "상세페이지 비서", accent: "#5ce5ff", accentDark: "#2a86a8", autoCapable: true  },
-  ads:         { name: "애디",   role: "광고 전문가",     accent: "#ffd84d", accentDark: "#a08820", autoCapable: true  },
-  finance:     { name: "페니",   role: "재무 비서",       accent: "#66ff9d", accentDark: "#2a8a55", autoCapable: false },
+  marketing:   { deskId: "marky",  name: "마키",   role: "마케팅 비서",   accent: "#ff4ec9", accentDark: "#8a2877", autoCapable: true  },
+  detail_page: { deskId: "dali",   name: "데일리", role: "상세페이지 비서", accent: "#5ce5ff", accentDark: "#2a86a8", autoCapable: true  },
+  ads:         { deskId: "addy",   name: "애디",   role: "광고 전문가",     accent: "#ffd84d", accentDark: "#a08820", autoCapable: true  },
+  finance:     { deskId: "penny",  name: "페니",   role: "재무 비서",       accent: "#66ff9d", accentDark: "#2a8a55", autoCapable: false },
 } as const;
 
 type AgentType = keyof typeof CREW_MAP;
@@ -322,7 +322,7 @@ export default function AutomationHubClient() {
                       {running === at ? "실행 중..." : c.autoCapable ? "▶ 자동 임무 1회 실행" : "수동 전용"}
                     </button>
                     <button
-                      onClick={() => router.push(`/app/assistants/${at}`)}
+                      onClick={() => router.push(`/desk/${CREW_MAP[at].deskId}`)}
                       style={{
                         fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, fontWeight: 500,
                         padding: "9px 16px",

@@ -25,6 +25,7 @@ const NAV_COMMANDS: Command[] = [
   { id: "nav-desk-addy", kind: "nav", title: "애디 데스크", hint: "광고 전문가", href: "/desk/addy", icon: "🎯", accent: "#ffd84d" },
   { id: "nav-desk-penny", kind: "nav", title: "페니 데스크", hint: "재무 비서", href: "/desk/penny", icon: "💰", accent: "#66ff9d" },
   { id: "nav-assist", kind: "nav", title: "비서 현황판", hint: "전체 4명 한 화면", href: "/app/assistants", icon: "🛰️", accent: "#5ce5ff" },
+  { id: "nav-studio", kind: "nav", title: "스튜디오", hint: "카드뉴스·광고 자동 생성", href: "/app/studio", icon: "🎨", accent: "#ff4ec9" },
   { id: "nav-auto", kind: "nav", title: "자동화 허브", hint: "사용량·임무·승인", href: "/app/automation", icon: "⚡", accent: "#5ce5ff" },
   { id: "nav-library", kind: "nav", title: "보관함", hint: "AI 결과물 + 메모", href: "/app/library", icon: "📦", accent: "#5ce5ff" },
   { id: "nav-brand", kind: "nav", title: "브랜드 프로필", hint: "비서가 자동 참조", href: "/app/brand", icon: "✨", accent: "#5ce5ff" },

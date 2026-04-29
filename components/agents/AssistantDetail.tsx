@@ -692,7 +692,13 @@ export function AssistantDetail({ agentType, quickTasks = [] }: AssistantDetailP
           <span style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 14, color: crew.accent, fontWeight: 600 }}>
             {crew.name} · {crew.role}
           </span>
-          <span style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          <span style={{ marginLeft: "auto", display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              onClick={() => router.push("/app/studio")}
+              style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 13, color: "#ff4ec9", background: "none", border: "1px solid #ff4ec966", padding: "4px 10px", cursor: "pointer", fontWeight: 600 }}
+            >
+              🎨 스튜디오
+            </button>
             <button
               onClick={() => router.push("/app/brand")}
               style={{ fontFamily: '"IBM Plex Sans KR", sans-serif', fontSize: 13, color: "#5ce5ff", background: "none", border: "1px solid #5ce5ff44", padding: "4px 10px", cursor: "pointer", fontWeight: 500 }}

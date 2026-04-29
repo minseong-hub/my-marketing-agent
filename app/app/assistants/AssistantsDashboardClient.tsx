@@ -316,8 +316,9 @@ export default function AssistantsDashboardClient() {
                 </div>
 
                 {/* 빠른 진입 카드 */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 14 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 14 }}>
                   {[
+                    { href: "/app/studio", label: "🎨 스튜디오", desc: "카드뉴스·광고 자동 생성" },
                     { href: "/app/brand", label: "브랜드 프로필", desc: "비서가 자동 참조" },
                     { href: "/app/products", label: "상품 카탈로그", desc: "한 번 등록 → 모든 비서 활용" },
                     { href: "/app/library", label: "보관함", desc: "결과물·즐겨찾기 모음" },

@@ -78,6 +78,7 @@ function NavLink({
 const NAV_ITEMS = [
   { href: "/app/assistants", label: "어시스턴트 현황판", icon: LayoutDashboard, exact: true },
   { href: "/app/automation", label: "⚡ 자동화 허브", icon: Zap },
+  { href: "/app/studio", label: "🎨 스튜디오", icon: Sparkles },
   { href: "/app/library", label: "📦 보관함", icon: Archive },
   { href: "/app/brand", label: "✨ 브랜드 프로필", icon: Sparkles },
   { href: "/app/products", label: "🏷️ 상품 카탈로그", icon: Package },

@@ -32,6 +32,7 @@ export function CockpitNav() {
         {(loggedIn
           ? [
               { href: "/desk/marky", label: "데스크" },
+              { href: "/app/studio", label: "스튜디오" },
               { href: "/app/automation", label: "자동화" },
               { href: "/app/library", label: "보관함" },
               { href: "/app/brand", label: "브랜드" },
@@ -139,6 +140,7 @@ export function CockpitNav() {
           {(loggedIn
             ? [
                 { href: "/desk/marky", label: "데스크" },
+                { href: "/app/studio", label: "스튜디오" },
                 { href: "/app/automation", label: "자동화" },
                 { href: "/app/library", label: "보관함" },
                 { href: "/app/brand", label: "브랜드" },

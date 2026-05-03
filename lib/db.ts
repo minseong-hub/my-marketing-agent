@@ -5,7 +5,7 @@ import { PLAN_DEFINITIONS, PLAN_ORDER } from "./plans";
 
 let _db: Database.Database | null = null;
 
-function getDb(): Database.Database {
+export function getDb(): Database.Database {
   if (_db) return _db;
   const dbPath = path.resolve(process.cwd(), "data/users.db");
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
@@ -313,6 +313,66 @@ function getDb(): Database.Database {
     CREATE INDEX IF NOT EXISTS idx_token_usage_user ON token_usage(user_id, created_at);
     CREATE INDEX IF NOT EXISTS idx_token_usage_session ON token_usage(session_id);
 
+    -- 기획 코어 v2 — 비서 자동화 룰북 (Strategy Core v2)
+    -- 입력/출력/사고/토큰/비용/실행로그/학습메모를 한 row에 보관.
+    -- 멀티테넌트 격리는 모든 쿼리에서 user_id 필터로 강제.
+    CREATE TABLE IF NOT EXISTS plan_runs (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      scope TEXT NOT NULL,                     -- marketing | detail_page | ads | finance
+      input_json TEXT NOT NULL,                -- PlanInputV2 (브랜드/채널/제약 등)
+      spec_json TEXT NOT NULL DEFAULT '{}',    -- PlanSpecV2 (룰북 전체)
+      thinking_json TEXT NOT NULL DEFAULT '[]',-- Opus thinking blocks (텍스트 배열)
+      cost_json TEXT NOT NULL DEFAULT '{}',    -- PlanCostBreakdown
+      execution_log TEXT NOT NULL DEFAULT '[]',-- PlanExecutionEntry[] (후속 작업 추적)
+      self_learning TEXT NOT NULL DEFAULT '{}',-- 자가 학습 메모 (다음 호출 시 컨텍스트로 주입)
+      status TEXT NOT NULL DEFAULT 'active',   -- active | archived | deleted
+      is_favorite INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_plan_runs_user ON plan_runs(user_id, status, updated_at);
+    CREATE INDEX IF NOT EXISTS idx_plan_runs_scope ON plan_runs(user_id, scope, updated_at);
+    CREATE INDEX IF NOT EXISTS idx_plan_runs_favorite ON plan_runs(user_id, is_favorite, updated_at);
+
+    -- 브랜드 카드뉴스 디자인 템플릿 (사용자별)
+    -- 레퍼런스 이미지·계정에서 추출하거나 AI 생성 또는 수동으로 만든 디자인 토큰 묶음.
+    CREATE TABLE IF NOT EXISTS brand_templates (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      source TEXT NOT NULL,              -- reference_url | reference_image | reference_account | ai_generated | preset | manual
+      tokens_json TEXT NOT NULL,         -- BrandTemplate.tokens (palette/typography/layout/decorations/imagery)
+      tone_profile TEXT NOT NULL DEFAULT '{}',
+      reference_meta TEXT NOT NULL DEFAULT '{}',  -- 출처 메타 (URL은 저장 안함, 도메인/extracted_at만)
+      preview_image TEXT,
+      is_active INTEGER NOT NULL DEFAULT 0,        -- 사용자별 1개만 active (애플리케이션 레이어에서 강제)
+      is_favorite INTEGER NOT NULL DEFAULT 0,
+      usage_count INTEGER NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_brand_templates_user ON brand_templates(user_id, status, updated_at);
+    CREATE INDEX IF NOT EXISTS idx_brand_templates_active ON brand_templates(user_id, is_active);
+
+    -- 월간 카드뉴스 발행 계획 (위저드 2단계 산출물)
+    CREATE TABLE IF NOT EXISTS monthly_card_plans (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      month TEXT NOT NULL,                   -- "2026-05"
+      plan_run_id TEXT,                      -- plan_runs.id (옵션)
+      brand_template_id TEXT NOT NULL,       -- brand_templates.id
+      cards_json TEXT NOT NULL,              -- 카드뉴스 시드 배열 (PlannedCard[])
+      status TEXT NOT NULL DEFAULT 'planning',  -- planning | approved | generating | done
+      approval_token TEXT,                   -- 4단계 OK 시 발급, 일괄 생성 종료 후 폐기
+      progress_json TEXT NOT NULL DEFAULT '{}',  -- 일괄 생성 진행률 + 결과
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_monthly_plans_user ON monthly_card_plans(user_id, status, updated_at);
+    CREATE INDEX IF NOT EXISTS idx_monthly_plans_month ON monthly_card_plans(user_id, month);
+
     -- 보안 감사: 인증 관련 사건 로그 (로그인 시도/성공/실패 등)
     CREATE TABLE IF NOT EXISTS auth_events (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -327,7 +387,104 @@ function getDb(): Database.Database {
     CREATE INDEX IF NOT EXISTS idx_auth_events_user ON auth_events(user_id, created_at);
     CREATE INDEX IF NOT EXISTS idx_auth_events_email ON auth_events(email, created_at);
     CREATE INDEX IF NOT EXISTS idx_auth_events_kind ON auth_events(kind, created_at);
+
+    -- 레퍼런스 보드 (마키 자동 스카우트 + 사용자 수동 추가)
+    -- 외부 URL은 저장하지 않고 도메인/메타만 저장. 이미지는 추출된 base64 또는 외부 미러로 저장.
+    CREATE TABLE IF NOT EXISTS reference_board (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      brand_id TEXT,                              -- 브랜드 슬롯 (NULL = 기본/미지정)
+      source TEXT NOT NULL,                       -- 'auto_scout' | 'user_url' | 'user_upload'
+      domain TEXT,                                -- 출처 도메인 (instagram.com 등)
+      title TEXT NOT NULL DEFAULT '',
+      memo TEXT NOT NULL DEFAULT '',              -- 사용자 메모
+      tags TEXT NOT NULL DEFAULT '[]',            -- string[]
+      preview_image TEXT,                         -- 썸네일 (base64 또는 데이터 URL)
+      design_tokens TEXT NOT NULL DEFAULT '{}',   -- vision 분석 토큰 (palette/typography/layout)
+      fit_score INTEGER NOT NULL DEFAULT 0,       -- 0~100 적합도 (자동 스카우트)
+      query TEXT,                                 -- 자동 스카우트 시 사용된 쿼리
+      is_starred INTEGER NOT NULL DEFAULT 0,      -- 별표 → 템플릿화 후보
+      promoted_template_id TEXT,                  -- 템플릿으로 승격됐을 때 brand_templates.id
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_refboard_user ON reference_board(user_id, status, updated_at);
+    CREATE INDEX IF NOT EXISTS idx_refboard_brand ON reference_board(user_id, brand_id, updated_at);
+    CREATE INDEX IF NOT EXISTS idx_refboard_starred ON reference_board(user_id, is_starred, updated_at);
+
+    -- 카드뉴스 결과물 보관함 (편집 가능, 버전 히스토리 별도)
+    CREATE TABLE IF NOT EXISTS card_library (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      brand_id TEXT,
+      monthly_plan_id TEXT,                       -- monthly_card_plans.id (FK 옵션)
+      card_id TEXT,                               -- PlannedCard.id (옵션)
+      title TEXT NOT NULL,
+      category TEXT NOT NULL DEFAULT '',
+      cards_json TEXT NOT NULL,                   -- 카드 배열 (각 카드: { kind, headline, sub, body, design, effects, bg })
+      caption_json TEXT NOT NULL DEFAULT '{}',    -- { variants: string[] }
+      hashtags TEXT NOT NULL DEFAULT '[]',
+      template_id TEXT,                           -- brand_templates.id (옵션)
+      template_snapshot TEXT NOT NULL DEFAULT '{}', -- 생성 당시 토큰 스냅샷 (템플릿 삭제돼도 복구 가능)
+      review_state TEXT NOT NULL DEFAULT 'draft', -- 'draft' | 'needs_review' | 'approved'
+      auto_flags TEXT NOT NULL DEFAULT '[]',      -- 자기검수 플래그: [{ kind, message, cardIndex? }]
+      thumb TEXT,                                 -- 첫 카드 미리보기 (base64)
+      cost_krw INTEGER NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'active',
+      is_favorite INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_card_lib_user ON card_library(user_id, status, updated_at);
+    CREATE INDEX IF NOT EXISTS idx_card_lib_brand ON card_library(user_id, brand_id, updated_at);
+    CREATE INDEX IF NOT EXISTS idx_card_lib_review ON card_library(user_id, review_state, updated_at);
+
+    -- 카드뉴스 버전 히스토리 (수정/재생성 시마다 스냅샷)
+    CREATE TABLE IF NOT EXISTS card_versions (
+      id TEXT PRIMARY KEY,
+      library_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      version INTEGER NOT NULL,
+      cards_json TEXT NOT NULL,
+      caption_json TEXT NOT NULL DEFAULT '{}',
+      hashtags TEXT NOT NULL DEFAULT '[]',
+      change_note TEXT NOT NULL DEFAULT '',         -- 'AI 초안' | '카드 3 텍스트 수정' 등
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_card_versions ON card_versions(library_id, version);
+
+    -- 발행 큐 (카드뉴스 → 인스타 등 외부 발행, Phase F 준비)
+    CREATE TABLE IF NOT EXISTS publish_queue (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      brand_id TEXT,
+      library_id TEXT NOT NULL,
+      channel TEXT NOT NULL DEFAULT 'instagram',
+      scheduled_at TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'queued',        -- 'queued' | 'sent' | 'failed' | 'canceled'
+      sent_at TEXT,
+      external_ref TEXT,
+      last_error TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_pubq_user ON publish_queue(user_id, status, scheduled_at);
   `);
+
+  // brand_templates / monthly_card_plans 컬럼 마이그레이션 — brand_id 추가
+  try {
+    const cols = _db.prepare("PRAGMA table_info(brand_templates)").all() as { name: string }[];
+    const names = cols.map((c) => c.name);
+    if (!names.includes("brand_id")) _db.exec("ALTER TABLE brand_templates ADD COLUMN brand_id TEXT");
+  } catch {}
+  try {
+    const cols = _db.prepare("PRAGMA table_info(monthly_card_plans)").all() as { name: string }[];
+    const names = cols.map((c) => c.name);
+    if (!names.includes("brand_id")) _db.exec("ALTER TABLE monthly_card_plans ADD COLUMN brand_id TEXT");
+    if (!names.includes("source")) _db.exec("ALTER TABLE monthly_card_plans ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'");
+    if (!names.includes("auto_meta")) _db.exec("ALTER TABLE monthly_card_plans ADD COLUMN auto_meta TEXT NOT NULL DEFAULT '{}'");
+  } catch {}
 
   // Column migrations for existing DBs
   try {
@@ -689,6 +846,126 @@ export interface FinancialRecordRow {
   tags: string;
   generated_by: string;
   source_session_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlanRunRow {
+  id: string;
+  user_id: string;
+  scope: string;             // marketing | detail_page | ads | finance
+  input_json: string;
+  spec_json: string;
+  thinking_json: string;
+  cost_json: string;
+  execution_log: string;
+  self_learning: string;
+  status: string;            // active | archived | deleted
+  is_favorite: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BrandTemplateRow {
+  id: string;
+  user_id: string;
+  name: string;
+  source: string;
+  tokens_json: string;
+  tone_profile: string;
+  reference_meta: string;
+  preview_image: string | null;
+  is_active: number;
+  is_favorite: number;
+  usage_count: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MonthlyCardPlanRow {
+  id: string;
+  user_id: string;
+  month: string;
+  plan_run_id: string | null;
+  brand_template_id: string;
+  brand_id: string | null;
+  source: string;        // 'manual' | 'auto'
+  auto_meta: string;     // JSON: { rationale, confidence, basedOnPlanRunId, ... }
+  cards_json: string;
+  status: string;
+  approval_token: string | null;
+  progress_json: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReferenceBoardRow {
+  id: string;
+  user_id: string;
+  brand_id: string | null;
+  source: string;
+  domain: string | null;
+  title: string;
+  memo: string;
+  tags: string;             // JSON string[]
+  preview_image: string | null;
+  design_tokens: string;    // JSON
+  fit_score: number;
+  query: string | null;
+  is_starred: number;
+  promoted_template_id: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CardLibraryRow {
+  id: string;
+  user_id: string;
+  brand_id: string | null;
+  monthly_plan_id: string | null;
+  card_id: string | null;
+  title: string;
+  category: string;
+  cards_json: string;       // JSON: card array
+  caption_json: string;     // JSON: { variants: string[] }
+  hashtags: string;         // JSON string[]
+  template_id: string | null;
+  template_snapshot: string;
+  review_state: string;     // 'draft' | 'needs_review' | 'approved'
+  auto_flags: string;       // JSON
+  thumb: string | null;
+  cost_krw: number;
+  status: string;
+  is_favorite: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CardVersionRow {
+  id: string;
+  library_id: string;
+  user_id: string;
+  version: number;
+  cards_json: string;
+  caption_json: string;
+  hashtags: string;
+  change_note: string;
+  created_at: string;
+}
+
+export interface PublishQueueRow {
+  id: string;
+  user_id: string;
+  brand_id: string | null;
+  library_id: string;
+  channel: string;
+  scheduled_at: string;
+  status: string;
+  sent_at: string | null;
+  external_ref: string | null;
+  last_error: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -1374,6 +1651,426 @@ export const db = {
     const byKind: Record<string, number> = {};
     for (const r of byKindRows) byKind[r.kind] = r.c;
     return { total, favorites, byKind };
+  },
+
+  // ===== plan runs (기획 코어 v2 — 비서 자동화 룰북) =====
+  // 모든 메서드는 user_id 격리 강제. id로만 접근하지 못하게 항상 (id AND user_id) 페어로 쿼리.
+  createPlanRun(userId: string, input: {
+    scope: string;
+    input_json: string;
+    spec_json: string;
+    thinking_json?: string;
+    cost_json?: string;
+    self_learning?: string;
+  }): PlanRunRow {
+    const id = uid("plan2");
+    getDb().prepare(
+      `INSERT INTO plan_runs (id, user_id, scope, input_json, spec_json, thinking_json, cost_json, execution_log, self_learning, status, is_favorite)
+       VALUES (?, ?, ?, ?, ?, ?, ?, '[]', ?, 'active', 0)`
+    ).run(
+      id, userId,
+      input.scope,
+      input.input_json,
+      input.spec_json,
+      input.thinking_json ?? "[]",
+      input.cost_json ?? "{}",
+      input.self_learning ?? "{}",
+    );
+    return this.getPlanRun(userId, id)!;
+  },
+  getPlanRun(userId: string, id: string): PlanRunRow | undefined {
+    return getDb().prepare(
+      "SELECT * FROM plan_runs WHERE id = ? AND user_id = ? AND status != 'deleted'"
+    ).get(id, userId) as PlanRunRow | undefined;
+  },
+  listPlanRuns(userId: string, filters: {
+    scope?: string;
+    favorite?: boolean;
+    limit?: number;
+  } = {}): PlanRunRow[] {
+    const where: string[] = ["user_id = ?", "status != 'deleted'"];
+    const params: any[] = [userId];
+    if (filters.scope) { where.push("scope = ?"); params.push(filters.scope); }
+    if (filters.favorite) { where.push("is_favorite = 1"); }
+    params.push(filters.limit ?? 100);
+    return getDb().prepare(
+      `SELECT * FROM plan_runs WHERE ${where.join(" AND ")} ORDER BY is_favorite DESC, updated_at DESC LIMIT ?`
+    ).all(...params) as PlanRunRow[];
+  },
+  countPlanRuns(userId: string): { total: number; byScope: Record<string, number> } {
+    const total = (getDb().prepare("SELECT COUNT(*) as c FROM plan_runs WHERE user_id = ? AND status != 'deleted'").get(userId) as { c: number }).c;
+    const byScopeRows = getDb().prepare("SELECT scope, COUNT(*) as c FROM plan_runs WHERE user_id = ? AND status != 'deleted' GROUP BY scope").all(userId) as { scope: string; c: number }[];
+    const byScope: Record<string, number> = {};
+    for (const r of byScopeRows) byScope[r.scope] = r.c;
+    return { total, byScope };
+  },
+  togglePlanRunFavorite(userId: string, id: string, value: boolean): boolean {
+    const r = getDb().prepare(
+      "UPDATE plan_runs SET is_favorite = ?, updated_at = datetime('now') WHERE id = ? AND user_id = ? AND status != 'deleted'"
+    ).run(value ? 1 : 0, id, userId);
+    return (r.changes ?? 0) > 0;
+  },
+  softDeletePlanRun(userId: string, id: string): boolean {
+    const r = getDb().prepare(
+      "UPDATE plan_runs SET status = 'deleted', updated_at = datetime('now') WHERE id = ? AND user_id = ?"
+    ).run(id, userId);
+    return (r.changes ?? 0) > 0;
+  },
+  appendPlanExecutionLog(userId: string, id: string, entry: Record<string, unknown>): boolean {
+    const row = this.getPlanRun(userId, id);
+    if (!row) return false;
+    let log: unknown[] = [];
+    try { log = JSON.parse(row.execution_log); if (!Array.isArray(log)) log = []; } catch {}
+    log.push({ ts: new Date().toISOString(), ...entry });
+    // 최근 200건만 보관 (메모리/조회 보호)
+    if (log.length > 200) log = log.slice(-200);
+    const r = getDb().prepare(
+      "UPDATE plan_runs SET execution_log = ?, updated_at = datetime('now') WHERE id = ? AND user_id = ?"
+    ).run(JSON.stringify(log), id, userId);
+    return (r.changes ?? 0) > 0;
+  },
+  updatePlanSelfLearning(userId: string, id: string, learning: Record<string, unknown>): boolean {
+    const r = getDb().prepare(
+      "UPDATE plan_runs SET self_learning = ?, updated_at = datetime('now') WHERE id = ? AND user_id = ?"
+    ).run(JSON.stringify(learning), id, userId);
+    return (r.changes ?? 0) > 0;
+  },
+
+  // ===== brand templates (카드뉴스 디자인 템플릿) =====
+  // 사용자별 한도: 최대 30개. 초과 시 createBrandTemplate가 거부.
+  countActiveBrandTemplates(userId: string): number {
+    return (getDb().prepare("SELECT COUNT(*) as c FROM brand_templates WHERE user_id = ? AND status = 'active'").get(userId) as { c: number }).c;
+  },
+  listBrandTemplates(userId: string, filters: { favorite?: boolean; activeOnly?: boolean; limit?: number } = {}): BrandTemplateRow[] {
+    const where: string[] = ["user_id = ?", "status = 'active'"];
+    const params: any[] = [userId];
+    if (filters.favorite) where.push("is_favorite = 1");
+    if (filters.activeOnly) where.push("is_active = 1");
+    params.push(filters.limit ?? 100);
+    return getDb().prepare(
+      `SELECT * FROM brand_templates WHERE ${where.join(" AND ")} ORDER BY is_active DESC, is_favorite DESC, updated_at DESC LIMIT ?`
+    ).all(...params) as BrandTemplateRow[];
+  },
+  getBrandTemplate(userId: string, id: string): BrandTemplateRow | undefined {
+    return getDb().prepare(
+      "SELECT * FROM brand_templates WHERE id = ? AND user_id = ? AND status = 'active'"
+    ).get(id, userId) as BrandTemplateRow | undefined;
+  },
+  getActiveBrandTemplate(userId: string): BrandTemplateRow | undefined {
+    return getDb().prepare(
+      "SELECT * FROM brand_templates WHERE user_id = ? AND status = 'active' AND is_active = 1 LIMIT 1"
+    ).get(userId) as BrandTemplateRow | undefined;
+  },
+  createBrandTemplate(userId: string, t: {
+    name: string;
+    source: string;
+    tokens_json: string;
+    tone_profile?: string;
+    reference_meta?: string;
+    preview_image?: string | null;
+  }): BrandTemplateRow {
+    const cnt = this.countActiveBrandTemplates(userId);
+    if (cnt >= 30) throw new Error("브랜드 템플릿 최대 30개 제한 — 오래된 템플릿을 삭제 또는 보관해주세요.");
+    const id = uid("btpl");
+    getDb().prepare(
+      `INSERT INTO brand_templates (id, user_id, name, source, tokens_json, tone_profile, reference_meta, preview_image)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(
+      id, userId,
+      t.name.slice(0, 100),
+      t.source,
+      t.tokens_json,
+      t.tone_profile ?? "{}",
+      t.reference_meta ?? "{}",
+      t.preview_image ?? null,
+    );
+    return this.getBrandTemplate(userId, id)!;
+  },
+  // 활성 템플릿 1개 강제 — 다른 모든 템플릿 비활성화 후 지정 템플릿만 활성
+  activateBrandTemplate(userId: string, id: string): boolean {
+    const target = this.getBrandTemplate(userId, id);
+    if (!target) return false;
+    const tx = getDb().transaction(() => {
+      getDb().prepare("UPDATE brand_templates SET is_active = 0, updated_at = datetime('now') WHERE user_id = ? AND is_active = 1").run(userId);
+      getDb().prepare("UPDATE brand_templates SET is_active = 1, updated_at = datetime('now') WHERE id = ? AND user_id = ?").run(id, userId);
+    });
+    tx();
+    return true;
+  },
+  toggleBrandTemplateFavorite(userId: string, id: string, value: boolean): boolean {
+    const r = getDb().prepare(
+      "UPDATE brand_templates SET is_favorite = ?, updated_at = datetime('now') WHERE id = ? AND user_id = ? AND status = 'active'"
+    ).run(value ? 1 : 0, id, userId);
+    return (r.changes ?? 0) > 0;
+  },
+  incrementBrandTemplateUsage(userId: string, id: string): void {
+    getDb().prepare(
+      "UPDATE brand_templates SET usage_count = usage_count + 1, updated_at = datetime('now') WHERE id = ? AND user_id = ?"
+    ).run(id, userId);
+  },
+  softDeleteBrandTemplate(userId: string, id: string): boolean {
+    // 활성 템플릿이면 삭제 거부 (먼저 다른 걸로 활성화하라고)
+    const t = this.getBrandTemplate(userId, id);
+    if (!t) return false;
+    if (t.is_active === 1) throw new Error("활성 템플릿은 삭제할 수 없습니다. 먼저 다른 템플릿을 활성화해 주세요.");
+    const r = getDb().prepare(
+      "UPDATE brand_templates SET status = 'deleted', is_active = 0, updated_at = datetime('now') WHERE id = ? AND user_id = ?"
+    ).run(id, userId);
+    return (r.changes ?? 0) > 0;
+  },
+
+  // ===== monthly card plans (위저드 산출물) =====
+  // 사용자별 active 한도: 12개.
+  countActiveMonthlyPlans(userId: string): number {
+    return (getDb().prepare("SELECT COUNT(*) as c FROM monthly_card_plans WHERE user_id = ? AND status != 'done'").get(userId) as { c: number }).c;
+  },
+  listMonthlyPlans(userId: string, limit = 50): MonthlyCardPlanRow[] {
+    return getDb().prepare(
+      "SELECT * FROM monthly_card_plans WHERE user_id = ? ORDER BY updated_at DESC LIMIT ?"
+    ).all(userId, limit) as MonthlyCardPlanRow[];
+  },
+  getMonthlyPlan(userId: string, id: string): MonthlyCardPlanRow | undefined {
+    return getDb().prepare(
+      "SELECT * FROM monthly_card_plans WHERE id = ? AND user_id = ?"
+    ).get(id, userId) as MonthlyCardPlanRow | undefined;
+  },
+  createMonthlyPlan(userId: string, p: {
+    month: string;
+    plan_run_id?: string | null;
+    brand_template_id: string;
+    cards_json: string;
+  }): MonthlyCardPlanRow {
+    const cnt = this.countActiveMonthlyPlans(userId);
+    if (cnt >= 12) throw new Error("진행 중인 월간 계획 최대 12개 제한 — 완료/삭제 후 다시 시도해 주세요.");
+    const id = uid("mcp");
+    getDb().prepare(
+      `INSERT INTO monthly_card_plans (id, user_id, month, plan_run_id, brand_template_id, cards_json, status)
+       VALUES (?, ?, ?, ?, ?, ?, 'planning')`
+    ).run(id, userId, p.month, p.plan_run_id ?? null, p.brand_template_id, p.cards_json);
+    return this.getMonthlyPlan(userId, id)!;
+  },
+  updateMonthlyPlan(userId: string, id: string, patch: { cards_json?: string; status?: string; approval_token?: string | null; progress_json?: string }): boolean {
+    const allowed = ["cards_json", "status", "approval_token", "progress_json"];
+    const sets: string[] = [];
+    const params: Record<string, unknown> = { id, user_id: userId };
+    for (const [k, v] of Object.entries(patch)) {
+      if (allowed.includes(k) && v !== undefined) { sets.push(`${k} = @${k}`); params[k] = v; }
+    }
+    if (sets.length === 0) return false;
+    sets.push("updated_at = datetime('now')");
+    const r = getDb().prepare(
+      `UPDATE monthly_card_plans SET ${sets.join(", ")} WHERE id = @id AND user_id = @user_id`
+    ).run(params);
+    return (r.changes ?? 0) > 0;
+  },
+  deleteMonthlyPlan(userId: string, id: string): boolean {
+    const r = getDb().prepare("DELETE FROM monthly_card_plans WHERE id = ? AND user_id = ?").run(id, userId);
+    return (r.changes ?? 0) > 0;
+  },
+
+  // ===== reference board =====
+  listReferenceBoard(userId: string, opts: { brandId?: string | null; starredOnly?: boolean; limit?: number } = {}): ReferenceBoardRow[] {
+    const where: string[] = ["user_id = ?", "status = 'active'"];
+    const params: any[] = [userId];
+    if (opts.brandId !== undefined) {
+      if (opts.brandId === null) { where.push("(brand_id IS NULL OR brand_id = '')"); }
+      else { where.push("brand_id = ?"); params.push(opts.brandId); }
+    }
+    if (opts.starredOnly) where.push("is_starred = 1");
+    params.push(opts.limit ?? 60);
+    return getDb().prepare(
+      `SELECT * FROM reference_board WHERE ${where.join(" AND ")} ORDER BY is_starred DESC, fit_score DESC, updated_at DESC LIMIT ?`
+    ).all(...params) as ReferenceBoardRow[];
+  },
+  getReference(userId: string, id: string): ReferenceBoardRow | undefined {
+    return getDb().prepare("SELECT * FROM reference_board WHERE id = ? AND user_id = ? AND status = 'active'").get(id, userId) as ReferenceBoardRow | undefined;
+  },
+  createReference(userId: string, r: {
+    brand_id?: string | null;
+    source: string;
+    domain?: string | null;
+    title?: string;
+    memo?: string;
+    tags?: string[];
+    preview_image?: string | null;
+    design_tokens?: Record<string, unknown>;
+    fit_score?: number;
+    query?: string | null;
+  }): ReferenceBoardRow {
+    const cnt = (getDb().prepare("SELECT COUNT(*) as c FROM reference_board WHERE user_id = ? AND status = 'active'").get(userId) as { c: number }).c;
+    if (cnt >= 200) throw new Error("레퍼런스 보드 한도(200건)에 도달했습니다.");
+    const id = uid("ref");
+    getDb().prepare(
+      `INSERT INTO reference_board (id, user_id, brand_id, source, domain, title, memo, tags, preview_image, design_tokens, fit_score, query)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(
+      id, userId,
+      r.brand_id ?? null,
+      r.source,
+      r.domain ?? null,
+      (r.title ?? "").slice(0, 200),
+      (r.memo ?? "").slice(0, 1000),
+      JSON.stringify(r.tags ?? []),
+      r.preview_image ?? null,
+      JSON.stringify(r.design_tokens ?? {}),
+      Math.max(0, Math.min(100, r.fit_score ?? 0)),
+      r.query ?? null,
+    );
+    return this.getReference(userId, id)!;
+  },
+  updateReference(userId: string, id: string, patch: { memo?: string; tags?: string[]; is_starred?: boolean; brand_id?: string | null; promoted_template_id?: string | null }): boolean {
+    const sets: string[] = [];
+    const params: Record<string, unknown> = { id, user_id: userId };
+    if (patch.memo !== undefined) { sets.push("memo = @memo"); params.memo = patch.memo.slice(0, 1000); }
+    if (patch.tags !== undefined) { sets.push("tags = @tags"); params.tags = JSON.stringify(patch.tags); }
+    if (patch.is_starred !== undefined) { sets.push("is_starred = @is_starred"); params.is_starred = patch.is_starred ? 1 : 0; }
+    if (patch.brand_id !== undefined) { sets.push("brand_id = @brand_id"); params.brand_id = patch.brand_id; }
+    if (patch.promoted_template_id !== undefined) { sets.push("promoted_template_id = @promoted_template_id"); params.promoted_template_id = patch.promoted_template_id; }
+    if (sets.length === 0) return false;
+    sets.push("updated_at = datetime('now')");
+    const r = getDb().prepare(`UPDATE reference_board SET ${sets.join(", ")} WHERE id = @id AND user_id = @user_id`).run(params);
+    return (r.changes ?? 0) > 0;
+  },
+  softDeleteReference(userId: string, id: string): boolean {
+    const r = getDb().prepare("UPDATE reference_board SET status = 'deleted', updated_at = datetime('now') WHERE id = ? AND user_id = ?").run(id, userId);
+    return (r.changes ?? 0) > 0;
+  },
+
+  // ===== card library (편집 가능한 결과물 보관함) =====
+  listCardLibrary(userId: string, opts: { brandId?: string | null; reviewState?: string; limit?: number } = {}): CardLibraryRow[] {
+    const where: string[] = ["user_id = ?", "status = 'active'"];
+    const params: any[] = [userId];
+    if (opts.brandId !== undefined) {
+      if (opts.brandId === null) where.push("(brand_id IS NULL OR brand_id = '')");
+      else { where.push("brand_id = ?"); params.push(opts.brandId); }
+    }
+    if (opts.reviewState) { where.push("review_state = ?"); params.push(opts.reviewState); }
+    params.push(opts.limit ?? 80);
+    return getDb().prepare(
+      `SELECT * FROM card_library WHERE ${where.join(" AND ")} ORDER BY is_favorite DESC, updated_at DESC LIMIT ?`
+    ).all(...params) as CardLibraryRow[];
+  },
+  getCardLibrary(userId: string, id: string): CardLibraryRow | undefined {
+    return getDb().prepare("SELECT * FROM card_library WHERE id = ? AND user_id = ? AND status = 'active'").get(id, userId) as CardLibraryRow | undefined;
+  },
+  createCardLibrary(userId: string, p: {
+    brand_id?: string | null;
+    monthly_plan_id?: string | null;
+    card_id?: string | null;
+    title: string;
+    category?: string;
+    cards_json: string;
+    caption_json?: string;
+    hashtags?: string[];
+    template_id?: string | null;
+    template_snapshot?: Record<string, unknown>;
+    auto_flags?: unknown[];
+    thumb?: string | null;
+    cost_krw?: number;
+  }): CardLibraryRow {
+    const id = uid("clib");
+    getDb().prepare(
+      `INSERT INTO card_library (id, user_id, brand_id, monthly_plan_id, card_id, title, category, cards_json, caption_json, hashtags, template_id, template_snapshot, auto_flags, thumb, cost_krw)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(
+      id, userId,
+      p.brand_id ?? null,
+      p.monthly_plan_id ?? null,
+      p.card_id ?? null,
+      p.title.slice(0, 200),
+      (p.category ?? "").slice(0, 60),
+      p.cards_json,
+      p.caption_json ?? "{}",
+      JSON.stringify(p.hashtags ?? []),
+      p.template_id ?? null,
+      JSON.stringify(p.template_snapshot ?? {}),
+      JSON.stringify(p.auto_flags ?? []),
+      p.thumb ?? null,
+      p.cost_krw ?? 0,
+    );
+    // v1 스냅샷 자동 저장
+    this.appendCardVersion(userId, id, { cards_json: p.cards_json, caption_json: p.caption_json ?? "{}", hashtags: p.hashtags ?? [], change_note: "AI 초안" });
+    return this.getCardLibrary(userId, id)!;
+  },
+  updateCardLibrary(userId: string, id: string, patch: { cards_json?: string; caption_json?: string; hashtags?: string[]; review_state?: string; auto_flags?: unknown[]; is_favorite?: boolean; title?: string; thumb?: string | null; change_note?: string }): boolean {
+    const allowed: Record<string, string> = {
+      cards_json: "cards_json", caption_json: "caption_json", review_state: "review_state",
+      title: "title", thumb: "thumb",
+    };
+    const sets: string[] = [];
+    const params: Record<string, unknown> = { id, user_id: userId };
+    for (const [k, dbCol] of Object.entries(allowed)) {
+      const v = (patch as any)[k];
+      if (v !== undefined) { sets.push(`${dbCol} = @${k}`); params[k] = v; }
+    }
+    if (patch.hashtags !== undefined) { sets.push("hashtags = @hashtags"); params.hashtags = JSON.stringify(patch.hashtags); }
+    if (patch.auto_flags !== undefined) { sets.push("auto_flags = @auto_flags"); params.auto_flags = JSON.stringify(patch.auto_flags); }
+    if (patch.is_favorite !== undefined) { sets.push("is_favorite = @is_favorite"); params.is_favorite = patch.is_favorite ? 1 : 0; }
+    if (sets.length === 0) return false;
+    sets.push("updated_at = datetime('now')");
+    const r = getDb().prepare(`UPDATE card_library SET ${sets.join(", ")} WHERE id = @id AND user_id = @user_id`).run(params);
+    if ((r.changes ?? 0) > 0 && (patch.cards_json !== undefined || patch.caption_json !== undefined || patch.hashtags !== undefined)) {
+      const cur = this.getCardLibrary(userId, id);
+      if (cur) {
+        this.appendCardVersion(userId, id, {
+          cards_json: cur.cards_json,
+          caption_json: cur.caption_json,
+          hashtags: JSON.parse(cur.hashtags || "[]"),
+          change_note: patch.change_note ?? "수동 수정",
+        });
+      }
+    }
+    return (r.changes ?? 0) > 0;
+  },
+  softDeleteCardLibrary(userId: string, id: string): boolean {
+    const r = getDb().prepare("UPDATE card_library SET status = 'deleted', updated_at = datetime('now') WHERE id = ? AND user_id = ?").run(id, userId);
+    return (r.changes ?? 0) > 0;
+  },
+
+  // ===== card versions =====
+  appendCardVersion(userId: string, libraryId: string, v: { cards_json: string; caption_json?: string; hashtags?: string[]; change_note?: string }): void {
+    const next = ((getDb().prepare("SELECT COALESCE(MAX(version), 0) as m FROM card_versions WHERE library_id = ?").get(libraryId) as { m: number }).m) + 1;
+    const id = uid("cver");
+    getDb().prepare(
+      `INSERT INTO card_versions (id, library_id, user_id, version, cards_json, caption_json, hashtags, change_note)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(id, libraryId, userId, next, v.cards_json, v.caption_json ?? "{}", JSON.stringify(v.hashtags ?? []), (v.change_note ?? "").slice(0, 200));
+    // 한 항목당 최대 30버전 — 초과 시 가장 오래된 버전 삭제
+    getDb().prepare(
+      `DELETE FROM card_versions WHERE library_id = ? AND version <= (
+         SELECT version FROM card_versions WHERE library_id = ? ORDER BY version DESC LIMIT 1 OFFSET 30
+       )`
+    ).run(libraryId, libraryId);
+  },
+  listCardVersions(userId: string, libraryId: string): CardVersionRow[] {
+    return getDb().prepare(
+      "SELECT * FROM card_versions WHERE library_id = ? AND user_id = ? ORDER BY version DESC"
+    ).all(libraryId, userId) as CardVersionRow[];
+  },
+
+  // ===== publish queue =====
+  listPublishQueue(userId: string, status?: string, limit = 50): PublishQueueRow[] {
+    if (status) {
+      return getDb().prepare(
+        "SELECT * FROM publish_queue WHERE user_id = ? AND status = ? ORDER BY scheduled_at ASC LIMIT ?"
+      ).all(userId, status, limit) as PublishQueueRow[];
+    }
+    return getDb().prepare(
+      "SELECT * FROM publish_queue WHERE user_id = ? ORDER BY scheduled_at ASC LIMIT ?"
+    ).all(userId, limit) as PublishQueueRow[];
+  },
+  enqueuePublish(userId: string, p: { library_id: string; brand_id?: string | null; channel?: string; scheduled_at: string }): PublishQueueRow {
+    const id = uid("pubq");
+    getDb().prepare(
+      `INSERT INTO publish_queue (id, user_id, brand_id, library_id, channel, scheduled_at) VALUES (?, ?, ?, ?, ?, ?)`
+    ).run(id, userId, p.brand_id ?? null, p.library_id, p.channel ?? "instagram", p.scheduled_at);
+    return getDb().prepare("SELECT * FROM publish_queue WHERE id = ?").get(id) as PublishQueueRow;
+  },
+  cancelPublishQueue(userId: string, id: string): boolean {
+    const r = getDb().prepare(
+      "UPDATE publish_queue SET status = 'canceled', updated_at = datetime('now') WHERE id = ? AND user_id = ? AND status = 'queued'"
+    ).run(id, userId);
+    return (r.changes ?? 0) > 0;
   },
 
   listAdminLogs(limit = 100): AdminLogRow[] {

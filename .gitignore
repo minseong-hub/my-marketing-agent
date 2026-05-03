@@ -28,8 +28,11 @@ Thumbs.db
 
 /lib/generated/prisma
 
-# SQLite DB
-/data/
+# SQLite DB (소스 코드는 보존, DB 파일만 ignore)
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
 *.db
 *.db-journal
 *.db-wal

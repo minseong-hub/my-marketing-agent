@@ -63,6 +63,7 @@ export function CardNewsStudio() {
     } finally { setLoading(false); }
   }, [topic, notes]);
 
+  // 카드뉴스는 디자인 코어 = Recraft v3 (design 티어) — 일러스트·텍스트 렌더링 강함
   const generateImage = useCallback(async () => {
     if (!spec?.imagePrompt) return;
     setImageLoading(true);
@@ -70,7 +71,7 @@ export function CardNewsStudio() {
       const res = await fetch("/api/studio/image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: spec.imagePrompt, ratio: "1:1" }),
+        body: JSON.stringify({ prompt: spec.imagePrompt, ratio: "1:1", quality: "design" }),
       });
       const data = await res.json();
       if (data.imageUrl) setSpec({ ...spec, imageUrl: data.imageUrl });
@@ -152,7 +153,7 @@ export function CardNewsStudio() {
                   opacity: imageLoading ? 0.6 : 1,
                 }}
               >
-                {imageLoading ? "이미지 생성 중..." : "🎨 배경 이미지 생성"}
+                {imageLoading ? "디자인 코어 생성 중..." : "🎨 디자인 코어 (Recraft v3)"}
               </button>
               <button
                 onClick={downloadAll}

@@ -36,10 +36,13 @@ function downloadBlob(blob: Blob, filename: string) {
  * 애디 데스크 광고 소재 제작 탭에 임베드되는 위젯.
  * 메타 광고 1:1 / 4:5 / 9:16 — 입력 → AI 카피 3변형 → 디자인 → PNG 다운로드.
  */
+type ImageQualityChoice = "design" | "photo";
+
 export function AdCreativeStudio() {
   const [topic, setTopic] = useState("");
   const [goal, setGoal] = useState("");
   const [notes, setNotes] = useState("");
+  const [imageQuality, setImageQuality] = useState<ImageQualityChoice>("photo");
   const [spec, setSpec] = useState<(AdCreativeSpec & { imagePrompt?: string }) | null>(null);
   const [loading, setLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
@@ -64,6 +67,7 @@ export function AdCreativeStudio() {
     } finally { setLoading(false); }
   }, [topic, goal, notes]);
 
+  // 광고는 디자인 코어 — 사용자 선택: photo (Flux Pro 1.1) 또는 design (Recraft v3)
   const generateImage = useCallback(async () => {
     if (!spec?.imagePrompt) return;
     setImageLoading(true);
@@ -71,7 +75,7 @@ export function AdCreativeStudio() {
       const res = await fetch("/api/studio/image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: spec.imagePrompt, ratio: "1:1" }),
+        body: JSON.stringify({ prompt: spec.imagePrompt, ratio: "1:1", quality: imageQuality }),
       });
       const data = await res.json();
       if (data.imageUrl) setSpec({ ...spec, imageUrl: data.imageUrl });
@@ -79,7 +83,7 @@ export function AdCreativeStudio() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "이미지 생성 오류");
     } finally { setImageLoading(false); }
-  }, [spec]);
+  }, [spec, imageQuality]);
 
   const downloadOne = useCallback(async (idx: number) => {
     const node = adRefs.current[idx];
@@ -157,6 +161,35 @@ export function AdCreativeStudio() {
           </button>
           {spec && (
             <>
+              <div style={{ display: "inline-flex", border: `1px solid ${ACC}55`, alignItems: "stretch" }}>
+                <button
+                  onClick={() => setImageQuality("photo")}
+                  style={{
+                    background: imageQuality === "photo" ? ACC : "transparent",
+                    color: imageQuality === "photo" ? "#060920" : ACC,
+                    border: "none",
+                    padding: "10px 14px",
+                    fontFamily: FONT_KR, fontSize: 13, fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  📸 포토 (Flux Pro)
+                </button>
+                <button
+                  onClick={() => setImageQuality("design")}
+                  style={{
+                    background: imageQuality === "design" ? ACC : "transparent",
+                    color: imageQuality === "design" ? "#060920" : ACC,
+                    border: "none",
+                    borderLeft: `1px solid ${ACC}55`,
+                    padding: "10px 14px",
+                    fontFamily: FONT_KR, fontSize: 13, fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  🎨 디자인 (Recraft)
+                </button>
+              </div>
               <button
                 onClick={generateImage}
                 disabled={imageLoading}
@@ -169,7 +202,7 @@ export function AdCreativeStudio() {
                   opacity: imageLoading ? 0.6 : 1,
                 }}
               >
-                {imageLoading ? "이미지 생성 중..." : "🎨 배경 이미지 생성"}
+                {imageLoading ? "디자인 코어 생성 중..." : "🎨 디자인 코어 호출"}
               </button>
               <button
                 onClick={downloadAll}

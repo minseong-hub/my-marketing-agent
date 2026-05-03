@@ -18,10 +18,11 @@ import { PennyLedger } from "./widgets/specialty/PennyLedger";
 import { ChatBubble } from "./chat/ChatBubble";
 import { CommandPalette } from "@/components/system/CommandPalette";
 import {
-  MarkyContentCalendarTab, MarkyAudienceTab, MarkyCardNewsTab,
+  MarkyContentCalendarTab, MarkyAudienceTab, MarkyCardNewsTab, MarkyDesignGalleryTab,
   DaliTemplatesTab, DaliABTab,
   AddyCampaignsTab, AddySpendTab, AddyAdCreativeTab,
   PennyLedgerTab, PennyTaxTab,
+  PlanCoreTab,
   HistoryTab, PerformanceTab, KnowledgeTab, TeamTab, ReportsTab, SettingsTab,
 } from "./tabs/DeskTabs";
 import {
@@ -30,6 +31,13 @@ import {
   AddyKeywordsTab, AddyNegativeKeywordsTab, AddyAdCopyTab, AddyBudgetTab,
   PennyMonthlyReportTab, PennyCostReductionTab, PennyVatTab, PennyRefundPolicyTab, PennyDiagnosisTab,
 } from "./tabs/WorkTabs";
+import {
+  MonthlyThisMonthTab, MonthlyAutoDraftTab, MonthlyHistoryTab,
+  CardInboxTab, CardAutoLogTab,
+  ActiveTemplateTab, DesignGalleryTab, PresetSeedTab,
+  ReferenceBoardTab, ReferenceScoutTab, BrandDNATab,
+  CardLibraryTab, PublishQueueTab,
+} from "./tabs/MarkyNewTabs";
 import { type DeskAgentId } from "@/data/desks";
 
 function Specialty({ agentId }: { agentId: DeskAgentId }) {
@@ -40,8 +48,27 @@ function Specialty({ agentId }: { agentId: DeskAgentId }) {
 }
 
 function TabContent({ agentId, tab }: { agentId: DeskAgentId; tab: string }) {
+  // 기획 코어 — 4 비서 공통
+  if (tab === "🧠 기획 코어") return <PlanCoreTab agentId={agentId} />;
+
   // Special tabs (비서별)
   if (agentId === "marky") {
+    // 신규 큰메뉴
+    if (tab === "📅 이번 달 계획") return <MonthlyThisMonthTab agentId={agentId} />;
+    if (tab === "📅 다음 달 자동 초안") return <MonthlyAutoDraftTab agentId={agentId} />;
+    if (tab === "📅 계획 히스토리") return <MonthlyHistoryTab agentId={agentId} />;
+    if (tab === "🎨 지시 인박스") return <CardInboxTab agentId={agentId} />;
+    if (tab === "🎨 자동 실행 로그") return <CardAutoLogTab agentId={agentId} />;
+    if (tab === "🖼️ 활성 템플릿") return <ActiveTemplateTab agentId={agentId} />;
+    if (tab === "🖼️ 디자인 갤러리") return <DesignGalleryTab agentId={agentId} />;
+    if (tab === "🖼️ 프리셋 시드") return <PresetSeedTab agentId={agentId} />;
+    if (tab === "🔖 내 보드") return <ReferenceBoardTab agentId={agentId} />;
+    if (tab === "🔖 자동 스카우트") return <ReferenceScoutTab agentId={agentId} />;
+    if (tab === "🔖 브랜드 DNA") return <BrandDNATab agentId={agentId} />;
+    if (tab === "📦 카드뉴스 보관함") return <CardLibraryTab agentId={agentId} />;
+    if (tab === "📦 발행 큐") return <PublishQueueTab agentId={agentId} />;
+
+    // 기존 호환
     if (tab === "콘텐츠 캘린더") return <MarkyContentCalendarTab agentId={agentId} />;
     if (tab === "오디언스") return <MarkyAudienceTab agentId={agentId} />;
     if (tab === "🎨 카드뉴스 자동화") return <MarkyCardNewsTab agentId={agentId} />;

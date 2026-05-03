@@ -16,6 +16,9 @@ import { AddyROAS } from "../widgets/specialty/AddyROAS";
 import { PennyLedger } from "../widgets/specialty/PennyLedger";
 import { CardNewsStudio } from "@/components/studio/CardNewsStudio";
 import { AdCreativeStudio } from "@/components/studio/AdCreativeStudio";
+import { PlanStudio, type PlanScopeV2 } from "@/components/studio/PlanStudio";
+import { CardNewsWizard } from "@/components/studio/CardNewsWizard";
+import { TemplateGalleryStudio } from "@/components/studio/TemplateGalleryStudio";
 import { showToast } from "../ToastHost";
 
 const FONT_KR = '"IBM Plex Sans KR", sans-serif';
@@ -67,18 +70,64 @@ export function MarkyAudienceTab({ agentId }: { agentId: DeskAgentId }) {
   );
 }
 
-// 2-A) 카드뉴스 자동화 (마키 SPECIAL)
+// 1-Z) 기획 코어 v2 (전 비서 공통 — scope만 다름)
+const PLAN_SCOPE_BY_AGENT: Record<DeskAgentId, PlanScopeV2> = {
+  marky: "marketing",
+  dali:  "detail_page",
+  addy:  "ads",
+  penny: "finance",
+};
+const PLAN_SUB_BY_AGENT: Record<DeskAgentId, string> = {
+  marky: "마키가 4주 동안 자동으로 콘텐츠를 만들고 발행하는 운영 룰북을 생성합니다.",
+  dali:  "데일리가 자동으로 상세페이지를 만들고 개선하는 운영 룰북을 생성합니다.",
+  addy:  "애디가 자동으로 광고 소재·캠페인을 운영하는 룰북을 생성합니다.",
+  penny: "페니가 자동으로 정산 매칭·세금·리포트를 운영하는 룰북을 생성합니다.",
+};
+export function PlanCoreTab({ agentId }: { agentId: DeskAgentId }) {
+  const a = DESKS[agentId].agent;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <SectionHeader
+        title="🧠 기획 코어 · STRATEGY CORE"
+        sub={PLAN_SUB_BY_AGENT[agentId]}
+        accent={a.accent}
+      />
+      <PlanStudio scope={PLAN_SCOPE_BY_AGENT[agentId]} accent={a.accent} />
+    </div>
+  );
+}
+
+// 2-A) 카드뉴스 자동화 (마키 SPECIAL) — 4단계 위저드
 export function MarkyCardNewsTab({ agentId }: { agentId: DeskAgentId }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <SectionHeader
         title="🎨 카드뉴스 자동화"
-        sub="주제 한 줄 → 마키가 6장 카드 카피 + 디자인 + 해시태그까지 자동 작성. PNG로 즉시 다운로드, 결과는 보관함에 저장됩니다."
+        sub="레퍼런스 추출 → 월간 계획 → 피드 미리보기 → 일괄 생성. 4단계 워크플로우로 한 달치 카드뉴스를 일괄 자동 생성합니다."
         accent={DESKS[agentId].agent.accent}
       />
-      <CardNewsStudio />
+      <CardNewsWizard />
     </div>
   );
+}
+
+// 2-B) 디자인 갤러리 (마키 SPECIAL)
+export function MarkyDesignGalleryTab({ agentId }: { agentId: DeskAgentId }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <SectionHeader
+        title="🖼️ 디자인 갤러리"
+        sub="브랜드 카드뉴스 디자인 템플릿을 관리합니다. 활성 템플릿 1개가 카드뉴스 자동 생성에 적용됩니다."
+        accent={DESKS[agentId].agent.accent}
+      />
+      <TemplateGalleryStudio />
+    </div>
+  );
+}
+
+// 2-Z) 단일 카드뉴스 즉시 생성 (호환성 — 기존 CardNewsStudio도 사용 가능하도록)
+export function MarkyCardNewsLegacyTab() {
+  return <CardNewsStudio />;
 }
 
 // 3) 템플릿 갤러리 (데일리 SPECIAL)
